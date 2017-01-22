@@ -1,5 +1,5 @@
-import {Calculator} from './calculator'
+import {Calculator} from "./calculator";
 
 export default function getInstance() {
-  return new Calculator();
+	return new Calculator();
 }
