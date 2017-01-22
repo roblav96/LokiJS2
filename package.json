@@ -1,54 +1,52 @@
 {
-	"name": "LokiJS2",
-	"version": "2.0.1",
-	"description": "Fast document oriented javascript in-memory database",
-	"homepage": "http://lokijs.org",
-	"main": "lib/library.js",
-	"scripts": {
-		"build": "webpack --mode=build",
-		"dev": "webpack --progress --colors --watch --mode=dev",
-		"lint": "eslint ./test/* ./src/* || true",
-		"test": "karma start karma.config.js --single-run || true",
-		"jsdoc": "jsdoc -c jsdoc-conf.json",
-		"tester": "bash -c \"NODE_ENV=test karma start karma.config.js --single-run\""
-	},
-	"devDependencies": {
-		"babel-cli": "6.22.2",
-		"babel-core": "6.22.1",
-		"babel-eslint": "7.1.1",
-		"babel-loader": "6.2.10",
-		"babel-plugin-istanbul": "^3.1.2",
-		"babel-plugin-transform-es2015-modules-commonjs": "6.22.0",
-		"eslint": "3.13.1",
-		"eslint-loader": "1.6.1",
-		"istanbul": "^0.4.5",
-		"istanbul-instrumenter-loader": "^1.2.0",
-		"jasmine": "^2.5.3",
-		"jsdoc": "3.4.3",
-		"karma": "^1.4.0",
-		"karma-chrome-launcher": "^2.0.0",
-		"karma-coverage": "^1.1.1",
-		"karma-jasmine": "^1.1.0",
-		"karma-webpack": "^2.0.1",
-		"uglify-js": "git://github.com/mishoo/UglifyJS2.git#harmony",
-		"webpack": "1.14.0"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/LokiJS-Forge/LokiJS2.git"
-	},
-	"keywords": [
-		"webpack",
-		"es6",
-		"starter",
-		"library",
-		"universal",
-		"umd",
-		"commonjs"
-	],
-	"author": "Various authors",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/LokiJS-Forge/LokiJS2/issues"
-	}
+  "name": "LokiJS2",
+  "version": "2.0.1",
+  "description": "Fast document oriented javascript in-memory database",
+  "homepage": "http://lokijs.org",
+  "main": "lib/library.js",
+  "scripts": {
+    "build": "webpack --mode=build",
+    "dev": "webpack --progress --colors --watch --mode=dev",
+    "lint": "eslint ./test/* ./src/* || true",
+    "test": "cross-env NODE_ENV=test karma start karma.config.js --single-run || true",
+    "jsdoc": "jsdoc -c jsdoc-conf.json"
+  },
+  "devDependencies": {
+    "babel-cli": "6.22.2",
+    "babel-core": "6.22.1",
+    "babel-eslint": "7.1.1",
+    "babel-loader": "6.2.10",
+    "babel-plugin-istanbul": "^3.1.2",
+    "babel-plugin-transform-es2015-modules-commonjs": "6.22.0",
+    "cross-env": "^3.1.4",
+    "eslint": "3.13.1",
+    "eslint-loader": "1.6.1",
+    "jasmine": "^2.5.3",
+    "jsdoc": "3.4.3",
+    "karma": "^1.4.0",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-coverage": "^1.1.1",
+    "karma-jasmine": "^1.1.0",
+    "karma-webpack": "^2.0.1",
+    "uglify-js": "git://github.com/mishoo/UglifyJS2.git#harmony",
+    "webpack": "1.14.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LokiJS-Forge/LokiJS2.git"
+  },
+  "keywords": [
+    "webpack",
+    "es6",
+    "starter",
+    "library",
+    "universal",
+    "umd",
+    "commonjs"
+  ],
+  "author": "Various authors",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LokiJS-Forge/LokiJS2/issues"
+  }
 }

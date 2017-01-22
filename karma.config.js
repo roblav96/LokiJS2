@@ -29,13 +29,6 @@ module.exports = function (config) {
 						loader: 'babel',
 						exclude: /(node_modules|bower_components)/
 					}
-				],
-				postLoaders: [
-					{
-						test: /\.js$/,
-						loader: 'istanbul-instrumenter',
-						exclude: /(node_modules|resources\/js\/vendor)/
-					}
 				]
 			},
 			watch: true
