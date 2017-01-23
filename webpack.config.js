@@ -1,11 +1,13 @@
 var webpack = require('webpack');
 var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
+var CommonsChunkPlugin = webpack.optimize.CommonsChunkPlugin;
 var path = require('path');
 var env = require('yargs').argv.mode;
 
-var libraryName = 'library';
+var libraryName = 'library.[name]';
 
-var plugins = [], outputFile;
+var outputFile;
+var plugins = [];
 
 if (env === 'build') {
 	plugins.push(new UglifyJsPlugin({minimize: true}));
@@ -15,10 +17,13 @@ if (env === 'build') {
 }
 
 var config = {
-	entry: __dirname + '/src/index.js',
+	entry: {
+		core: __dirname + '/src/index.js',
+		memory: __dirname + '/src/memory.js'
+	},
 	devtool: 'source-map',
 	output: {
-		path: __dirname + '/lib',
+		path: path.join(__dirname, '/lib'),
 		filename: outputFile,
 		library: libraryName,
 		libraryTarget: 'umd',

@@ -7,9 +7,11 @@
   "scripts": {
     "build": "webpack --mode=build",
     "dev": "webpack --progress --colors --watch --mode=dev",
-    "lint": "eslint ./test/* ./src/* || true",
-    "test": "cross-env NODE_ENV=test karma start karma.config.js --single-run || true",
-    "jsdoc": "jsdoc -c jsdoc-conf.json"
+    "lint": "eslint ./src/**/*.js ./bench/**/*.bench.js ./spec/**/*.spec.js -c config/eslint.js || true",
+    "test": " karma start config/karma.config.js --single-run || true",
+		"coverage": "cross-env NODE_ENV=test karma start config/karma-coverage.config.js --single-run || true",
+		"bench": "karma start config/karma-bench.config.js --single-run || true",
+    "doc": "jsdoc -c config/jsdoc-conf.json"
   },
   "devDependencies": {
     "babel-cli": "6.22.2",
@@ -18,15 +20,19 @@
     "babel-loader": "6.2.10",
     "babel-plugin-istanbul": "^3.1.2",
     "babel-plugin-transform-es2015-modules-commonjs": "6.22.0",
+    "benchmark": "^2.1.3",
     "cross-env": "^3.1.4",
     "eslint": "3.13.1",
     "eslint-loader": "1.6.1",
     "jasmine": "^2.5.3",
     "jsdoc": "3.4.3",
     "karma": "^1.4.0",
+    "karma-benchmark": "^0.7.1",
+    "karma-benchmarkjs-reporter": "^1.0.0",
     "karma-chrome-launcher": "^2.0.0",
     "karma-coverage": "^1.1.1",
     "karma-jasmine": "^1.1.0",
+    "karma-junit-reporter": "^1.2.0",
     "karma-webpack": "^2.0.1",
     "uglify-js": "git://github.com/mishoo/UglifyJS2.git#harmony",
     "webpack": "1.14.0"
