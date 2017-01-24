@@ -4,16 +4,16 @@ var CommonsChunkPlugin = webpack.optimize.CommonsChunkPlugin;
 var path = require('path');
 var env = require('yargs').argv.mode;
 
-var libraryName = 'library.[name]';
+var libraryName = 'lokijs';
 
 var outputFile;
 var plugins = [];
 
 if (env === 'build') {
 	plugins.push(new UglifyJsPlugin({minimize: true}));
-	outputFile = libraryName + '.min.js';
+	outputFile = libraryName + '.[name].min.js';
 } else {
-	outputFile = libraryName + '.js';
+	outputFile = libraryName + '.[name].js';
 }
 
 var config = {

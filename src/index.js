@@ -1,5 +1,7 @@
 import {Calculator} from "./calculator";
 
-export default function getInstance() {
+export function getInstance() {
 	return new Calculator();
 }
+
+//module.exports = getInstance;
