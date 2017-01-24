@@ -4,16 +4,24 @@ module.exports = function (config) {
 	config.set({
 		browsers: ['Chrome'],
 		files: [
-			{pattern: '../spec/**/*.spec.js', watched: false}
+			{pattern: '../spec/**/*.spec.js', watched: false},
+			{pattern: '../spec/**/*.helpers.js', watched: false}
 		],
 
 		// coverage reporter generates the coverage
-		reporters: ['progress'],
+		reporters: ['dots', 'coverage'],
 
 		frameworks: ['jasmine'],
 
 		preprocessors: {
-			'../spec/**/*.spec.js': ['webpack']
+			'../spec/**/*.spec.js': ['webpack'],
+			'../spec/**/*.helpers.js': ['webpack']
+		},
+
+		// optionally, configure the reporter
+		coverageReporter: {
+			type: 'html',
+			dir: '../reports/coverage/'
 		},
 
 		webpack: {
@@ -33,6 +41,7 @@ module.exports = function (config) {
 		},
 		plugins: [
 			'karma-chrome-launcher',
+			'karma-coverage',
 			'karma-jasmine',
 			'karma-webpack'
 		],

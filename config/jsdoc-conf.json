@@ -1,21 +1,28 @@
 {
-  "opts": {
-    "readme": "./OVERVIEW.md",
-    "destination": "./jsdoc",
-    "tutorials": "./tutorials"
-  },
-  "tags": {
-    "allowUnknownTags": true,
-    "dictionaries": ["jsdoc","closure"]
-  },
-  "source": {
-    "include": ["src/"],
-    "includePattern": ".+\\.js$",
-    "excludePattern": "(^|\\/|\\\\)_"
-  },
-  "plugins": ["plugins/markdown"],
-  "templates": {
-    "cleverlinks": false,
-    "monospaceLinks": false
-  }
+	"opts": {
+		"readme": "./OVERVIEW.md",
+		"destination": "./jsdoc",
+		"tutorials": "./tutorials"
+	},
+	"tags": {
+		"allowUnknownTags": true,
+		"dictionaries": [
+			"jsdoc",
+			"closure"
+		]
+	},
+	"source": {
+		"include": [
+			"src/"
+		],
+		"includePattern": ".+\\.js$",
+		"excludePattern": "(^|\\/|\\\\)_"
+	},
+	"plugins": [
+		"plugins/markdown"
+	],
+	"templates": {
+		"cleverlinks": false,
+		"monospaceLinks": false
+	}
 }

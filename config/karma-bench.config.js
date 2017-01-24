@@ -17,9 +17,9 @@ module.exports = function (config) {
 		},
 
 		junitReporter: {
-		 outputDir: '../reports/bench/',
-		 outputFile: 'benchmark.xml'
-	  },
+			outputDir: '../reports/bench/',
+			outputFile: 'benchmark.xml'
+		},
 
 		browserNoActivityTimeout: 60000,
 

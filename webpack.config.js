@@ -29,6 +29,9 @@ var config = {
 		libraryTarget: 'umd',
 		umdNamedDefine: true
 	},
+	eslint: {
+    configFile: 'config/eslintrc.js'
+  },
 	module: {
 		loaders: [
 			{
