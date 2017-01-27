@@ -4,4 +4,4 @@ export function getInstance() {
 	return new Calculator();
 }
 
-//module.exports = getInstance;
+module.exports = getInstance;

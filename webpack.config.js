@@ -18,16 +18,20 @@ if (env === 'build') {
 
 var config = {
 	entry: {
-		core: __dirname + '/src/index.js',
-		memory: __dirname + '/src/memory.js'
+		core: __dirname + '/src/core/index.js',
+		memory: __dirname + '/src/memory.js',
+		loki: __dirname + '/src/lokijs.js',
 	},
 	devtool: 'source-map',
 	output: {
 		path: path.join(__dirname, '/lib'),
 		filename: outputFile,
-		library: libraryName,
+		library: [libraryName, '[name]'],
 		libraryTarget: 'umd',
 		umdNamedDefine: true
+	},
+	externals: {
+		"fs": "fs"
 	},
 	eslint: {
     configFile: 'config/eslintrc.js'
