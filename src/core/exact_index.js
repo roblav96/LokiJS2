@@ -12,7 +12,7 @@ export class ExactIndex {
 		} else {
 			this.index[key] = [val];
 		}
-		console.log("?")
+		console.log("?");
 	}
 
 	// remove the value from the index, if the value was the last one, remove the key
@@ -30,7 +30,7 @@ export class ExactIndex {
 
 	// get the values related to the key, could be more than one
 	get(key) {
-		console.log("!")
+		console.log("!");
 		return this.index[key];
 	}
 

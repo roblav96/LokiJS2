@@ -49,7 +49,7 @@ export class LokiIndexedAdapter {
 		if (typeof indexedDB !== "undefined" && indexedDB) return true;
 
 		return false;
-	};
+	}
 
 	/**
 	 * Retrieves a serialized db string from the catalog.
@@ -91,7 +91,7 @@ export class LokiIndexedAdapter {
 				resolve(result.val);
 			});
 		});
-	};
+	}
 
 	// alias
 	loadKey(dbname) {
@@ -148,7 +148,7 @@ export class LokiIndexedAdapter {
 		this.catalog.setAppKey(appName, dbname, dbstring, saveCallback);
 
 		return result;
-	};
+	}
 
 	// alias
 	saveKey(dbname, dbstring) {
@@ -196,7 +196,7 @@ export class LokiIndexedAdapter {
 				resolve();
 			});
 		});
-	};
+	}
 
 	// alias
 	deleteKey(dbname) {
@@ -219,7 +219,7 @@ export class LokiIndexedAdapter {
 				}
 			});
 		});
-	};
+	}
 
 	/**
 	 * Retrieves object array of catalog entries for current app.
@@ -267,7 +267,7 @@ export class LokiIndexedAdapter {
 				});
 			}
 		});
-	};
+	}
 
 	// alias
 	getKeyList(callback) {
@@ -329,7 +329,7 @@ export class LokiIndexedAdapter {
 				});
 			}
 		});
-	};
+	}
 }
 
 /**
@@ -384,7 +384,7 @@ class LokiCatalog {
 		openRequest.onerror = function(e) {
 			throw e;
 		};
-	};
+	}
 
 	getAppKey(app, key, callback) {
 		var transaction = this.db.transaction(["LokiAKV"], "readonly");
@@ -424,7 +424,7 @@ class LokiCatalog {
 				}
 			};
 		})(callback);
-	};
+	}
 
 	getAppKeyById(id, callback, data) {
 		var transaction = this.db.transaction(["LokiAKV"], "readonly");
@@ -440,7 +440,7 @@ class LokiCatalog {
 				}
 			};
 		})(data, callback);
-	};
+	}
 
 	setAppKey(app, key, val, callback) {
 		var transaction = this.db.transaction(["LokiAKV"], "readwrite");
@@ -504,7 +504,7 @@ class LokiCatalog {
 				}
 			};
 		})(callback);
-	};
+	}
 
 	deleteAppKey(id, callback) {
 		var transaction = this.db.transaction(["LokiAKV"], "readwrite");
@@ -529,7 +529,7 @@ class LokiCatalog {
 				}
 			};
 		})(callback);
-	};
+	}
 
 	getAppKeys(app, callback) {
 		var transaction = this.db.transaction(["LokiAKV"], "readonly");
@@ -576,7 +576,7 @@ class LokiCatalog {
 			};
 		})(callback);
 
-	};
+	}
 
 	// Hide "cursoring" and return array of { id: id, key: key }
 	getAllKeys(callback) {
@@ -610,5 +610,5 @@ class LokiCatalog {
 				if (typeof(usercallback) === "function") usercallback(null);
 			};
 		})(callback);
-	};
+	}
 }

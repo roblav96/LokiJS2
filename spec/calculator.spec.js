@@ -1,6 +1,6 @@
 /* global describe, it, expect */
 import getInstance from "../src/index";
-
+;
 describe("Calculator", () => {
 	it("should add two numbers", () => {
 		let calculator = getInstance();

@@ -1,3 +1,3 @@
-import {Loki} from './lokicore'
+import {Loki} from './lokicore';
 
 module.exports = Loki;

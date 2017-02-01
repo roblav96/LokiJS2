@@ -1,9 +1,14 @@
 import {LokiEventEmitter} from './event_emitter';
-import {Resultset} from './resultset'
+import {Resultset} from './resultset';
 
 /*
 'LokiEventEmitter' is not defined        no-undef
 'Resultset' is not defined               no-undef
+
+applySortCriteria -> like Resultset::compoundsort
+
+queueRebuildEvent -> Promise?
+
  */
 
 /**
@@ -133,7 +138,7 @@ export class DynamicView extends LokiEventEmitter {
 		this.emit('rebuild', this);
 
 		return this;
-	};
+	}
 
 	/**
 	 * branchResultset() - Makes a copy of the internal resultset for branched queries.
@@ -153,7 +158,7 @@ export class DynamicView extends LokiEventEmitter {
 		}
 
 		return rs.transform(transform, parameters);
-	};
+	}
 
 	/**
 	 * toJSON() - Override of toJSON to avoid circular references
@@ -174,7 +179,7 @@ export class DynamicView extends LokiEventEmitter {
 		copy.collection = null;
 
 		return copy;
-	};
+	}
 
 	/**
 	 * removeFilters() - Used to clear pipeline and reset dynamic view to initial state.
@@ -205,7 +210,7 @@ export class DynamicView extends LokiEventEmitter {
 		if (options.queueSortPhase === true) {
 			this.queueSortPhase();
 		}
-	};
+	}
 
 	/**
 	 * applySort() - Used to apply a sort to the dynamic view
@@ -227,7 +232,7 @@ export class DynamicView extends LokiEventEmitter {
 		this.queueSortPhase();
 
 		return this;
-	};
+	}
 
 	/**
 	 * applySimpleSort() - Used to specify a property used for view translation.
@@ -248,7 +253,7 @@ export class DynamicView extends LokiEventEmitter {
 		this.queueSortPhase();
 
 		return this;
-	};
+	}
 
 	/**
 	 * applySortCriteria() - Allows sorting a resultset based on multiple columns.
@@ -271,7 +276,7 @@ export class DynamicView extends LokiEventEmitter {
 		this.queueSortPhase();
 
 		return this;
-	};
+	}
 
 	/**
 	 * startTransaction() - marks the beginning of a transaction.
@@ -282,7 +287,7 @@ export class DynamicView extends LokiEventEmitter {
 		this.cachedresultset = this.resultset.copy();
 
 		return this;
-	};
+	}
 
 	/**
 	 * commit() - commits a transaction.
@@ -293,7 +298,7 @@ export class DynamicView extends LokiEventEmitter {
 		this.cachedresultset = null;
 
 		return this;
-	};
+	}
 
 	/**
 	 * rollback() - rolls back a transaction.
@@ -312,7 +317,7 @@ export class DynamicView extends LokiEventEmitter {
 		}
 
 		return this;
-	};
+	}
 
 
 	/**
@@ -331,7 +336,7 @@ export class DynamicView extends LokiEventEmitter {
 			}
 		}
 		return -1;
-	};
+	}
 
 	/**
 	 * Implementation detail.
@@ -342,7 +347,7 @@ export class DynamicView extends LokiEventEmitter {
 	_addFilter(filter) {
 		this.filterPipeline.push(filter);
 		this.resultset[filter.type](filter.val);
-	};
+	}
 
 	/**
 	 * reapplyFilters() - Reapply all the filters in the current pipeline.
@@ -372,7 +377,7 @@ export class DynamicView extends LokiEventEmitter {
 		}
 
 		return this;
-	};
+	}
 
 	/**
 	 * applyFilter() - Adds or updates a filter in the DynamicView filter pipeline
@@ -404,7 +409,7 @@ export class DynamicView extends LokiEventEmitter {
 		}
 
 		return this;
-	};
+	}
 
 	/**
 	 * applyFind() - Adds or updates a mongo-style query option in the DynamicView filter pipeline
@@ -421,7 +426,7 @@ export class DynamicView extends LokiEventEmitter {
 			uid: uid
 		});
 		return this;
-	};
+	}
 
 	/**
 	 * applyWhere() - Adds or updates a javascript filter function in the DynamicView filter pipeline
@@ -438,7 +443,7 @@ export class DynamicView extends LokiEventEmitter {
 			uid: uid
 		});
 		return this;
-	};
+	}
 
 	/**
 	 * removeFilter() - Remove the specified filter from the DynamicView filter pipeline
@@ -456,7 +461,7 @@ export class DynamicView extends LokiEventEmitter {
 		this.filterPipeline.splice(idx, 1);
 		this.reapplyFilters();
 		return this;
-	};
+	}
 
 	/**
 	 * count() - returns the number of documents representing the current DynamicView contents.
@@ -473,7 +478,7 @@ export class DynamicView extends LokiEventEmitter {
 		}
 
 		return this.resultset.count();
-	};
+	}
 
 	/**
 	 * data() - resolves and pending filtering and sorting, then returns document array as result.
@@ -489,7 +494,7 @@ export class DynamicView extends LokiEventEmitter {
 			});
 		}
 		return (this.options.persistent) ? (this.resultdata) : (this.resultset.data());
-	};
+	}
 
 	/**
 	 * queueRebuildEvent() - When the view is not sorted we may still wish to be notified of rebuild events.
@@ -508,7 +513,7 @@ export class DynamicView extends LokiEventEmitter {
 				self.emit('rebuild', self);
 			}
 		}, this.options.minRebuildInterval);
-	};
+	}
 
 	/**
 	 * queueSortPhase : If the view is sorted we will throttle sorting to either :
@@ -533,7 +538,7 @@ export class DynamicView extends LokiEventEmitter {
 			// potentially notify user that data has changed.
 			this.queueRebuildEvent();
 		}
-	};
+	}
 
 	/**
 	 * performSortPhase() - invoked synchronously or asynchronously to perform final sort phase (if needed)
@@ -566,7 +571,7 @@ export class DynamicView extends LokiEventEmitter {
 		if (!options.suppressRebuildEvent) {
 			this.emit('rebuild', this);
 		}
-	};
+	}
 
 	/**
 	 * evaluateDocument() - internal method for (re)evaluating document inclusion.
@@ -671,7 +676,7 @@ export class DynamicView extends LokiEventEmitter {
 
 			return;
 		}
-	};
+	}
 
 	/**
 	 * removeDocument() - internal function called on collection.delete()
@@ -733,7 +738,7 @@ export class DynamicView extends LokiEventEmitter {
 				ofr[idx]--;
 			}
 		}
-	};
+	}
 
 	/**
 	 * mapReduce() - data transformation via user supplied functions
@@ -749,6 +754,6 @@ export class DynamicView extends LokiEventEmitter {
 		} catch (err) {
 			throw err;
 		}
-	};
+	}
 
 }

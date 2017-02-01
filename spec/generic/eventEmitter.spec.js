@@ -1,13 +1,14 @@
-import {Loki as loki} from '../../src/core/lokicore'
+/* global describe, it, expect, beforeEach */
+import {Loki as loki} from '../../src/core/lokicore';
 
-describe('eventEmitter', function() {
+describe('eventEmitter', function () {
 	var db;
-  var users;
+	var users;
 
-	beforeEach(function() {
+	beforeEach(function () {
 		db = new loki('test', {
-				persistenceMethod: null
-			}),
+			persistenceMethod: null
+		}),
 			users = db.addCollection('users', {
 				asyncListeners: false
 			});
@@ -21,7 +22,7 @@ describe('eventEmitter', function() {
 		expect(db.asyncListeners).toBe(false);
 	});
 
-	it('emit', function() {
+	it('emit', function () {
 		var index = db.on('test', function test(obj) {
 			expect(obj).toEqual(42);
 		});

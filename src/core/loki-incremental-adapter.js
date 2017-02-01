@@ -45,9 +45,9 @@
 		class LokiIncrementalAdapter {
 			constructor(options) {
 				const config = options || {
-						journaling: false,
-						format: 'json'
-					};
+					journaling: false,
+					format: 'json'
+				};
 				this.mode = 'reference';
 				this.journaling = config.journaling;
 				this.format = config.format;

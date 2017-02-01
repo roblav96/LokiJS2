@@ -6,7 +6,7 @@
 export class LokiFsAdapter {
 
 	constructor() {
-		this.fs = undefined //TODO require('fs');
+		this.fs = undefined; //TODO require('fs');
 	}
 
 	/**
@@ -35,7 +35,7 @@ export class LokiFsAdapter {
 				}
 			});
 		});
-	};
+	}
 
 	/**
 	 * saveDatabase() - save data to file, will throw an error if the file can't be saved
@@ -63,7 +63,7 @@ export class LokiFsAdapter {
 				}
 			});
 		});
-	};
+	}
 
 	/**
 	 * deleteDatabase() - delete the database file, will throw an error if the
@@ -84,5 +84,5 @@ export class LokiFsAdapter {
 				}
 			});
 		});
-	};
+	}
 }

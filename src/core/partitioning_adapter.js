@@ -1,4 +1,4 @@
-import {Loki} from './lokicore'
+import {Loki} from './lokicore';
 
 /**
  * An adapter for adapters.  Converts a non reference mode adapter into a reference mode adapter
@@ -92,7 +92,7 @@ export class LokiPartitioningAdapter {
 				return self.dbref;
 			});
 		});
-	};
+	}
 
 	/**
 	 * Used to sequentially load each collection partition, one at a time.
@@ -120,7 +120,7 @@ export class LokiPartitioningAdapter {
 				return self.loadNextPartition(partition);
 			}
 		});
-	};
+	}
 
 	/**
 	 * Used to sequentially load the next page of collection partition, one at a time.
@@ -169,7 +169,7 @@ export class LokiPartitioningAdapter {
 				return self.loadNextPage();
 			}
 		});
-	};
+	}
 
 	/**
 	 * Saves a database by partioning into separate key/value saves.
@@ -197,7 +197,7 @@ export class LokiPartitioningAdapter {
 		}
 
 		return this.saveNextPartition();
-	};
+	}
 
 	/**
 	 * Helper method used internally to save each dirty collection, one at a time.
@@ -237,7 +237,7 @@ export class LokiPartitioningAdapter {
 				return self.saveNextPartition();
 			}
 		});
-	};
+	}
 
 	/**
 	 * Helper method used internally to generate and save the next page of the current (dirty) partition.
@@ -295,5 +295,5 @@ export class LokiPartitioningAdapter {
 				return this.adapter.saveDatabase(keyname, pageBuilder).then(pageSaveCallback);
 			}
 		}
-	};
+	}
 }

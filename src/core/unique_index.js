@@ -16,17 +16,15 @@ export class UniqueIndex {
 				this.lokiMap[obj.$loki] = fieldValue;
 			}
 		}
-	};
+	}
 
 	get(key) {
-		console.log(key);
 		return this.keyMap[key];
-	};
+	}
 
 	byId(id) {
-		console.log("byId", key);
 		return this.keyMap[this.lokiMap[id]];
-	};
+	}
 
 	/**
 	 * Updates a document's unique index given an updated object.
@@ -42,7 +40,7 @@ export class UniqueIndex {
 		} else {
 			this.keyMap[obj[this.field]] = doc;
 		}
-	};
+	}
 	remove(key) {
 		var obj = this.keyMap[key];
 		if (obj !== null && typeof obj !== 'undefined') {
@@ -51,9 +49,9 @@ export class UniqueIndex {
 		} else {
 			throw new Error('Key is not in unique index: ' + this.field);
 		}
-	};
+	}
 	clear() {
 		this.keyMap = {};
 		this.lokiMap = {};
-	};
+	}
 }

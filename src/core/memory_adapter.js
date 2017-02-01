@@ -25,7 +25,7 @@ export class LokiMemoryAdapter {
 		} else {
 			return Promise.reject(new Error("unable to load database, " + dbname + " was not found in memory adapter"));
 		}
-	};
+	}
 
 	/**
 	 * Saves a serialized database to its in-memory store.
@@ -45,7 +45,7 @@ export class LokiMemoryAdapter {
 		};
 
 		return Promise.resolve();
-	};
+	}
 
 	/**
 	 * Deletes a database from its in-memory store.
@@ -60,6 +60,6 @@ export class LokiMemoryAdapter {
 		}
 
 		return Promise.resolve();
-	};
+	}
 
 }

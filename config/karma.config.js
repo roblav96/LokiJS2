@@ -11,7 +11,7 @@ module.exports = function (config) {
 		// coverage reporter generates the coverage
 		reporters: ['dots', 'coverage'],
 
-		frameworks: ['jasmine'],
+		frameworks: ['jasmine', 'jasmine-matchers'],
 
 		preprocessors: {
 			'../spec/**/*.spec.js': ['webpack'],
@@ -43,6 +43,7 @@ module.exports = function (config) {
 			'karma-chrome-launcher',
 			'karma-coverage',
 			'karma-jasmine',
+			'karma-jasmine-matchers',
 			'karma-webpack'
 		],
 	});

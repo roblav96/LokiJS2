@@ -1,12 +1,13 @@
-import {Loki as loki} from '../../src/core/lokicore'
+/* global describe, it, expect */
+import {Loki as loki} from '../../src/core/lokicore';
 
-describe('Staging and commits', function() {
+describe('Staging and commits', function () {
 	let db, directors, films;
 
-	beforeEach(function() {
+	beforeEach(function () {
 		db = new loki('testJoins', {
-				persistenceMethod: null
-			});
+			persistenceMethod: null
+		});
 		directors = db.addCollection('directors');
 		films = db.addCollection('films');
 
@@ -25,7 +26,7 @@ describe('Staging and commits', function() {
 		}]);
 	});
 
-	it('work', function() {
+	it('work', function () {
 
 		var stageName = 'tentative directors',
 			newDirectorsName = 'Joel and Ethan Cohen',

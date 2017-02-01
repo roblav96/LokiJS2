@@ -1,10 +1,10 @@
 
-import {LokiEventEmitter} from './event_emitter'
+import {LokiEventEmitter} from './event_emitter';
 
-import {LokiFsAdapter} from './fs_adapter'
-import {LokiLocalStorageAdapter} from './local_storage_adapter'
-import {Collection} from './collection'
-import {Utils} from './utils'
+import {LokiFsAdapter} from './fs_adapter';
+import {LokiLocalStorageAdapter} from './local_storage_adapter';
+import {Collection} from './collection';
+import {Utils} from './utils';
 
 /*
 'LokiFsAdapter' is not defined                 no-undef	x
@@ -12,6 +12,12 @@ import {Utils} from './utils'
 'Collection' is not defined                    no-undef	x
 'delim' is not defined                         no-undef	x
 'Utils' is not defined                         no-undef	x
+
+TBD:
+	* Default persistence should be not available.
+	* getIndexedAdapter is also obsolet
+	* Make some functions private.
+	* Inflate? -> Utils.copyProperties
  */
 
 /**
@@ -111,7 +117,7 @@ export class Loki extends LokiEventEmitter {
 		}
 
 		return adapter;
-	};
+	}
 
 
 	/**
@@ -201,7 +207,7 @@ export class Loki extends LokiEventEmitter {
 				self.autosaveEnable();
 			}
 		});
-	};
+	}
 
 	/**
 	 * Copies 'this' database into a new Loki instance. Object references are shared to make lightweight.
@@ -234,7 +240,7 @@ export class Loki extends LokiEventEmitter {
 		}
 
 		return databaseCopy;
-	};
+	}
 
 	/**
 	 * Shorthand method for quickly creating and populating an anonymous collection.
@@ -256,7 +262,7 @@ export class Loki extends LokiEventEmitter {
 			collection.console = console;
 
 		return collection;
-	};
+	}
 
 	/**
 	 * Adds a collection to the database.
@@ -282,14 +288,14 @@ export class Loki extends LokiEventEmitter {
 			collection.console = console;
 
 		return collection;
-	};
+	}
 
 	loadCollection(collection) {
 		if (!collection.name) {
 			throw new Error('Collection must have a name property to be loaded');
 		}
 		this.collections.push(collection);
-	};
+	}
 
 	/**
 	 * Retrieves reference to a collection by name.
@@ -310,7 +316,7 @@ export class Loki extends LokiEventEmitter {
 		// no such collection
 		this.emit('warning', 'collection ' + collectionName + ' not found');
 		return null;
-	};
+	}
 
 	listCollections() {
 
@@ -325,7 +331,7 @@ export class Loki extends LokiEventEmitter {
 			});
 		}
 		return colls;
-	};
+	}
 
 	/**
 	 * Removes a collection from the database.
@@ -349,11 +355,11 @@ export class Loki extends LokiEventEmitter {
 				return;
 			}
 		}
-	};
+	}
 
 	getName() {
 		return this.name;
-	};
+	}
 
 	/**
 	 * serializeReplacer - used to prevent certain properties from being serialized
@@ -369,7 +375,7 @@ export class Loki extends LokiEventEmitter {
 			default:
 				return value;
 		}
-	};
+	}
 
 	/**
 	 * Serialize database to a string which can be loaded via {@link Loki#loadJSON}
@@ -394,7 +400,7 @@ export class Loki extends LokiEventEmitter {
 			default:
 				return JSON.stringify(this, this.serializeReplacer);
 		}
-	};
+	}
 
 	// alias of serialize
 	toJson() {
@@ -534,7 +540,7 @@ export class Loki extends LokiEventEmitter {
 		reconstruct.push("");
 
 		return reconstruct.join(delim);
-	};
+	}
 
 	/**
 	 * Utility method to serialize a collection in a 'destructured' format
@@ -580,7 +586,7 @@ export class Loki extends LokiEventEmitter {
 			// NDAA and NDA
 			return resultlines;
 		}
-	};
+	}
 
 	/**
 	 * Destructured JSON deserialization routine to minimize memory overhead.
@@ -692,7 +698,7 @@ export class Loki extends LokiEventEmitter {
 		}
 
 		return cdb;
-	};
+	}
 
 	/**
 	 * Deserializes a destructured collection.
@@ -736,7 +742,7 @@ export class Loki extends LokiEventEmitter {
 		}
 
 		return workarray;
-	};
+	}
 
 	/**
 	 * Inflates a loki database from a serialized JSON string
@@ -766,7 +772,7 @@ export class Loki extends LokiEventEmitter {
 		}
 
 		this.loadJSONObject(dbObject, options);
-	};
+	}
 
 	/**
 	 * Inflates a loki database from a JS object
@@ -896,7 +902,7 @@ export class Loki extends LokiEventEmitter {
 				});
 			}
 		}
-	};
+	}
 
 	/**
 	 * Emits the close event. In autosave scenarios, if the database is dirty, this will save and disable timer.
@@ -921,7 +927,7 @@ export class Loki extends LokiEventEmitter {
 		return Promise.resolve(saved).then(function() {
 			self.emit('close');
 		});
-	};
+	}
 
 	/**-------------------------+
 	 | Changes API               |
@@ -955,7 +961,7 @@ export class Loki extends LokiEventEmitter {
 			}
 		});
 		return changes;
-	};
+	}
 
 	/**
 	 * (Changes API) - stringify changes for network transmission
@@ -964,7 +970,7 @@ export class Loki extends LokiEventEmitter {
 	 */
 	serializeChanges(collectionNamesArray) {
 		return JSON.stringify(this.generateChangesNotification(collectionNamesArray));
-	};
+	}
 
 	/**
 	 * (Changes API) : clears all the changes in all collections.
@@ -976,7 +982,7 @@ export class Loki extends LokiEventEmitter {
 				coll.flushChanges();
 			}
 		});
-	};
+	}
 
 	/**
 	 * Handles loading from file system, local storage, or adapter (indexeddb).
@@ -1011,7 +1017,7 @@ export class Loki extends LokiEventEmitter {
 					}
 				}
 			});
-	};
+	}
 
 	/**
 	 * Handles saving to file system, local storage, or adapter (indexeddb)
@@ -1045,7 +1051,7 @@ export class Loki extends LokiEventEmitter {
 			self.autosaveClearFlags();
 			self.emit("save");
 		});
-	};
+	}
 
 	// alias
 	save() {
@@ -1065,7 +1071,7 @@ export class Loki extends LokiEventEmitter {
 		}
 
 		return Promise.resolve(this.persistenceAdapter.deleteDatabase(this.filename));
-	};
+	}
 
 	/**
 	 * autosaveDirty - check whether any collections are 'dirty' meaning we need to save (entire) database
@@ -1080,7 +1086,7 @@ export class Loki extends LokiEventEmitter {
 		}
 
 		return false;
-	};
+	}
 
 	/**
 	 * autosaveClearFlags - resets dirty flags on all collections.
@@ -1091,7 +1097,7 @@ export class Loki extends LokiEventEmitter {
 		for (var idx = 0; idx < this.collections.length; idx++) {
 			this.collections[idx].dirty = false;
 		}
-	};
+	}
 
 	/**
 	 * autosaveEnable - begin a javascript interval to periodically save the database.
@@ -1118,7 +1124,7 @@ export class Loki extends LokiEventEmitter {
 				}
 			}, self.autosaveInterval);
 		})();
-	};
+	}
 
 	/**
 	 * autosaveDisable - stop the autosave interval timer.
@@ -1130,5 +1136,5 @@ export class Loki extends LokiEventEmitter {
 		if (this.autosaveHandle) {
 			this.autosaveHandle();
 		}
-	};
+	}
 }

@@ -1,10 +1,33 @@
 import {LokiEventEmitter} from './event_emitter';
-import {UniqueIndex} from './unique_index'
-import {ExactIndex} from './exact_index'
-import {Resultset} from './resultset'
-import {DynamicView} from './dynamic_view'
-import {clone, cloneObjectArray} from './clone'
-import {ltHelper, gtHelper} from './helper'
+import {UniqueIndex} from './unique_index';
+import {ExactIndex} from './exact_index';
+import {Resultset} from './resultset';
+import {DynamicView} from './dynamic_view';
+import {clone, cloneObjectArray} from './clone';
+import {ltHelper, gtHelper} from './helper';
+
+/*
+ 'UniqueIndex' is not defined                 no-undef
+ 'ExactIndex' is not defined                  no-undef
+ 'ltHelper' is not defined                    no-undef
+ 'gtHelper' is not defined                    no-undef
+ 'DynamicView' is not defined                 no-undef
+ 'clone' is not defined                       no-undef
+ 'Resultset' is not defined                   no-undef
+ 'cloneObjectArray' is not defined            no-undef
+
+ 'isDeepProperty' is not defined              no-undef
+ 'deepProperty' is not defined                no-undef
+ 'average' is not defined                     no-undef
+ 'standardDeviation' is not defined           no-undef
+ 'sub' is not defined                         no-undef
+
+
+ byExample?
+ indexing -> own class?
+ remove data only?
+
+ */
 
 /**
  * General utils, including statistical functions
@@ -55,23 +78,6 @@ function deepProperty(obj, property, isDeep) {
 	}
 	return root;
 }
-
-/*
-'UniqueIndex' is not defined                 no-undef
-'ExactIndex' is not defined                  no-undef
-'ltHelper' is not defined                    no-undef
-'gtHelper' is not defined                    no-undef
-'DynamicView' is not defined                 no-undef
-'clone' is not defined                       no-undef
-'Resultset' is not defined                   no-undef
-'cloneObjectArray' is not defined            no-undef
-
-'isDeepProperty' is not defined              no-undef
-'deepProperty' is not defined                no-undef
-'average' is not defined                     no-undef
-'standardDeviation' is not defined           no-undef
-'sub' is not defined                         no-undef
- */
 
 /**
  * Collection class that handles documents of same type
@@ -639,7 +645,6 @@ export class Collection extends LokiEventEmitter {
 	 * @returns {DynamicView} reference to the dynamic view added
 	 * @memberof Collection
 	 **/
-
 	addDynamicView(name, options) {
 		var dv = new DynamicView(this, name, options);
 		this.DynamicViews.push(dv);

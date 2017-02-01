@@ -28,7 +28,7 @@ export class LokiLocalStorageAdapter {
 		}
 
 		return Promise.reject(new Error('localStorage is not available'));
-	};
+	}
 
 	/**
 	 * saveDatabase() - save data to localstorage, will throw an error if the file can't be saved
@@ -45,7 +45,7 @@ export class LokiLocalStorageAdapter {
 		}
 
 		return Promise.reject(new Error('localStorage is not available'));
-	};
+	}
 
 	/**
 	 * deleteDatabase() - delete the database from localstorage, will throw an error if it
@@ -62,6 +62,6 @@ export class LokiLocalStorageAdapter {
 		}
 
 		return Promise.reject(new Error('localStorage is not available'));
-	};
+	}
 
 }

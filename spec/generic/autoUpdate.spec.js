@@ -1,96 +1,95 @@
-import Loki from '../../src/core/index'
-
-var loki = Loki;
+/* global describe, it, expect */
+import {Loki as loki} from '../../src/core/lokicore';
 
 describe('autoupdate', function () {
 
-  it('auto updates inserted documents', function (done) {
+	it('auto updates inserted documents', function (done) {
 
-    if (typeof Object.observe !== 'function') {
-      done();
-      return;
-    }
+		if (typeof Object.observe !== 'function') {
+			done();
+			return;
+		}
 
-    var coll = new loki.Collection('test', {
-      unique: ['name'],
-      autoupdate: true
-    });
+		var coll = new loki.Collection('test', {
+			unique: ['name'],
+			autoupdate: true
+		});
 
-    coll.insert({
-      name: 'Jack'
-    });
+		coll.insert({
+			name: 'Jack'
+		});
 
-    var doc = coll.insert({
-      name: 'Peter'
-    });
+		var doc = coll.insert({
+			name: 'Peter'
+		});
 
-    function change1() {
-      coll.on('update', function (target) {
-        expect(target).toBe(doc);
+		function change1() {
+			coll.on('update', function (target) {
+				expect(target).toBe(doc);
 
-        change2();
-      });
-      doc.name = 'John';
-    }
+				change2();
+			});
+			doc.name = 'John';
+		}
 
-    function change2() {
-      coll.on('error', function (err) {
-        expect(err).toEqual(new Error('Duplicate key for property name: ' + doc.name));
-        done();
-      });
-      doc.name = 'Jack';
-    }
+		function change2() {
+			coll.on('error', function (err) {
+				expect(err).toEqual(new Error('Duplicate key for property name: ' + doc.name));
+				done();
+			});
+			doc.name = 'Jack';
+		}
 
-    change1();
-  });
+		change1();
+	});
 
-  it('auto updates documents loaded from storage', function (done) {
+	it('auto updates documents loaded from storage', function (done) {
 
-    if (typeof Object.observe !== 'function') {
-      done();
-      return;
-    }
+		if (typeof Object.observe !== 'function') {
+			done();
+			return;
+		}
 
-    var db1 = new loki('autoupdate1.json'),
-      db2 = new loki('autoupdate2.json');
+		var db1 = new loki('autoupdate1.json'),
+			db2 = new loki('autoupdate2.json');
 
-    var coll = db1.addCollection('test', {
-      unique: ['name'],
-      autoupdate: true
-    });
+		var coll = db1.addCollection('test', {
+			unique: ['name'],
+			autoupdate: true
+		});
 
-    var originalDocs = coll.insert([{
-      name: 'Jack'
-    }, {
-      name: 'Peter'
-    }]);
+		var originalDocs = coll.insert([{
+			name: 'Jack'
+		}, {
+			name: 'Peter'
+		}]);
 
-    db2.loadJSON(db1.serialize());
+		db2.loadJSON(db1.serialize());
 
-    coll = db2.getCollection('test');
+		coll = db2.getCollection('test');
 
-    var doc = coll.by('name', 'Peter');
+		var doc = coll.by('name', 'Peter');
 
-    expect(coll.autoupdate).toBe(true);
-    expect(doc).toEqual(originalDocs[1]);
+		expect(coll.autoupdate).toBe(true);
+		expect(doc).toEqual(originalDocs[1]);
 
-    function change1() {
-      coll.on('update', function (target) {
-        expect(target).toBe(doc);
+		function change1() {
+			coll.on('update', function (target) {
+				expect(target).toBe(doc);
 
-        change2();
-      });
-      doc.name = 'John';
-    }
+				change2();
+			});
+			doc.name = 'John';
+		}
 
-    function change2() {
-      coll.on('error', function (err) {
-        expect(err).toEqual(new Error('Duplicate key for property name: ' + doc.name));
-        done();
-      });
-      doc.name = 'Jack';
-    }
+		function change2() {
+			coll.on('error', function (err) {
+				expect(err).toEqual(new Error('Duplicate key for property name: ' + doc.name));
+				done();
+			});
+			doc.name = 'Jack';
+		}
 
-    change1();
-  });
+		change1();
+	});
 });

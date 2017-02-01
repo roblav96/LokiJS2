@@ -1,8 +1,19 @@
-import {LokiEventEmitter} from './event_emitter';
-import {clone} from './clone'
-import {Collection} from './collection'
-import {Utils} from './utils'
-import {ltHelper, gtHelper} from './helper'
+import {clone} from './clone';
+import {Collection} from './collection';
+import {Utils} from './utils';
+import {ltHelper, gtHelper} from './helper';
+
+/*
+ 'Utils' is not defined                 no-undef	(resolveTransformParams)
+ 'sortHelper' is not defined            no-undef
+ 'compoundeval' is not defined          no-undef
+ 'indexedOpsList' is not defined        no-undef
+ 'LokiOps' is not defined               no-undef
+ 'dotSubScan' is not defined            no-undef
+ 'clone' is not defined                 no-undef
+
+
+ */
 
 function containsCheckFn(a) {
 	if (typeof a === 'string' || Array.isArray(a)) {
@@ -268,16 +279,6 @@ function dotSubScan(root, paths, fun, value, poffset) {
 	return valueFound;
 }
 
-/*
-'Utils' is not defined                 no-undef	x
-'sortHelper' is not defined            no-undef
-'compoundeval' is not defined          no-undef
-'indexedOpsList' is not defined        no-undef
-'LokiOps' is not defined               no-undef
-'dotSubScan' is not defined            no-undef
-'clone' is not defined                 no-undef
- */
-
 /**
  * Resultset class allowing chainable queries.  Intended to be instanced internally.
  *    Collection.find(), Collection.where(), and Collection.chain() instantiate this.
@@ -335,7 +336,7 @@ export class Resultset {
 		}
 		this.filterInitialized = false;
 		return this;
-	};
+	}
 
 	/**
 	 * toJSON() - Override of toJSON to avoid circular references
@@ -345,7 +346,7 @@ export class Resultset {
 		var copy = this.copy();
 		copy.collection = null;
 		return copy;
-	};
+	}
 
 	/**
 	 * Allows you to limit the number of documents passed to next chain operation.
@@ -365,7 +366,7 @@ export class Resultset {
 		rscopy.filteredrows = this.filteredrows.slice(0, qty);
 		rscopy.filterInitialized = true;
 		return rscopy;
-	};
+	}
 
 	/**
 	 * Used for skipping 'pos' number of documents in the resultset.
@@ -384,7 +385,7 @@ export class Resultset {
 		rscopy.filteredrows = this.filteredrows.slice(pos);
 		rscopy.filterInitialized = true;
 		return rscopy;
-	};
+	}
 
 	/**
 	 * copy() - To support reuse of resultset in branched query situations.
@@ -401,7 +402,7 @@ export class Resultset {
 		result.filterInitialized = this.filterInitialized;
 
 		return result;
-	};
+	}
 
 	/**
 	 * Alias of copy()
@@ -488,7 +489,7 @@ export class Resultset {
 		}
 
 		return rs;
-	};
+	}
 
 	/**
 	 * Instances a new anonymous collection with the documents contained in the current resultset.
@@ -520,7 +521,7 @@ export class Resultset {
 		}
 
 		return instanceCollection;
-	};
+	}
 
 	/**
 	 * User supplied compare function is provided two documents to compare. (chainable)
@@ -551,7 +552,7 @@ export class Resultset {
 		this.filteredrows.sort(wrappedComparer);
 
 		return this;
-	};
+	}
 
 	/**
 	 * Simpler, loose evaluation for user to sort based on a property name. (chainable).
@@ -594,7 +595,7 @@ export class Resultset {
 		this.filteredrows.sort(wrappedComparer);
 
 		return this;
-	};
+	}
 
 	/**
 	 * Allows sorting a resultset based on multiple columns.
@@ -645,7 +646,7 @@ export class Resultset {
 		this.filteredrows.sort(wrappedComparer);
 
 		return this;
-	};
+	}
 
 	/**
 	 * findOr() - oversee the operation of OR'ed query expressions.
@@ -690,7 +691,7 @@ export class Resultset {
 		this.filterInitialized = true;
 
 		return this;
-	};
+	}
 	$or() {
 		return this.findOr(...arguments);
 	}
@@ -714,7 +715,7 @@ export class Resultset {
 			this.find(expressionArray[i]);
 		}
 		return this;
-	};
+	}
 
 	$and() {
 		return this.findAnd(...arguments);
@@ -1001,7 +1002,7 @@ export class Resultset {
 
 		this.filteredrows = result;
 		return this;
-	};
+	}
 
 
 	/**
@@ -1069,7 +1070,7 @@ export class Resultset {
 		} catch (err) {
 			throw err;
 		}
-	};
+	}
 
 	/**
 	 * count() - returns the number of documents in the resultset.
@@ -1082,7 +1083,7 @@ export class Resultset {
 			return this.filteredrows.length;
 		}
 		return this.collection.count();
-	};
+	}
 
 	/**
 	 * Terminates the chain and returns array of filtered documents
@@ -1142,7 +1143,7 @@ export class Resultset {
 			}
 		}
 		return result;
-	};
+	}
 
 	/**
 	 * Used to run an update operation on all documents currently in the resultset.
@@ -1174,7 +1175,7 @@ export class Resultset {
 		}
 
 		return this;
-	};
+	}
 
 	/**
 	 * Removes all document objects which are currently in resultset from collection (as well as resultset)
@@ -1194,7 +1195,7 @@ export class Resultset {
 		this.filteredrows = [];
 
 		return this;
-	};
+	}
 
 	/**
 	 * data transformation via user supplied functions
@@ -1210,7 +1211,7 @@ export class Resultset {
 		} catch (err) {
 			throw err;
 		}
-	};
+	}
 
 	/**
 	 * eqJoin() - Left joining two sets of data. Join keys can be defined or calculated properties
@@ -1277,7 +1278,7 @@ export class Resultset {
 		this.filterInitialized = false;
 
 		return this;
-	};
+	}
 
 	map(mapFun) {
 		var data = this.data().map(mapFun);
@@ -1288,6 +1289,6 @@ export class Resultset {
 		this.filterInitialized = false;
 
 		return this;
-	};
+	}
 
 }
