@@ -21,6 +21,7 @@ var config = {
 		core: __dirname + '/src/core/index.js',
 		memory: __dirname + '/src/memory.js',
 		loki: __dirname + '/src/lokijs.js',
+		inv: __dirname + '/src/inverted_index/full_text_search.js',
 	},
 	devtool: 'source-map',
 	output: {
