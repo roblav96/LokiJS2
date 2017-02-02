@@ -75,7 +75,7 @@ export class Tokenizer {
 	}
 
 	/**
-	 * Gets a function from the queue.
+	 * Gets a functionthrow new  from the queue.
 	 * Only the first found function gets returned if a label or a function is multiple used.
 	 *
 	 * @param {string|function} labelFunc - an existing label or function
@@ -84,7 +84,7 @@ export class Tokenizer {
 	get(labelFunc) {
 		let pos = this._getPosition(labelFunc);
 		if (pos === -1) {
-			throw new Error('Cannot find existing function.');
+			throw Error('Cannot find existing function.');
 		}
 		return [this._queue[pos][this._symbol], this._queue[pos]];
 	}
@@ -111,7 +111,7 @@ export class Tokenizer {
 	addBefore(labelFunc, label, func) {
 		let pos = this._getPosition(labelFunc);
 		if (pos === -1) {
-			throw new Error('Cannot find existing function.');
+			throw Error('Cannot find existing function.');
 		}
 		this._addFunction(label, func, pos);
 	}
@@ -127,7 +127,7 @@ export class Tokenizer {
 	addAfter(labelFunc, label, func) {
 		let pos = this._getPosition(labelFunc);
 		if (pos === -1) {
-			throw new Error('Cannot find existing function.');
+			throw Error('Cannot find existing function.');
 		}
 		this._addFunction(label, func, pos + 1);
 	}
@@ -139,7 +139,7 @@ export class Tokenizer {
 	remove(labelFunc) {
 		let pos = this._getPosition(labelFunc);
 		if (pos === -1) {
-			throw new Error('Cannot find existing function.');
+			throw Error('Cannot find existing function.');
 		}
 		this._queue.splice(pos, 1);
 	}
@@ -168,32 +168,38 @@ export class Tokenizer {
 
 	/**
 	 * Serializes the tokenizer by returning the labels of the used functions.
-	 * @returns {{splitter: string?, queue: string[]}} - the serialization
+	 * @returns {{splitter: string?, tokenizers: string[]}} - the serialization
 	 * @protected
 	 */
 	toJSON() {
-		let serialized = {queue: []};
+		let serialized = {tokenizers: []};
 		if (this._splitter !== defaultSplitter) {
 			serialized.splitter = this._splitter[this._symbol];
 		}
 		for (let i = 0; i < this._queue.length; i++) {
-			serialized.queue.push(this._queue[i][this._symbol]);
+			serialized.tokenizers.push(this._queue[i][this._symbol]);
 		}
 		return serialized;
 	}
 
 	/**
 	 * Deserializes the tokenizer by reassign the correct function to each label.
-	 * @param {{splitter: string, queue: string[]}} serialized - the serialized labels
+	 * @param {{splitter: string, tokenizers: string[]}} serialized - the serialized labels
 	 * @param {Object.<string, function>} functions - the depending functions with labels
 	 */
 	loadJSON(serialized, functions) {
 		this.reset();
 		if (serialized.hasOwnProperty("splitter")) {
-			this.setSplitter(serialized.splitter, functions[serialized.splitter]);
+			if (!functions.splitters.hasOwnProperty(serialized.splitter)) {
+				throw Error("Splitter function not found.");
+			}
+			this.setSplitter(serialized.splitter, functions.splitters[serialized.splitter]);
 		}
-		for (let i = 0; i < serialized.queue.length; i++) {
-			this.add(serialized.queue[i], functions[serialized.queue[i]]);
+		for (let i = 0; i < serialized.tokenizers.length; i++) {
+			if (!functions.tokenizers.hasOwnProperty(serialized.tokenizers[i])) {
+				throw Error("Tokenizer function not found.");
+			}
+			this.add(serialized.tokenizers[i], functions.tokenizers[serialized.tokenizers[i]]);
 		}
 	}
 

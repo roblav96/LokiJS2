@@ -75,8 +75,8 @@ export class Scorer {
 				let res = 0;
 				switch (docResult.type) {
 					case 'BM25': {
-						let fieldLength = this._invIdxs[docResult.fieldName].getDocumentStore()[docId].fieldLength /
-							Math.pow(this._invIdxs[docResult.fieldName].getDocumentStore()[docId].boost, 2);
+						let fieldLength = this._invIdxs[docResult.fieldName].documentStore[docId].fieldLength /
+							Math.pow(this._invIdxs[docResult.fieldName].documentStore[docId].boost, 2);
 						let avgFieldLength = this._avgFieldLength(docResult.fieldName);
 						let tfNorm = ((k1 + 1) * docResult.tf) / (k1 * ((1 - b)
 							+ b * (fieldLength / avgFieldLength)) + docResult.tf);
@@ -110,7 +110,7 @@ export class Scorer {
 
 	_getCache(fieldName) {
 		if (!this._cache.hasOwnProperty(fieldName)) {
-			let avgFieldLength = this._invIdxs[fieldName].getTotalFieldLength() / this._invIdxs[fieldName].getDocumentCount();
+			let avgFieldLength = this._invIdxs[fieldName].totalFieldLength / this._invIdxs[fieldName].documentCount;
 			this._cache[fieldName] = {idfs: {}, avgFieldLength: avgFieldLength};
 		}
 		return this._cache[fieldName];
@@ -127,7 +127,7 @@ export class Scorer {
 		if (cache.idfs.hasOwnProperty(String(docFreq))) {
 			return cache.idfs[docFreq];
 		}
-		return cache.idfs[docFreq] = Math.log(1 + (this._invIdxs[fieldName].getDocumentCount() - docFreq + 0.5) / (docFreq + 0.5));
+		return cache.idfs[docFreq] = Math.log(1 + (this._invIdxs[fieldName].documentCount - docFreq + 0.5) / (docFreq + 0.5));
 	}
 
 	_avgFieldLength(fieldName) {

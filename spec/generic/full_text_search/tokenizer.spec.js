@@ -114,22 +114,25 @@ describe('tokenizer', function () {
 
 		let serialized = tkz.toJSON();
 		let funcs = {
-			f1: f1,
-			f2: f2,
-			f3: f3
+			splitters: {},
+			tokenizers: {
+				f1: f1,
+				f2: f2,
+				f3: f3
+			}
 		};
 
 		tkz = new Tokenizer();
 		tkz.loadJSON(serialized, funcs);
 
 		tkz = new Tokenizer();
-		delete funcs.f1;
+		delete funcs.tokenizers.f1;
 		expect(() => tkz.loadJSON(serialized, funcs)).toThrowAnyError();
 
 		tkz.setSplitter("MySplitter", splitter);
 		serialized = tkz.toJSON();
 		expect(() => tkz.loadJSON(serialized, funcs)).toThrowAnyError();
-		funcs["MySplitter"] = splitter;
+		funcs.splitters["MySplitter"] = splitter;
 		tkz.loadJSON(serialized, funcs);
 
 		done();

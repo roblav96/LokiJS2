@@ -17,21 +17,45 @@ export class InvertedIndex {
 		this._root = {};
 	}
 
+	get documentCount() {
+		return this._docCount;
+	}
+
+	get documentStore() {
+		return this._docStore;
+	}
+
+	get totalFieldLength() {
+		return this._totalFieldLength;
+	}
+
+	get fieldName() {
+		return this._fieldName;
+	}
+
+	get tokenizer() {
+		return this._tokenizer;
+	}
+
+	get root() {
+		return this._root;
+	}
+
 	/**
 	 * Adds defined fields of a document to the inverted index.
-	 * @param {object} doc - the document to add
+	 * @param {object} field - the field to add
 	 * @param {number} [boost=1] - object with field (key) specific boost (value)
 	 */
-	insert(doc, docId, boost = 1) {
+	insert(field, docId, boost = 1) {
 		if (this._docStore.hasOwnProperty(docId)) {
-			throw new Error('Document already added.');
+			throw Error('Field already added.');
 		}
 
 		this._docCount += 1;
 		this._docStore[docId] = {};
 
 		// Tokenize document field.
-		let fieldTokens = this._tokenizer.tokenize(doc);
+		let fieldTokens = this._tokenizer.tokenize(field);
 		this._totalFieldLength += fieldTokens.length;
 
 		let termRefs = [];
@@ -42,8 +66,8 @@ export class InvertedIndex {
 
 		// Iterate over all unique field terms.
 		for (let term of new Set(fieldTokens)) {
-			if (term == '') {
-				throw Error('Term cannot be empty!');
+			if (term === '') {
+				continue;
 			}
 			// Calculate term frequency.
 			let tf = 0;
@@ -130,26 +154,6 @@ export class InvertedIndex {
 		}
 	}
 
-	getDocumentCount() {
-		return this._docCount;
-	}
-
-	getDocumentStore() {
-		return this._docStore;
-	}
-
-	getTotalFieldLength() {
-		return this._totalFieldLength;
-	}
-
-	getFieldName() {
-		return this._fieldName;
-	}
-
-	getTokenizer() {
-		return this._tokenizer;
-	}
-
 	/**
 	 * Gets the term index of a term.
 	 * @param {string} term - the term.
@@ -225,7 +229,7 @@ export class InvertedIndex {
 
 	/**
 	 * Deserialize the inverted index.
-	 * @param {string} serialized - The serialized inverted index.
+	 * @param {{docStore: *, _fields: *, index: *}} serialized - The serialized inverted index.
 	 */
 	loadJSON(serialized) {
 		let dbObject = serialized;

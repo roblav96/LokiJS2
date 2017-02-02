@@ -36,8 +36,8 @@ export class IndexSearcher {
 		let root = null;
 		let tokenizer = null;
 		if (this._invIdxs.hasOwnProperty(fieldName)) {
-			root = this._invIdxs[fieldName]._root;
-			tokenizer = this._invIdxs[fieldName]._tokenizer;
+			root = this._invIdxs[fieldName].root;
+			tokenizer = this._invIdxs[fieldName].tokenizer;
 		}
 
 		switch (query.type) {
@@ -142,7 +142,7 @@ export class IndexSearcher {
 			}
 			case "exists": {
 				if (root != null) {
-					let docs = Object.keys(this._invIdxs[fieldName].getDocumentStore());
+					let docs = Object.keys(this._invIdxs[fieldName].documentStore);
 					for (let i = 0; i < docs.length; i++) {
 						this._scorer.scoreConstant(boost, docs[i], docResults);
 					}
