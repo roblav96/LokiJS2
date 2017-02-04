@@ -42,15 +42,15 @@
 <tbody>
 <tr>
 <td>must</td>
-<td>Only documents where all sub queries match will be considered and contribute to the score.</td>
+<td>Finds documents which matches all sub queries.</td>
 </tr>
 <tr>
 <td>filter</td>
-<td>Only documents where all sub queries match will be considered but not contribute to the score.</td>
+<td>Finds documents which matches all sub queries but these documents do not contribute to the score.</td>
 </tr>
 <tr>
 <td>should</td>
-<td>Only documents where some sub queries match will be considered and contribute to the score. The minimum amount of matches can be controlled with <a href="BoolQuery.html#minimumShouldMatch">minimumShouldMatch</a>.</td>
+<td>Finds documents which matches some sub queries. The minimum amount of matches can be controlled with <a href="BoolQuery.html#minimumShouldMatch">minimumShouldMatch</a> (default is 1).</td>
 </tr>
 <tr>
 <td>not</td>
@@ -58,7 +58,9 @@
 </tr>
 </tbody>
 </table>
-<p>A sub query can be any other query type and also the bool query itself.</p></div>
+<p>A sub query can be any other query type and also the bool query itself.</p>
+<p>See also <a href="https://lucene.apache.org/core/6_4_0/core/org/apache/lucene/search/BooleanQuery.html">Lucene#BooleanQuery</a>
+and <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-bool-query.html">Elasticsearch#BoolQuery</a>.</p></div>
         
     
 </header>
@@ -119,7 +121,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line387">line 387</a>
+        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line505">line 505</a>
     </li></ul></dd>
     
 
@@ -146,25 +148,24 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>new QueryBuilder()
-  .bool()
-    .startMust()
-      .term("first_name", "albert")
-    .endMust()
-    .startFilter()
-      .term("birthplace", "ulm")
-    .endFilter()
-    .startShould().minimumShouldMatch(2)
-      .fuzzy("surname", "einstin")
-      .wildcard("name", "geni?s")
-      .term("quotes", "infinity")
-    .endShould()
-    .startNot()
-      .terms("research_field", ["biology", "geography"])
-    .endNot()
+    <pre class="prettyprint"><code>new BoolQuery()
+  .startMust().boost(2)
+    .term("first_name", "albert")
+  .endMust()
+  .startFilter()
+    .term("birthplace", "ulm")
+  .endFilter()
+  .startShould().minimumShouldMatch(2)
+    .fuzzy("surname", "einstin")
+    .wildcard("name", "geni?s")
+    .term("quotes", "infinity")
+  .endShould()
+  .startNot()
+    .terms("research_field", ["biology", "geography"])
+  .endNot()
 .build();
 // The resulting documents:
-// contains the name albert (must: contribute to the score)
+// contains the name albert (must: contribute to the score with a boost of 2)
 // contains the birthplace ulm (filter: not contribute to the score)
 // contains a minimum of two matches from the fuzzy, wildcard and/or term query (should: contribute to the score)
 // do not contains biology or geography as research field (not: not contribute to the score)</code></pre>
@@ -213,6 +214,8 @@
 
 <div class="description">
     <p>Boosts the query result.</p>
+<p>See also <a href="https://lucene.apache.org/core/6_4_0/core/org/apache/lucene/search/BoostQuery.html">Lucene#BoostQuery</a>
+and <a href="https://www.elastic.co/guide/en/elasticsearch/reference/5.2/mapping-boost.html">Elasticsearch#boost</a>.</p>
 </div>
 
 
@@ -310,7 +313,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line20">line 20</a>
+        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line27">line 27</a>
     </li></ul></dd>
     
 
@@ -419,7 +422,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line32">line 32</a>
+        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line39">line 39</a>
     </li></ul></dd>
     
 
@@ -574,7 +577,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line438">line 438</a>
+        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line556">line 556</a>
     </li></ul></dd>
     
 
@@ -678,7 +681,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line410">line 410</a>
+        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line528">line 528</a>
     </li></ul></dd>
     
 
@@ -782,7 +785,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line401">line 401</a>
+        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line519">line 519</a>
     </li></ul></dd>
     
 
@@ -886,7 +889,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line428">line 428</a>
+        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line546">line 546</a>
     </li></ul></dd>
     
 
@@ -990,7 +993,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line419">line 419</a>
+        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line537">line 537</a>
     </li></ul></dd>
     
 
@@ -1060,7 +1063,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Feb 04 2017 16:41:32 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Feb 04 2017 21:34:40 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>
