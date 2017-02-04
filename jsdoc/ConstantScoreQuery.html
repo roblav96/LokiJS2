@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Calculator</title>
+    <title>JSDoc: Class: ConstantScoreQuery</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Calculator</h1>
+    <h1 class="page-title">Class: ConstantScoreQuery</h1>
 
     
 
@@ -28,9 +28,9 @@
 
 <header>
     
-        <h2>Calculator</h2>
+        <h2>ConstantScoreQuery</h2>
         
-            <div class="class-description"><p>Test class.</p></div>
+            <div class="class-description"><p>A query that wraps sub queries and returns a constant score equal to the query boost for every document in the filter.</p></div>
         
     
 </header>
@@ -44,7 +44,7 @@
     <h2>Constructor</h2>
     
 
-    <h4 class="name" id="Calculator"><span class="type-signature"></span>new Calculator<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="ConstantScoreQuery"><span class="type-signature"></span>new ConstantScoreQuery<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -91,7 +91,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="calculator.js.html">calculator.js</a>, <a href="calculator.js.html#line4">line 4</a>
+        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line332">line 332</a>
     </li></ul></dd>
     
 
@@ -116,9 +116,33 @@
 
 
 
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>new QueryBuilder()
+  .constantScore().boost(1.5)
+    .startFilter()
+      .term("first_name", "albert")
+      .term("surname", "einstein")
+    .endFilter()
+.build()
+// The resulting documents:
+// * contains albert as first name, einstein as surname and the document score is 42.</code></pre>
+
+
 
     
     </div>
+
+    
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="BaseQuery.html">BaseQuery</a></li>
+    </ul>
+
 
     
 
@@ -140,11 +164,15 @@
 
     
 
-    <h4 class="name" id="add"><span class="type-signature"></span>add<span class="signature">(op1, op2)</span><span class="type-signature"> &rarr; {*}</span></h4>
+    <h4 class="name" id="boost"><span class="type-signature"></span>boost<span class="signature">(value)</span><span class="type-signature"> &rarr; {<a href="BaseQuery.html">BaseQuery</a>}</span></h4>
 
     
 
 
+
+<div class="description">
+    <p>Boosts the query result.</p>
+</div>
 
 
 
@@ -179,10 +207,15 @@
 
         <tr>
             
-                <td class="name"><code>op1</code></td>
+                <td class="name"><code>value</code></td>
             
 
             <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
             
             </td>
 
@@ -190,25 +223,7 @@
 
             
 
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>op2</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
+            <td class="description last"><p>the positive boost</p></td>
         </tr>
 
     
@@ -226,6 +241,11 @@
 
     
 
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseQuery.html#boost">BaseQuery#boost</a>
+    </li></ul></dd>
     
 
     
@@ -249,7 +269,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="calculator.js.html">calculator.js</a>, <a href="calculator.js.html#line11">line 11</a>
+        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line20">line 20</a>
     </li></ul></dd>
     
 
@@ -275,6 +295,10 @@
 <h5>Returns:</h5>
 
         
+<div class="param-desc">
+    <p>object itself for cascading</p>
+</div>
+
 
 
 <dl>
@@ -283,7 +307,7 @@
     </dt>
     <dd>
         
-<span class="param-type">*</span>
+<span class="param-type"><a href="BaseQuery.html">BaseQuery</a></span>
 
 
     </dd>
@@ -298,12 +322,15 @@
 
     
 
-    <h4 class="name" id="subtract"><span class="type-signature"></span>subtract<span class="signature">(op1, op2)</span><span class="type-signature"> &rarr; {number}</span></h4>
+    <h4 class="name" id="build"><span class="type-signature"></span>build<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
 
     
 
 
 
+<div class="description">
+    <p>Build the final query.</p>
+</div>
 
 
 
@@ -312,66 +339,116 @@
 
 
 
-    <h5>Parameters:</h5>
+
+
+
+
+
+<dl class="details">
+
     
 
-<table class="params">
-    <thead>
-    <tr>
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseQuery.html#build">BaseQuery#build</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line32">line 32</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
         
-        <th>Name</th>
+<div class="param-desc">
+    <ul>
+<li>the final query</li>
+</ul>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
         
+<span class="param-type">Object</span>
 
-        <th>Type</th>
 
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>op1</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
+    </dd>
+</dl>
 
     
 
-        <tr>
-            
-                <td class="name"><code>op2</code></td>
-            
 
-            <td class="type">
-            
-            </td>
 
+        
             
-
-            
-
-            <td class="description last"></td>
-        </tr>
 
     
-    </tbody>
-</table>
+
+    <h4 class="name" id="startFilter"><span class="type-signature"></span>startFilter<span class="signature">()</span><span class="type-signature"> &rarr; {ArrayQuery}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Starts an array of queries. Use endFilter() to finish the array.</p>
+</div>
+
+
+
+
+
+
+
 
 
 
@@ -407,7 +484,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="calculator.js.html">calculator.js</a>, <a href="calculator.js.html#line21">line 21</a>
+        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line341">line 341</a>
     </li></ul></dd>
     
 
@@ -433,6 +510,10 @@
 <h5>Returns:</h5>
 
         
+<div class="param-desc">
+    <p>array query for holding sub queries</p>
+</div>
+
 
 
 <dl>
@@ -441,7 +522,7 @@
     </dt>
     <dd>
         
-<span class="param-type">number</span>
+<span class="param-type">ArrayQuery</span>
 
 
     </dd>

@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: inverted_index/queries.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: inverted_index/queries.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * Query builder
  */
 
@@ -18,7 +46,7 @@ export class BaseQuery {
 	 * @return {BaseQuery} object itself for cascading
 	 */
 	boost(value) {
-		if (typeof(value) !== "number" || value < 0) {
+		if (typeof(value) !== "number" || value &lt; 0) {
 			throw TypeError("Boost must be a positive number.");
 		}
 		this._data.boost = value;
@@ -100,7 +128,7 @@ export class FuzzyQuery extends BaseQuery {
 	 * @return {FuzzyQuery} - object itself for cascading
 	 */
 	fuzziness(fuzziness) {
-		if (typeof(fuzziness) !== "number" || fuzziness < 0) {
+		if (typeof(fuzziness) !== "number" || fuzziness &lt; 0) {
 			throw TypeError("Fuzziness must be a positive number.");
 		}
 		this._data.fuzziness = fuzziness;
@@ -113,7 +141,7 @@ export class FuzzyQuery extends BaseQuery {
 	 * @return {FuzzyQuery}  object itself for cascading
 	 */
 	prefixLength(prefixLength) {
-		if (typeof(prefixLength) !== "number" || prefixLength < 0) {
+		if (typeof(prefixLength) !== "number" || prefixLength &lt; 0) {
 			throw TypeError("Prefix length must be a positive number.");
 		}
 		this._data.prefix_length = prefixLength;
@@ -166,7 +194,7 @@ export class MatchQuery extends BaseQuery {
 		if (typeof(minShouldMatch) !== "number") {
 			throw TypeError("Value for minimum should match must be a number.");
 		}
-		if (this._data.hasOwnProperty("operator") && this._data.operator == "and") {
+		if (this._data.hasOwnProperty("operator") &amp;&amp; this._data.operator == "and") {
 			throw SyntaxError("Match query with \"and\" operator does not support minimum should match.");
 		}
 		this._data.minimum_should_match = minShouldMatch;
@@ -182,11 +210,11 @@ export class MatchQuery extends BaseQuery {
 		if (typeof(value) !== "string") {
 			throw TypeError("Value for operator must be a string.");
 		}
-		if (value != 'and' && value != 'or') {
+		if (value != 'and' &amp;&amp; value != 'or') {
 			throw SyntaxError("Unknown operator.");
 		}
 		this._data.operator = value;
-		if (this._data.hasOwnProperty("minimum_should_match") && this._data.operator == "and") {
+		if (this._data.hasOwnProperty("minimum_should_match") &amp;&amp; this._data.operator == "and") {
 			throw SyntaxError("Match query with \"and\" operator does not support minimum should match.");
 		}
 		return this;
@@ -198,7 +226,7 @@ export class MatchQuery extends BaseQuery {
 	 * @return {MatchQuery} object itself for cascading
 	 */
 	fuzziness(fuzziness) {
-		if (typeof(fuzziness) !== "number" || fuzziness < 0) {
+		if (typeof(fuzziness) !== "number" || fuzziness &lt; 0) {
 			throw TypeError("Fuzziness must be a positive number.");
 		}
 		this._data.fuzziness = fuzziness;
@@ -211,7 +239,7 @@ export class MatchQuery extends BaseQuery {
 	 * @return {InvertedIndex.Queries.MatchQuery} - object itself for cascading
 	 */
 	prefixLength(prefixLength) {
-		if (typeof(prefixLength) !== "number" || prefixLength < 0) {
+		if (typeof(prefixLength) !== "number" || prefixLength &lt; 0) {
 			throw TypeError("Prefix length must be a positive number.");
 		}
 		this._data.prefix_length = prefixLength;
@@ -226,6 +254,7 @@ export class MatchQuery extends BaseQuery {
  * clause.
  *
  * @example
+ * // This query is an expedient.
  * new QueryBuilder()
  *   .matchAll().boost(2.5)
  * .build()
@@ -435,7 +464,7 @@ export class BoolQuery extends BaseQuery {
 	 * @return {BoolQuery} object itself for cascading
 	 */
 	minimumShouldMatch(minShouldMatch) {
-		if (typeof(minShouldMatch) !== "number" || minShouldMatch < 0) {
+		if (typeof(minShouldMatch) !== "number" || minShouldMatch &lt; 0) {
 			throw TypeError("Minimum should match must be a number greater than zero.");
 		}
 		this._data.minimum_should_match = minShouldMatch;
@@ -471,10 +500,10 @@ export class QueryBuilder {
 	}
 
 	useBM25(k1, b) {
-		if (typeof(k1) !== "number" || k1 < 0) {
+		if (typeof(k1) !== "number" || k1 &lt; 0) {
 			throw TypeError("BM25s k1 must be a positive number.");
 		}
-		if (typeof(b) !== "number" || b < 0 || b > 1) {
+		if (typeof(b) !== "number" || b &lt; 0 || b > 1) {
 			throw TypeError("BM25s b must be a number between 0 and 1 inclusive.");
 		}
 
@@ -526,3 +555,26 @@ export class QueryBuilder {
 		return this._prepare(ExistsQuery, field);
 	}
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BaseQuery.html">BaseQuery</a></li><li><a href="BoolQuery.html">BoolQuery</a></li><li><a href="Calculator.html">Calculator</a></li><li><a href="Collection.html">Collection</a></li><li><a href="ConstantScoreQuery.html">ConstantScoreQuery</a></li><li><a href="DynamicView.html">DynamicView</a></li><li><a href="ExistsQuery.html">ExistsQuery</a></li><li><a href="FuzzyQuery.html">FuzzyQuery</a></li><li><a href="IndexSearcher.html">IndexSearcher</a></li><li><a href="InvertedIndex.html">InvertedIndex</a></li><li><a href="Loki.html">Loki</a></li><li><a href="LokiEventEmitter.html">LokiEventEmitter</a></li><li><a href="LokiFsAdapter.html">LokiFsAdapter</a></li><li><a href="LokiLocalStorageAdapter.html">LokiLocalStorageAdapter</a></li><li><a href="MatchAll.html">MatchAll</a></li><li><a href="MatchQuery.html">MatchQuery</a></li><li><a href="PrefixQuery.html">PrefixQuery</a></li><li><a href="QueryBuilder.html">QueryBuilder</a></li><li><a href="Resultset.html">Resultset</a></li><li><a href="TermQuery.html">TermQuery</a></li><li><a href="TermsQuery.html">TermsQuery</a></li><li><a href="Tokenizer.html">Tokenizer</a></li><li><a href="WildcardQuery.html">WildcardQuery</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Query.html">Query</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Feb 04 2017 16:41:32 GMT+0100 (CET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
