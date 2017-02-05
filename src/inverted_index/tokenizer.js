@@ -1,3 +1,5 @@
+import * as Utils from './utils.js';
+
 /**
  * Splits a string at non-alphanumeric characters into lower case tokens.
  * @param {string} str - the string
@@ -46,10 +48,8 @@ export class Tokenizer {
 	 * @param {function} func - the function
 	 */
 	setSplitter(label, func) {
-		if (typeof label !== 'string') {
-			throw TypeError("Function label must be string.");
-		}
-		if (typeof func !== 'function') {
+		label = Utils.asString(label);
+		if (!Utils.isFunction(func)) {
 			throw TypeError("Splitter must be a function.");
 		}
 		if (label === "") {
@@ -210,9 +210,10 @@ export class Tokenizer {
 	 * @private
 	 */
 	_getPosition(labelFunc) {
-		if (typeof labelFunc === 'function') {
+		if (Utils.isFunction(labelFunc)) {
 			return this._queue.indexOf(labelFunc);
-		} else if (typeof labelFunc === 'string') {
+		} else if (Utils.isConvertibleToString(labelFunc)) {
+			labelFunc = String(labelFunc);
 			for (let i = 0; i < this._queue.length; i++) {
 				if (this._queue[i][this._symbol] === labelFunc) {
 					return i;
@@ -232,10 +233,8 @@ export class Tokenizer {
 	 * @private
 	 */
 	_addFunction(label, func, pos) {
-		if (typeof label !== 'string') {
-			throw TypeError("Function label must be string.");
-		}
-		if (typeof func !== 'function') {
+		label = Utils.asString(label);
+		if (!Utils.isFunction(func)) {
 			throw TypeError("Type of func must be function.");
 		}
 		if (label === "") {
