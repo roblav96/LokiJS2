@@ -93,9 +93,9 @@ export class IndexSearcher {
 				break;
 			}
 			case "terms": {
-				for (let i = 0; i < query.values.length; i++) {
-					let termIdx = InvertedIndex.getTermIndex(query.values[i], root);
-					this._scorer.prepare(fieldName, boost, termIdx, doScoring, docResults, query.values[i]);
+				for (let i = 0; i < query.value.length; i++) {
+					let termIdx = InvertedIndex.getTermIndex(query.value[i], root);
+					this._scorer.prepare(fieldName, boost, termIdx, doScoring, docResults, query.value[i]);
 				}
 				break;
 			}
@@ -150,7 +150,7 @@ export class IndexSearcher {
 				break;
 			}
 			case "match": {
-				let terms = tokenizer.tokenize(query.query);
+				let terms = tokenizer.tokenize(query.value);
 				let operator = query.hasOwnProperty("operator") ? query.operator : "or";
 
 				let tmpQuery = new QueryBuilder().bool();
@@ -321,7 +321,7 @@ class FuzzySearch {
 
 			// Compare tokens if they are in near distance.
 			if (root.hasOwnProperty('df') && Math.abs(fuzzy.length - treeTerms.length) <= this._fuzziness) {
-				var distance = this.levenshtein_distance(fuzzy, treeTerms);
+				const distance = this.levenshtein_distance(fuzzy, treeTerms);
 				if (distance <= this._fuzziness) {
 					// Calculate boost.
 					let boost = 1 - distance / (pre.length + treeTerms.length);
@@ -350,7 +350,7 @@ class FuzzySearch {
 class WildcardSearch {
 
 	constructor(query) {
-		this._wildcard = query.wildcard;
+		this._wildcard = query.value;
 		this._result = [];
 	}
 

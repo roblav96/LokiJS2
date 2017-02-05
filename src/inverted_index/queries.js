@@ -13,7 +13,7 @@ import * as Utils from './utils.js';
 export class BaseQuery {
 	constructor(type, data = {}) {
 		this._data = data;
-		this._data.type = type;
+		this._data.type = Utils.asString(type);
 	}
 
 	/**
@@ -86,7 +86,7 @@ export class TermsQuery extends BaseQuery {
 	constructor(field, terms, data = {}) {
 		super("terms", data);
 		this._data.field = Utils.asString(field);
-		this._data.values = Utils.asArrayOfString(terms, true);
+		this._data.value = Utils.asArrayOfString(terms);
 	}
 }
 
@@ -119,7 +119,7 @@ export class WildcardQuery extends BaseQuery {
 	constructor(field, wildcard, data = {}) {
 		super("wildcard", data);
 		this._data.field = Utils.asString(field);
-		this._data.wildcard = Utils.asString(wildcard);
+		this._data.value = Utils.asString(wildcard);
 	}
 }
 
@@ -139,8 +139,8 @@ export class WildcardQuery extends BaseQuery {
  *
  * @example
  * new FuzzyQuery("surname", "einsten")
- * 	.fuzziness(3)
- * 	.prefixLength(3)
+ *  .fuzziness(3)
+ *  .prefixLength(3)
  * .build();
  * // The resulting documents:
  * // contains the fuzzy surname einstn (like Einstein or Einst but not Eisstein or Insten)
@@ -262,7 +262,7 @@ export class MatchQuery extends BaseQuery {
 	constructor(field, query, data = {}) {
 		super("match", data);
 		this._data.field = Utils.asString(field);
-		this._data.query = Utils.asString(query);
+		this._data.value = Utils.asString(query);
 	}
 
 	/**
@@ -271,7 +271,7 @@ export class MatchQuery extends BaseQuery {
 	 * @return {MatchQuery} object itself for cascading
 	 */
 	minimumShouldMatch(minShouldMatch) {
-		if (Utils.isNumber(minShouldMatch) || minShouldMatch < 0) {
+		if (!Utils.isNumber(minShouldMatch) || minShouldMatch < 0) {
 			throw TypeError("Value for minimum should match must be a positive number.");
 		}
 		if (this._data.hasOwnProperty("operator") && this._data.operator == "and") {
@@ -335,7 +335,7 @@ export class MatchQuery extends BaseQuery {
  * and [Elasticsearch#MatchAllQuery]{@link https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-all-query.html}.
  *
  * @example
- * new MatchAll()
+ * new MatchAllQuery()
  *   .boost(2.5)
  * .build()
  * // The resulting documents:
@@ -343,7 +343,7 @@ export class MatchQuery extends BaseQuery {
  *
  * @extends BaseQuery
  */
-export class MatchAll extends BaseQuery {
+export class MatchAllQuery extends BaseQuery {
 	constructor(data = {}) {
 		super("match_all", data);
 	}
@@ -410,7 +410,7 @@ class ArrayQuery extends BaseQuery {
 	}
 
 	matchAll() {
-		return this._prepare(MatchAll);
+		return this._prepare(MatchAllQuery);
 	}
 
 	prefix(field, prefix) {
@@ -452,7 +452,9 @@ export class ConstantScoreQuery extends BaseQuery {
 	 */
 	startFilter() {
 		this._data.filter = {};
-		return new ArrayQuery("endFilter", () => {return this;}, this._data.filter);
+		return new ArrayQuery("endFilter", () => {
+			return this;
+		}, this._data.filter);
 	}
 }
 
@@ -509,7 +511,9 @@ export class BoolQuery extends BaseQuery {
 	 */
 	startMust() {
 		this._data.must = {};
-		return new ArrayQuery("endMust", () => {return this;}, this._data.must);
+		return new ArrayQuery("endMust", () => {
+			return this;
+		}, this._data.must);
 	}
 
 	/**
@@ -518,7 +522,9 @@ export class BoolQuery extends BaseQuery {
 	 */
 	startFilter() {
 		this._data.filter = {};
-		return new ArrayQuery("endFilter", () => {return this;}, this._data.filter);
+		return new ArrayQuery("endFilter", () => {
+			return this;
+		}, this._data.filter);
 	}
 
 	/**
@@ -527,7 +533,9 @@ export class BoolQuery extends BaseQuery {
 	 */
 	startShould() {
 		this._data.should = {};
-		return new ArrayQuery("endShould", () => {return this;}, this._data.should);
+		return new ArrayQuery("endShould", () => {
+			return this;
+		}, this._data.should);
 	}
 
 	/**
@@ -536,7 +544,9 @@ export class BoolQuery extends BaseQuery {
 	 */
 	startNot() {
 		this._data.not = {};
-		return new ArrayQuery("endNot", () => {return this;}, this._data.not);
+		return new ArrayQuery("endNot", () => {
+			return this;
+		}, this._data.not);
 	}
 
 	/**
@@ -611,7 +621,7 @@ export class QueryBuilder {
 	}
 
 	matchAll() {
-		return this._prepare(MatchAll);
+		return this._prepare(MatchAllQuery);
 	}
 
 	prefix(field, prefix) {
@@ -624,7 +634,9 @@ export class QueryBuilder {
 
 	_prepare(queryType, ...args) {
 		this._child = new queryType(...args, this._data.query);
-		this._child.build = () => {return this._data};
+		this._child.build = () => {
+			return this._data
+		};
 		return this._child;
 	}
 }
