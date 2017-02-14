@@ -54,17 +54,8 @@ export class Scorer {
 	finalScore(query, docResults = {}) {
 
 		let result = {};
-		let k1 = 1.2;
-		let b = 0.75;
-
-		if (query.hasOwnProperty("scoring")) {
-			if (query.scoring.hasOwnProperty("k1")) {
-				k1 = query.scoring.k1;
-			}
-			if (query.scoring.hasOwnProperty("b")) {
-				b = query.scoring.b;
-			}
-		}
+		let k1 = query.scoring.k1;
+		let b = query.scoring.b;
 
 		let docs = Object.keys(docResults);
 		for (let i = 0, docId; i < docs.length, docId = docs[i]; i++) {

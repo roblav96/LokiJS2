@@ -61,6 +61,7 @@ export function isConvertibleToString(x) {
  * Converts a variable to a boolean (from boolean or number).
  * Throws an error if not possible.
  * @param {*} x - the variable
+ * @param {error} [error=TypeError] - the error to throw
  * @return {boolean} the converted boolean
  * @protected
  */
@@ -75,7 +76,7 @@ export function asBoolean(x, error = TypeError("Value is not convertible to bool
  * Converts a variable to a string (from string, number or obj.toString).
  * Throws an error if not possible.
  * @param {*} x - the variable
- * @param {error=TypeError} error - the error to throw
+ * @param {error} [error=TypeError] - the error to throw
  * @return {string} the converted string
  * @protected
  */
@@ -90,7 +91,7 @@ export function asString(x, error = TypeError("Value is not convertible to strin
  * Converts a variable to a array of string (from an array of string, number or obj.toString).
  * Throws an error if not possible.
  * @param {*} x - the variable
- * @param {error=TypeError} error - the error to throw
+ * @param {error} [error=TypeError] - the error to throw
  * @return {string[]} the converted array of string
  * @protected
  */

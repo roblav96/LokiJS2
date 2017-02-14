@@ -18,8 +18,14 @@ describe('tokenizer', function () {
 		let q = new Query.TermQuery("user", "albert").boost(2.5).build();
 		expect(q).toEqual({type: "term", field: "user", value: "albert", boost: 2.5});
 
-		q = new Query.TermQuery(1, 1).build();
-		expect(q).toEqual({type: "term", field: "1", value: "1"});
+		class TmpClass {
+			toString() {
+				return "user";
+			}
+		}
+
+		q = new Query.TermQuery(new TmpClass(), 1).build();
+		expect(q).toEqual({type: "term", field: "user", value: "1"});
 		expect(() => new Query.TermQuery("user", undefined)).toThrowErrorOfType("TypeError");
 		expect(() => new Query.TermQuery(null, "albert")).toThrowErrorOfType("TypeError");
 
@@ -133,8 +139,167 @@ describe('tokenizer', function () {
 			.term("user", "albert")
 			.fuzzy("name", "einsten")
 			.endFilter().build();
-		expect(q).toEqual({type: 'constant_score', filter: { type: 'array',
-			values: [new Query.TermQuery("user", "albert").build(), new Query.FuzzyQuery("name", "einsten").build()]}});
+		expect(q).toEqual({
+			type: 'constant_score', filter: {
+				type: 'array',
+				values: [new Query.TermQuery("user", "albert").build(), new Query.FuzzyQuery("name", "einsten").build()]
+			}
+		});
+
+		done();
+	});
+
+	it('BoolQuery', function (done) {
+		let q = new Query.BoolQuery().boost(8.5).build();
+		expect(q).toEqual({type: "bool", boost: 8.5});
+
+		expect(() => new Query.BoolQuery().minimumShouldMatch(-1)).toThrowErrorOfType("TypeError");
+		expect(() => new Query.BoolQuery().minimumShouldMatch("123")).toThrowErrorOfType("TypeError");
+		expect(new Query.BoolQuery().minimumShouldMatch(2).build()).toEqual(
+			{type: 'bool', minimum_should_match: 2}
+		);
+
+		q = new Query.BoolQuery()
+			.startFilter().boost(2)
+			.term("user", "albert")
+			.fuzzy("name", "einsten")
+			.endFilter()
+			.startMust().boost(3)
+			.wildcard("user", "alb?rt")
+			.prefix("user", "alb")
+			.exists("name")
+			.endMust()
+			.startShould().boost(4)
+			.terms("quotes", ["infinity", "atom"])
+			.matchAll()
+			.endShould()
+			.startNot().boost(5)
+			.match("user", "alb")
+			.constantScore()
+			.bool()
+			.endNot()
+			.build();
+		expect(q).toEqual({
+			type: 'bool',
+			filter: {
+				type: 'array',
+				boost: 2,
+				values: [new Query.TermQuery("user", "albert").build(), new Query.FuzzyQuery("name", "einsten").build()]
+			},
+			must: {
+				type: 'array',
+				boost: 3,
+				values: [new Query.WildcardQuery("user", "alb?rt").build(), new Query.PrefixQuery("user", "alb").build(),
+					new Query.ExistsQuery("name").build()]
+			},
+			should: {
+				type: 'array',
+				boost: 4,
+				values: [new Query.TermsQuery("quotes", ["infinity", "atom"]).build(), new Query.MatchAllQuery().build()]
+			},
+			not: {
+				type: 'array',
+				boost: 5,
+				values: [new Query.MatchQuery("user", "alb").build(), new Query.ConstantScoreQuery().build(),
+					new Query.BoolQuery().build()]
+			}
+		});
+
+		done();
+	});
+
+	it('QueryBuilder', function (done) {
+		let q = new Query.QueryBuilder()
+			.enableFinalScoring(true)
+			.useBM25(0.1, 0.5)
+			.term("user", "albert").build();
+		expect(q).toEqual({
+			final_scoring: true,
+			scoring: {
+				type: "BM25",
+				k1: 0.1,
+				b: 0.5,
+			},
+			query: {
+				type: "term", field: "user", value: "albert",
+			}
+		});
+
+		let scoring = {
+			type: "BM25",
+				k1: 1.2,
+				b: 0.75,
+		};
+
+		expect(() => new Query.QueryBuilder().enableFinalScoring("false")).toThrowErrorOfType("TypeError");
+		expect(() => new Query.QueryBuilder().useBM25(-1, -1)).toThrowErrorOfType("TypeError");
+		expect(() => new Query.QueryBuilder().useBM25(0, 2)).toThrowErrorOfType("TypeError");
+		expect(() => new Query.QueryBuilder().useBM25("0", {})).toThrowErrorOfType("TypeError");
+
+		expect(new Query.QueryBuilder().bool().startMust().term("user", "albert").endMust().build()).toEqual({
+			query: {
+				type: "bool",
+				must: {
+					type: "array",
+					values: [{type: "term", field: "user", value: "albert"}]
+				}
+			},
+			scoring: scoring
+		});
+		expect(new Query.QueryBuilder().constantScore().build()).toEqual({
+			query: {
+				type: "constant_score",
+			},
+			scoring: scoring
+		});
+		expect(new Query.QueryBuilder().term("user", "albert").build()).toEqual({
+			query: {
+				type: "term", field: "user", value: "albert",
+			},
+			scoring: scoring
+		});
+		expect(new Query.QueryBuilder().terms("quotes", ["infinity", "atom"]).build()).toEqual({
+			query: {
+				type: "terms", field: "quotes", value: ["infinity", "atom"],
+			},
+			scoring: scoring
+		});
+		expect(new Query.QueryBuilder().wildcard("user", "alb?rt").build()).toEqual({
+			query: {
+				type: "wildcard", field: "user", value: "alb?rt",
+			},
+			scoring: scoring
+		});
+		expect(new Query.QueryBuilder().fuzzy("name", "einsten").build()).toEqual({
+			query: {
+				type: "fuzzy", field: "name", value: "einsten",
+			},
+			scoring: scoring
+		});
+		expect(new Query.QueryBuilder().match("user", "alb").build()).toEqual({
+			query: {
+				type: "match", field: "user", value: "alb",
+			},
+			scoring: scoring
+		});
+		expect(new Query.QueryBuilder().matchAll().build()).toEqual({
+			query: {
+				type: "match_all",
+			},
+			scoring: scoring
+		});
+		expect(new Query.QueryBuilder().prefix("user", "alb").build()).toEqual({
+			query: {
+				type: "prefix", field: "user", value: "alb",
+			},
+			scoring: scoring
+		});
+		expect(new Query.QueryBuilder().exists("user").build()).toEqual({
+			query: {
+				type: "exists", field: "user"
+			},
+			scoring: scoring
+		});
 
 		done();
 	});

@@ -360,23 +360,22 @@ class ArrayQuery extends BaseQuery {
 		this._callbackName = callbackName;
 		this[callbackName] = callback;
 
-		let self = this;
 		this._prepare = (queryType, ...args) => {
 			let data = {};
 			let query = new queryType(...args, data);
-			self._data.values.push(data);
-			query.bool = self.bool;
-			query.constantScore = self.constantScore;
-			query.term = self.term;
-			query.terms = self.terms;
-			query.wildcard = self.wildcard;
-			query.fuzzy = self.fuzzy;
-			query.match = self.match;
-			query.matchAll = self.matchAll;
-			query.prefix = self.prefix;
-			query.exists = self.exists;
-			query._prepare = self._prepare;
-			query[self._callbackName] = self[self._callbackName];
+			this._data.values.push(data);
+			query.bool = this.bool;
+			query.constantScore = this.constantScore;
+			query.term = this.term;
+			query.terms = this.terms;
+			query.wildcard = this.wildcard;
+			query.fuzzy = this.fuzzy;
+			query.match = this.match;
+			query.matchAll = this.matchAll;
+			query.prefix = this.prefix;
+			query.exists = this.exists;
+			query._prepare = this._prepare;
+			query[this._callbackName] = this[this._callbackName];
 			return query;
 		};
 	}
@@ -564,19 +563,53 @@ export class BoolQuery extends BaseQuery {
 }
 
 /**
- * Builder to help.
+ * This query builder is the root of each query search.
+ * The query contains a sub query and parameters for setup scoring and search options.
+ *
+ * Possible sub query types are:
+ * {@link TermQuery}, {@link TermsQuery}, {@link FuzzyQuery}, {@link WildcardQuery},
+ * {@link MatchQuery}, {@link MatchAllQuery}, {@link PrefixQuery},  {@link BoolQuery},
+ * {@link ConstantScoreQuery}, {@link ExistsQuery}
+ *
+ * @example
+ * new QueryBuilder()
+ *   .finalScoring(true)
+ *   .useBM25(1.5, 0.5)
+ *   .term("first_name", "albert")
+ * .build();
+ * // The resulting documents:
+ * // contains the first name albert
+ * // are scored and ranked using BM25 with k1=1.5 and b=0.5
  */
 export class QueryBuilder {
 	constructor() {
 		this._data = {query: {}};
+		this.useBM25();
 	}
 
+	/**
+	 * The query performs a final scoring over all scored sub queries and rank documents by there relevant.
+	 * @param {boolean} enabled - flag to enable or disable final scoring
+	 * @return {QueryBuilder}
+	 */
 	enableFinalScoring(enabled) {
 		this._data.final_scoring = Utils.asBoolean(enabled);
 		return this;
 	}
 
-	useBM25(k1, b) {
+	/**
+	 * Use [Okapi BM25]{@link https://en.wikipedia.org/wiki/Okapi_BM25} as scoring model (default).
+	 *
+	 * See also [Lucene#MatchAllDocsQuery]{@link https://lucene.apache.org/core/6_4_0/core/org/apache/lucene/search/similarities/BM25Similarity.html}
+	 * and [Elasticsearch#BM25]{@link https://www.elastic.co/guide/en/elasticsearch/guide/current/pluggable-similarites.html#bm25}.
+	 *
+	 * @param {number} [k1=1.2] - controls how quickly an increase in term frequency results in term-frequency saturation.
+	 * 														Lower values result in quicker saturation, and higher values in slower saturation.
+	 * @param {number} [b=0.75] - controls how much effect field-length normalization should have.
+	 * 														A value of 0.0 disables normalization completely, and a value of 1.0 normalizes fully.
+	 * @return {QueryBuilder}
+	 */
+	useBM25(k1 = 1.2, b = 0.75) {
 		if (!Utils.isNumber(k1) || k1 < 0) {
 			throw TypeError("BM25s k1 must be a positive number.");
 		}

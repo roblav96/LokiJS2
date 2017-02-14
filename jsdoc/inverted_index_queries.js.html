@@ -31,6 +31,7 @@
  * todo: Document scoring.
  * todo: Align description.
  */
+import * as Utils from './utils.js';
 
 /**
  * The base query class to enable boost to a query type.
@@ -40,7 +41,7 @@
 export class BaseQuery {
 	constructor(type, data = {}) {
 		this._data = data;
-		this._data.type = type;
+		this._data.type = Utils.asString(type);
 	}
 
 	/**
@@ -53,7 +54,7 @@ export class BaseQuery {
 	 * @return {BaseQuery} object itself for cascading
 	 */
 	boost(value) {
-		if (typeof(value) !== "number" || value &lt; 0) {
+		if (!Utils.isNumber(value) || value &lt; 0) {
 			throw TypeError("Boost must be a positive number.");
 		}
 		this._data.boost = value;
@@ -88,8 +89,8 @@ export class BaseQuery {
 export class TermQuery extends BaseQuery {
 	constructor(field, term, data = {}) {
 		super("term", data);
-		this._data.field = field;
-		this._data.value = term;
+		this._data.field = Utils.asString(field);
+		this._data.value = Utils.asString(term);
 	}
 }
 
@@ -112,11 +113,8 @@ export class TermQuery extends BaseQuery {
 export class TermsQuery extends BaseQuery {
 	constructor(field, terms, data = {}) {
 		super("terms", data);
-		if (!Array.isArray(terms)) {
-			throw TypeError("Value for terms must be an array.");
-		}
-		this._data.field = field;
-		this._data.values = terms;
+		this._data.field = Utils.asString(field);
+		this._data.value = Utils.asArrayOfString(terms);
 	}
 }
 
@@ -148,8 +146,8 @@ export class TermsQuery extends BaseQuery {
 export class WildcardQuery extends BaseQuery {
 	constructor(field, wildcard, data = {}) {
 		super("wildcard", data);
-		this._data.field = field;
-		this._data.wildcard = wildcard;
+		this._data.field = Utils.asString(field);
+		this._data.value = Utils.asString(wildcard);
 	}
 }
 
@@ -169,8 +167,8 @@ export class WildcardQuery extends BaseQuery {
  *
  * @example
  * new FuzzyQuery("surname", "einsten")
- * 	.fuzziness(3)
- * 	.prefixLength(3)
+ *  .fuzziness(3)
+ *  .prefixLength(3)
  * .build();
  * // The resulting documents:
  * // contains the fuzzy surname einstn (like Einstein or Einst but not Eisstein or Insten)
@@ -182,8 +180,8 @@ export class WildcardQuery extends BaseQuery {
 export class FuzzyQuery extends BaseQuery {
 	constructor(field, fuzzy, data = {}) {
 		super("fuzzy", data);
-		this._data.field = field;
-		this._data.value = fuzzy;
+		this._data.field = Utils.asString(field);
+		this._data.value = Utils.asString(fuzzy);
 	}
 
 	/**
@@ -192,7 +190,7 @@ export class FuzzyQuery extends BaseQuery {
 	 * @return {FuzzyQuery} - object itself for cascading
 	 */
 	fuzziness(fuzziness) {
-		if (typeof(fuzziness) !== "number" || fuzziness &lt; 0) {
+		if (!Utils.isNumber(fuzziness) || fuzziness &lt; 0) {
 			throw TypeError("Fuzziness must be a positive number.");
 		}
 		this._data.fuzziness = fuzziness;
@@ -205,7 +203,7 @@ export class FuzzyQuery extends BaseQuery {
 	 * @return {FuzzyQuery}  object itself for cascading
 	 */
 	prefixLength(prefixLength) {
-		if (typeof(prefixLength) !== "number" || prefixLength &lt; 0) {
+		if (!Utils.isNumber(prefixLength) || prefixLength &lt; 0) {
 			throw TypeError("Prefix length must be a positive number.");
 		}
 		this._data.prefix_length = prefixLength;
@@ -233,8 +231,8 @@ export class FuzzyQuery extends BaseQuery {
 export class PrefixQuery extends BaseQuery {
 	constructor(field, prefix, data = {}) {
 		super("prefix", data);
-		this._data.field = field;
-		this._data.value = prefix;
+		this._data.field = Utils.asString(field);
+		this._data.value = Utils.asString(prefix);
 	}
 }
 
@@ -256,7 +254,7 @@ export class PrefixQuery extends BaseQuery {
 export class ExistsQuery extends BaseQuery {
 	constructor(field, data = {}) {
 		super("exists", data);
-		this._data.field = field;
+		this._data.field = Utils.asString(field);
 	}
 }
 
@@ -291,8 +289,8 @@ export class ExistsQuery extends BaseQuery {
 export class MatchQuery extends BaseQuery {
 	constructor(field, query, data = {}) {
 		super("match", data);
-		this._data.field = field;
-		this._data.query = query;
+		this._data.field = Utils.asString(field);
+		this._data.value = Utils.asString(query);
 	}
 
 	/**
@@ -301,8 +299,8 @@ export class MatchQuery extends BaseQuery {
 	 * @return {MatchQuery} object itself for cascading
 	 */
 	minimumShouldMatch(minShouldMatch) {
-		if (typeof(minShouldMatch) !== "number") {
-			throw TypeError("Value for minimum should match must be a number.");
+		if (!Utils.isNumber(minShouldMatch) || minShouldMatch &lt; 0) {
+			throw TypeError("Value for minimum should match must be a positive number.");
 		}
 		if (this._data.hasOwnProperty("operator") &amp;&amp; this._data.operator == "and") {
 			throw SyntaxError("Match query with \"and\" operator does not support minimum should match.");
@@ -317,9 +315,7 @@ export class MatchQuery extends BaseQuery {
 	 * @return {MatchQuery} object itself for cascading
 	 */
 	operator(op) {
-		if (typeof(op) !== "string") {
-			throw TypeError("Value for operator must be a string.");
-		}
+		op = Utils.asString(op);
 		if (op != 'and' &amp;&amp; op != 'or') {
 			throw SyntaxError("Unknown operator.");
 		}
@@ -336,7 +332,7 @@ export class MatchQuery extends BaseQuery {
 	 * @return {MatchQuery} object itself for cascading
 	 */
 	fuzziness(fuzziness) {
-		if (typeof(fuzziness) !== "number" || fuzziness &lt; 0) {
+		if (!Utils.isNumber(fuzziness) || fuzziness &lt; 0) {
 			throw TypeError("Fuzziness must be a positive number.");
 		}
 		this._data.fuzziness = fuzziness;
@@ -349,7 +345,7 @@ export class MatchQuery extends BaseQuery {
 	 * @return {MatchQuery} - object itself for cascading
 	 */
 	prefixLength(prefixLength) {
-		if (typeof(prefixLength) !== "number" || prefixLength &lt; 0) {
+		if (!Utils.isNumber(prefixLength) || prefixLength &lt; 0) {
 			throw TypeError("Prefix length must be a positive number.");
 		}
 		this._data.prefix_length = prefixLength;
@@ -367,7 +363,7 @@ export class MatchQuery extends BaseQuery {
  * and [Elasticsearch#MatchAllQuery]{@link https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-all-query.html}.
  *
  * @example
- * new MatchAll()
+ * new MatchAllQuery()
  *   .boost(2.5)
  * .build()
  * // The resulting documents:
@@ -375,7 +371,7 @@ export class MatchQuery extends BaseQuery {
  *
  * @extends BaseQuery
  */
-export class MatchAll extends BaseQuery {
+export class MatchAllQuery extends BaseQuery {
 	constructor(data = {}) {
 		super("match_all", data);
 	}
@@ -392,23 +388,22 @@ class ArrayQuery extends BaseQuery {
 		this._callbackName = callbackName;
 		this[callbackName] = callback;
 
-		let self = this;
 		this._prepare = (queryType, ...args) => {
 			let data = {};
 			let query = new queryType(...args, data);
-			self._data.values.push(data);
-			query.bool = self.bool;
-			query.constantScore = self.constantScore;
-			query.term = self.term;
-			query.terms = self.terms;
-			query.wildcard = self.wildcard;
-			query.fuzzy = self.fuzzy;
-			query.match = self.match;
-			query.matchAll = self.matchAll;
-			query.prefix = self.prefix;
-			query.exists = self.exists;
-			query._prepare = self._prepare;
-			query[self._callbackName] = self[self._callbackName];
+			this._data.values.push(data);
+			query.bool = this.bool;
+			query.constantScore = this.constantScore;
+			query.term = this.term;
+			query.terms = this.terms;
+			query.wildcard = this.wildcard;
+			query.fuzzy = this.fuzzy;
+			query.match = this.match;
+			query.matchAll = this.matchAll;
+			query.prefix = this.prefix;
+			query.exists = this.exists;
+			query._prepare = this._prepare;
+			query[this._callbackName] = this[this._callbackName];
 			return query;
 		};
 	}
@@ -442,7 +437,7 @@ class ArrayQuery extends BaseQuery {
 	}
 
 	matchAll() {
-		return this._prepare(MatchAll);
+		return this._prepare(MatchAllQuery);
 	}
 
 	prefix(field, prefix) {
@@ -484,7 +479,9 @@ export class ConstantScoreQuery extends BaseQuery {
 	 */
 	startFilter() {
 		this._data.filter = {};
-		return new ArrayQuery("endFilter", () => {return this;}, this._data.filter);
+		return new ArrayQuery("endFilter", () => {
+			return this;
+		}, this._data.filter);
 	}
 }
 
@@ -533,11 +530,6 @@ export class ConstantScoreQuery extends BaseQuery {
 export class BoolQuery extends BaseQuery {
 	constructor(data = {}) {
 		super("bool", data);
-
-		let self = this;
-		this._callback = () => {
-			return self;
-		};
 	}
 
 	/**
@@ -546,7 +538,9 @@ export class BoolQuery extends BaseQuery {
 	 */
 	startMust() {
 		this._data.must = {};
-		return new ArrayQuery("endMust", this._callback, this._data.must);
+		return new ArrayQuery("endMust", () => {
+			return this;
+		}, this._data.must);
 	}
 
 	/**
@@ -555,7 +549,9 @@ export class BoolQuery extends BaseQuery {
 	 */
 	startFilter() {
 		this._data.filter = {};
-		return new ArrayQuery("endFilter", this._callback, this._data.filter);
+		return new ArrayQuery("endFilter", () => {
+			return this;
+		}, this._data.filter);
 	}
 
 	/**
@@ -564,7 +560,9 @@ export class BoolQuery extends BaseQuery {
 	 */
 	startShould() {
 		this._data.should = {};
-		return new ArrayQuery("endShould", this._callback, this._data.should);
+		return new ArrayQuery("endShould", () => {
+			return this;
+		}, this._data.should);
 	}
 
 	/**
@@ -573,7 +571,9 @@ export class BoolQuery extends BaseQuery {
 	 */
 	startNot() {
 		this._data.not = {};
-		return new ArrayQuery("endNot", this._callback, this._data.not);
+		return new ArrayQuery("endNot", () => {
+			return this;
+		}, this._data.not);
 	}
 
 	/**
@@ -591,37 +591,57 @@ export class BoolQuery extends BaseQuery {
 }
 
 /**
- * Builder to help.
+ * This query builder is the root of each query search.
+ * The query contains a sub query and parameters for setup scoring and search options.
+ *
+ * Possible sub query types are:
+ * {@link TermQuery}, {@link TermsQuery}, {@link FuzzyQuery}, {@link WildcardQuery},
+ * {@link MatchQuery}, {@link MatchAllQuery}, {@link PrefixQuery},  {@link BoolQuery},
+ * {@link ConstantScoreQuery}, {@link ExistsQuery}
+ *
+ * @example
+ * new QueryBuilder()
+ *   .finalScoring(true)
+ *   .useBM25(1.5, 0.5)
+ *   .term("first_name", "albert")
+ * .build();
+ * // The resulting documents:
+ * // contains the first name albert
+ * // are scored and ranked using BM25 with k1=1.5 and b=0.5
  */
 export class QueryBuilder {
 	constructor() {
 		this._data = {query: {}};
-
-		let self = this;
-		let callback = () => {
-			return self._data;
-		};
-
-		this._prepare = (queryType, ...args) => {
-			this._child = new queryType(...args, this._data.query);
-			this._child.build = callback;
-			return this._child;
-		};
+		this.useBM25();
 	}
 
+	/**
+	 * The query performs a final scoring over all scored sub queries and rank documents by there relevant.
+	 * @param {boolean} enabled - flag to enable or disable final scoring
+	 * @return {QueryBuilder}
+	 */
 	enableFinalScoring(enabled) {
-		if (typeof(enabled) !== "boolean") {
-			throw TypeError("Enable scoring must a boolean.");
-		}
-		this._data.final_scoring = enabled;
+		this._data.final_scoring = Utils.asBoolean(enabled);
 		return this;
 	}
 
-	useBM25(k1, b) {
-		if (typeof(k1) !== "number" || k1 &lt; 0) {
+	/**
+	 * Use [Okapi BM25]{@link https://en.wikipedia.org/wiki/Okapi_BM25} as scoring model (default).
+	 *
+	 * See also [Lucene#MatchAllDocsQuery]{@link https://lucene.apache.org/core/6_4_0/core/org/apache/lucene/search/similarities/BM25Similarity.html}
+	 * and [Elasticsearch#BM25]{@link https://www.elastic.co/guide/en/elasticsearch/guide/current/pluggable-similarites.html#bm25}.
+	 *
+	 * @param {number} [k1=1.2] - controls how quickly an increase in term frequency results in term-frequency saturation.
+	 * 														Lower values result in quicker saturation, and higher values in slower saturation.
+	 * @param {number} [b=0.75] - controls how much effect field-length normalization should have.
+	 * 														A value of 0.0 disables normalization completely, and a value of 1.0 normalizes fully.
+	 * @return {QueryBuilder}
+	 */
+	useBM25(k1 = 1.2, b = 0.75) {
+		if (!Utils.isNumber(k1) || k1 &lt; 0) {
 			throw TypeError("BM25s k1 must be a positive number.");
 		}
-		if (typeof(b) !== "number" || b &lt; 0 || b > 1) {
+		if (!Utils.isNumber(b) || b &lt; 0 || b > 1) {
 			throw TypeError("BM25s b must be a number between 0 and 1 inclusive.");
 		}
 
@@ -662,7 +682,7 @@ export class QueryBuilder {
 	}
 
 	matchAll() {
-		return this._prepare(MatchAll);
+		return this._prepare(MatchAllQuery);
 	}
 
 	prefix(field, prefix) {
@@ -671,6 +691,14 @@ export class QueryBuilder {
 
 	exists(field) {
 		return this._prepare(ExistsQuery, field);
+	}
+
+	_prepare(queryType, ...args) {
+		this._child = new queryType(...args, this._data.query);
+		this._child.build = () => {
+			return this._data
+		};
+		return this._child;
 	}
 }
 </code></pre>
@@ -683,13 +711,13 @@ export class QueryBuilder {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BaseQuery.html">BaseQuery</a></li><li><a href="BoolQuery.html">BoolQuery</a></li><li><a href="Calculator.html">Calculator</a></li><li><a href="Collection.html">Collection</a></li><li><a href="ConstantScoreQuery.html">ConstantScoreQuery</a></li><li><a href="DynamicView.html">DynamicView</a></li><li><a href="ExistsQuery.html">ExistsQuery</a></li><li><a href="FuzzyQuery.html">FuzzyQuery</a></li><li><a href="IndexSearcher.html">IndexSearcher</a></li><li><a href="InvertedIndex.html">InvertedIndex</a></li><li><a href="Loki.html">Loki</a></li><li><a href="LokiEventEmitter.html">LokiEventEmitter</a></li><li><a href="LokiFsAdapter.html">LokiFsAdapter</a></li><li><a href="LokiLocalStorageAdapter.html">LokiLocalStorageAdapter</a></li><li><a href="MatchAll.html">MatchAll</a></li><li><a href="MatchQuery.html">MatchQuery</a></li><li><a href="PrefixQuery.html">PrefixQuery</a></li><li><a href="QueryBuilder.html">QueryBuilder</a></li><li><a href="Resultset.html">Resultset</a></li><li><a href="TermQuery.html">TermQuery</a></li><li><a href="TermsQuery.html">TermsQuery</a></li><li><a href="Tokenizer.html">Tokenizer</a></li><li><a href="WildcardQuery.html">WildcardQuery</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Query.html">Query</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BaseQuery.html">BaseQuery</a></li><li><a href="BoolQuery.html">BoolQuery</a></li><li><a href="Calculator.html">Calculator</a></li><li><a href="Collection.html">Collection</a></li><li><a href="ConstantScoreQuery.html">ConstantScoreQuery</a></li><li><a href="DynamicView.html">DynamicView</a></li><li><a href="ExistsQuery.html">ExistsQuery</a></li><li><a href="FuzzyQuery.html">FuzzyQuery</a></li><li><a href="IndexSearcher.html">IndexSearcher</a></li><li><a href="InvertedIndex.html">InvertedIndex</a></li><li><a href="Loki.html">Loki</a></li><li><a href="LokiEventEmitter.html">LokiEventEmitter</a></li><li><a href="LokiFsAdapter.html">LokiFsAdapter</a></li><li><a href="LokiLocalStorageAdapter.html">LokiLocalStorageAdapter</a></li><li><a href="MatchAllQuery.html">MatchAllQuery</a></li><li><a href="MatchQuery.html">MatchQuery</a></li><li><a href="PrefixQuery.html">PrefixQuery</a></li><li><a href="QueryBuilder.html">QueryBuilder</a></li><li><a href="Resultset.html">Resultset</a></li><li><a href="TermQuery.html">TermQuery</a></li><li><a href="TermsQuery.html">TermsQuery</a></li><li><a href="Tokenizer.html">Tokenizer</a></li><li><a href="WildcardQuery.html">WildcardQuery</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Query.html">Query</a></li></ul><h3>Global</h3><ul><li><a href="global.html#asArrayOfString">asArrayOfString</a></li><li><a href="global.html#asBoolean">asBoolean</a></li><li><a href="global.html#asString">asString</a></li><li><a href="global.html#isBoolean">isBoolean</a></li><li><a href="global.html#isConvertibleToString">isConvertibleToString</a></li><li><a href="global.html#isFunction">isFunction</a></li><li><a href="global.html#isNumber">isNumber</a></li><li><a href="global.html#isObject">isObject</a></li><li><a href="global.html#isString">isString</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Feb 04 2017 21:34:40 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Feb 14 2017 22:54:44 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>

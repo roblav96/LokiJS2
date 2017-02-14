@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: ConstantScoreQuery</title>
+    <title>JSDoc: Class: MatchAllQuery</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: ConstantScoreQuery</h1>
+    <h1 class="page-title">Class: MatchAllQuery</h1>
 
     
 
@@ -28,11 +28,13 @@
 
 <header>
     
-        <h2>ConstantScoreQuery</h2>
+        <h2>MatchAllQuery</h2>
         
-            <div class="class-description"><p>A query that wraps sub queries and returns a constant score equal to the query boost for every document in the filter.</p>
-<p>See also <a href="https://lucene.apache.org/core/6_4_0/core/org/apache/lucene/search/ConstantScoreQuery.html">Lucene#BooleanQuery</a>
-and <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-constant-score-query.html">Elasticsearch#ConstantScoreQuery</a>.</p></div>
+            <div class="class-description"><p>A query that matches all documents and giving them a constant score equal to the query boost.</p>
+<p>Typically used inside a must clause of a <a href="BoolQuery.html">BoolQuery</a> to subsequently reject non matching documents with the not
+clause.</p>
+<p>See also <a href="https://lucene.apache.org/core/6_4_0/core/org/apache/lucene/search/MatchAllDocsQuery.html">Lucene#MatchAllDocsQuery</a>
+and <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-all-query.html">Elasticsearch#MatchAllQuery</a>.</p></div>
         
     
 </header>
@@ -46,7 +48,7 @@ and <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/que
     <h2>Constructor</h2>
     
 
-    <h4 class="name" id="ConstantScoreQuery"><span class="type-signature"></span>new ConstantScoreQuery<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="MatchAllQuery"><span class="type-signature"></span>new MatchAllQuery<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -93,7 +95,7 @@ and <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/que
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line443">line 443</a>
+        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line346">line 346</a>
     </li></ul></dd>
     
 
@@ -120,15 +122,11 @@ and <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/que
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>new ConstantScore()
-  .boost(1.5)
-  .startFilter()
-    .term("first_name", "albert")
-    .term("surname", "einstein")
-  .endFilter()
+    <pre class="prettyprint"><code>new MatchAllQuery()
+  .boost(2.5)
 .build()
 // The resulting documents:
-// * contains albert as first name, einstein as surname and the document score is 42.</code></pre>
+// all documents and giving a score of 2.5</code></pre>
 
 
 
@@ -423,110 +421,6 @@ and <a href="https://www.elastic.co/guide/en/elasticsearch/reference/5.2/mapping
     <dd>
         
 <span class="param-type">Object</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="startFilter"><span class="type-signature"></span>startFilter<span class="signature">()</span><span class="type-signature"> &rarr; {ArrayQuery}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Starts an array of queries. Use endFilter() to finish the array.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="inverted_index_queries.js.html">inverted_index/queries.js</a>, <a href="inverted_index_queries.js.html#line452">line 452</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>array query for holding sub queries</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">ArrayQuery</span>
 
 
     </dd>
