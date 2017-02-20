@@ -77,7 +77,8 @@ export class BaseQuery {
  * and [Elasticsearch#TermQuery]{@link https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-term-query.html}.
  *
  * @example
- * new TermQuery("name", "infinity"])
+ * new QueryBuilder()
+ *   .term("name", "infinity"])
  * .build();
  * // The resulting documents:
  * // contains the term infinity
@@ -101,7 +102,8 @@ export class TermQuery extends BaseQuery {
  * and [Elasticsearch#TermsQuery]{@link https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html}.
  *
  * @example
- * new TermsQuery("quotes", ["infinity", "atom", "energy"])
+ * new QueryBuilder()
+ *   .terms("quotes", ["infinity", "atom", "energy"])
  * .build();
  * // The resulting documents:
  * // contains the terms infinity, atom or energy
@@ -134,7 +136,8 @@ export class TermsQuery extends BaseQuery {
  * @todo Implement wildcard * (asterisk) to skip zero or more characters.
  *
  * @example
- * new WildcardQuery("question", "e?nste?n\?")
+ * new QueryBuilder()
+ *   .wildcard("question", "e?nste?n\?")
  * .build();
  * // The resulting documents:
  * // contains the wildcard surname e?nste?n\? (like Einstein? or Eynsteyn? but not Einsteine or Ensten?)
@@ -166,9 +169,10 @@ export class WildcardQuery extends BaseQuery {
  * and [Elasticsearch#FuzzyQuery]{@link https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-fuzzy-query.html}.
  *
  * @example
- * new FuzzyQuery("surname", "einsten")
- *  .fuzziness(3)
- *  .prefixLength(3)
+ * new QueryBuilder()
+ *   .fuzzy("surname", "einsten")
+ *     .fuzziness(3)
+ *     .prefixLength(3)
  * .build();
  * // The resulting documents:
  * // contains the fuzzy surname einstn (like Einstein or Einst but not Eisstein or Insten)
@@ -239,14 +243,14 @@ export class PrefixQuery extends BaseQuery {
 /**
  * A query which matches all documents with a given field.
  *
+ * See also [Elasticsearch#ExistsQuery]{@link https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html}.
+ *
  * @example
  * new QueryBuilder()
  *   .exists("name")
  * .build()
  * // The resulting documents:
  * // has the field "name"
- *
- * See also [Lucene#?]{@link ?} and [Elasticsearch#ExistsQuery]{@link https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html}.
  *
  * @param {string} field - the field name of the document
  * @extends BaseQuery
@@ -273,11 +277,12 @@ export class ExistsQuery extends BaseQuery {
  * and [Elasticsearch#MatchQuery]{@link https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-query.html}.
  *
  * @example
- * new MatchQuery("name", "albrt einsten")
- *   .boost(2.5)
- *   .operator("and")
- *   .fuzziness(2)
- *   .prefixLength(3)
+ * new QueryBuilder()
+ *   .match("name", "albrt einsten")
+ *     .boost(2.5)
+ *     .operator("and")
+ *     .fuzziness(2)
+ *     .prefixLength(3)
  * .build();
  * // The resulting documents:
  * // contains the fuzzy name albrt einsten (like Albert Einstein) with a boost of 2.5
@@ -363,8 +368,9 @@ export class MatchQuery extends BaseQuery {
  * and [Elasticsearch#MatchAllQuery]{@link https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-all-query.html}.
  *
  * @example
- * new MatchAllQuery()
- *   .boost(2.5)
+ * new QueryBuilder()
+ *   .matchAll()
+ *     .boost(2.5)
  * .build()
  * // The resulting documents:
  * // all documents and giving a score of 2.5
@@ -456,12 +462,13 @@ class ArrayQuery extends BaseQuery {
  * and [Elasticsearch#ConstantScoreQuery]{@link https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-constant-score-query.html}.
  *
  * @example
- * new ConstantScore()
- *   .boost(1.5)
- *   .startFilter()
- *     .term("first_name", "albert")
- *     .term("surname", "einstein")
- *   .endFilter()
+ * new QueryBuilder()
+ *   .constantScore()
+ *     .boost(1.5)
+ *     .startFilter()
+ *       .term("first_name", "albert")
+ *       .term("surname", "einstein")
+ *     .endFilter()
  * .build()
  * // The resulting documents:
  * // * contains albert as first name, einstein as surname and the document score is 42.
@@ -503,21 +510,22 @@ export class ConstantScoreQuery extends BaseQuery {
  * and [Elasticsearch#BoolQuery]{@link https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-bool-query.html}.
  *
  * @example
- * new BoolQuery()
- *   .startMust().boost(2)
- *     .term("first_name", "albert")
- *   .endMust()
- *   .startFilter()
- *     .term("birthplace", "ulm")
- *   .endFilter()
- *   .startShould().minimumShouldMatch(2)
- *     .fuzzy("surname", "einstin")
- *     .wildcard("name", "geni?s")
- *     .term("quotes", "infinity")
- *   .endShould()
- *   .startNot()
- *     .terms("research_field", ["biology", "geography"])
- *   .endNot()
+ * new QueryBuilder()
+ *   .bool()
+ *     .startMust().boost(2)
+ *       .term("first_name", "albert")
+ *     .endMust()
+ *     .startFilter()
+ *       .term("birthplace", "ulm")
+ *     .endFilter()
+ *     .startShould().minimumShouldMatch(2)
+ *       .fuzzy("surname", "einstin")
+ *       .wildcard("name", "geni?s")
+ *       .term("quotes", "infinity")
+ *     .endShould()
+ *     .startNot()
+ *       .terms("research_field", ["biology", "geography"])
+ *     .endNot()
  * .build();
  * // The resulting documents:
  * // contains the name albert (must: contribute to the score with a boost of 2)
@@ -717,7 +725,7 @@ export class QueryBuilder {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Feb 14 2017 22:54:44 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 20 2017 22:04:00 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>
