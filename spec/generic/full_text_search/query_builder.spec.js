@@ -1,7 +1,7 @@
 /* global describe, it, expect */
 import * as Query from '../../../src/inverted_index/queries';
 
-describe('tokenizer', function () {
+describe('query builder', function () {
 
 	it('BaseQuery', function (done) {
 		let q = new Query.BaseQuery("custom").boost(1.5).build();

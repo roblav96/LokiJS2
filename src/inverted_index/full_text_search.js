@@ -1,5 +1,6 @@
 import {InvertedIndex} from './inverted_index';
 import {IndexSearcher} from './index_searcher';
+import * as Utils from './utils.js';
 
 export class FullTextSearch {
 	constructor(options) {
@@ -9,20 +10,15 @@ export class FullTextSearch {
 
 		this._invIdxs = {};
 		// Get field names.
-		switch (Object.prototype.toString.call(options.fields)) {
-			case '[object Array]':
-				for (let i = 0; i < options.fields.length; i++) {
-					if (typeof options.fields[i] !== 'string') {
-						throw new TypeError('Fields needs to be a string or an array of strings');
-					}
-					this._invIdxs[options.fields[i]] = new InvertedIndex(options.fields[i]);
-				}
-				break;
-			case '[object String]':
-				this._invIdxs[options.fields] = new InvertedIndex(options.fields);
-				break;
-			default:
-				throw new TypeError('Fields needs to be a string or an array of strings');
+		if (Utils.isString(options.fields)) {
+			this._invIdxs[options.fields] = new InvertedIndex(options.fields);
+		} else if (Array.isArray(options.fields)) {
+			for (let i = 0; i < options.fields.length; i++) {
+				this._invIdxs[options.fields[i]] = new InvertedIndex(Utils.asString(options.fields[i],
+					TypeError('Fields needs to be a string or an array of strings')));
+			}
+		} else {
+			throw new TypeError('Fields needs to be a string or an array of strings');
 		}
 
 		this._docs = new Set();

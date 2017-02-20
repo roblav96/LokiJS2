@@ -72,7 +72,7 @@ export class Scorer {
 						let tfNorm = ((k1 + 1) * docResult.tf) / (k1 * ((1 - b)
 							+ b * (fieldLength / avgFieldLength)) + docResult.tf);
 						res = docResult.idf * tfNorm * docResult.boost;
-						console.log(
+						/*console.log(
 							docId + ":" + docResult.fieldName + ":" + docResult.term + " = " + res,
 							"\n\ttype: BM25",
 							"\n\tboost: " + docResult.boost,
@@ -80,20 +80,20 @@ export class Scorer {
 							"\n\ttfNorm : " + tfNorm,
 							"\n\ttf : " + docResult.tf,
 							"\n\tavg : " + avgFieldLength,
-							"\n\tfl : " + fieldLength);
+							"\n\tfl : " + fieldLength);*/
 						break;
 					}
 					case 'constant':
 						res = docResult.value * docResult.boost;
-						console.log(
+						/*console.log(
 							"Constant: " + res,
 							"\n\tboost: " + docResult.boost,
-							"\n\tvalue : " + docResult.value);
+							"\n\tvalue : " + docResult.value);*/
 						break;
 				}
 				docScore += res;
 			}
-			console.log(docId, " === ", docScore);
+			//console.log(docId, " === ", docScore);
 			result[docId] = docScore;
 		}
 		return result;
