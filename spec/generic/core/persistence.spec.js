@@ -1,7 +1,7 @@
 /* global describe, it, expect, beforeEach */
-import {Loki as loki} from '../../src/core/lokicore';
-import {LokiMemoryAdapter} from '../../src/core/memory_adapter';
-import {LokiPartitioningAdapter} from '../../src/core/partitioning_adapter';
+import {Loki as loki} from '../../../src/core/lokicore';
+import {LokiMemoryAdapter} from '../../../src/core/memory_adapter';
+import {LokiPartitioningAdapter} from '../../../src/core/partitioning_adapter';
 
 describe('testing unique index serialization', function () {
 	var db, users;

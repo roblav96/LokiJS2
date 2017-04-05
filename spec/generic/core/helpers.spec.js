@@ -1,5 +1,5 @@
 /* global describe, it, expect, beforeEach */
-import {LokiOps} from '../../src/core/resultset';
+import {LokiOps} from '../../../src/core/resultset';
 
 describe('Testing comparator helpers', function () {
 

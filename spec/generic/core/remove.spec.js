@@ -1,5 +1,5 @@
 /* global describe, it, expect */
-import {Loki as loki} from '../../src/core/lokicore';
+import {Loki as loki} from '../../../src/core/lokicore';
 
 describe('remove', function () {
 	it('removes', function () {

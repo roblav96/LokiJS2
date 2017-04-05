@@ -1,5 +1,5 @@
 /* global describe, it, expect, beforeEach */
-import {Loki as loki} from '../../src/core/lokicore';
+import {Loki as loki} from '../../../src/core/lokicore';
 
 describe('eventEmitter', function () {
 	var db;

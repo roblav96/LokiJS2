@@ -1,6 +1,6 @@
 /* global describe, it, expect, beforeEach */
-import {Loki as loki} from '../../src/core/lokicore';
-import {LokiOps} from '../../src/core/resultset';
+import {Loki as loki} from '../../../src/core/lokicore';
+import {LokiOps} from '../../../src/core/resultset';
 
 describe('Testing operators', function () {
 

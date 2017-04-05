@@ -1,6 +1,6 @@
 /* global describe, it, expect */
-import {Loki as loki} from '../../src/core/lokicore';
-import {Collection} from '../../src/core/collection';
+import {Loki as loki} from '../../../src/core/lokicore';
+import {Collection} from '../../../src/core/collection';
 
 describe('collection', function () {
 	it('works', function () {

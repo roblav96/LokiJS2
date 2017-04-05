@@ -1,6 +1,6 @@
 /* global describe, it, expect, beforeEach */
-import {Loki as loki} from '../../src/core/lokicore';
-import {LokiMemoryAdapter} from '../../src/core/memory_adapter';
+import {Loki as loki} from '../../../src/core/lokicore';
+import {LokiMemoryAdapter} from '../../../src/core/memory_adapter';
 
 
 var suite = {
