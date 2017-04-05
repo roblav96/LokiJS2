@@ -1,6 +1,7 @@
 /* global describe, it, expect */
 import {FullTextSearch} from '../../../../src/inverted_index/full_text_search';
 import {QueryBuilder} from '../../../../src/inverted_index/queries';
+import {Tokenizer} from '../../../../src/inverted_index/tokenizer';
 
 describe('wildcard query', function () {
 	// from lucene 6.4.0 core: TestWildCard
@@ -12,13 +13,8 @@ describe('wildcard query', function () {
 
 
 	it('Tests Wildcard queries with an asterisk.', function (done) {
-
-		done();
-	});
-
-	it('Tests Wildcard queries with a question mark.', function (done) {
 		let docs = ["metal", "metals", "mXtals", "mXtXls"];
-		let fts = new FullTextSearch({fields: ["body"]});
+		let fts = new FullTextSearch({fields: [{name: "body"}]});
 		for (let i = 0; i < docs.length; i++) {
 			fts.addDocument({
 				$loki: i,
@@ -26,7 +22,30 @@ describe('wildcard query', function () {
 			});
 		}
 		let query = null;
+		query = new QueryBuilder().wildcard("body", "metal*").build();
+		assertMatches(fts, query, 2);
+		query = new QueryBuilder().wildcard("body", "metals*").build();
+		assertMatches(fts, query, 1);
+		query = new QueryBuilder().wildcard("body", "mx*").build();
+		assertMatches(fts, query, 2);
+		query = new QueryBuilder().wildcard("body", "mX*").build();
+		assertMatches(fts, query, 0);
+		query = new QueryBuilder().wildcard("body", "m*").build();
+		assertMatches(fts, query, 4);
 
+		done();
+	});
+
+	it('Tests Wildcard queries with a question mark.', function (done) {
+		let docs = ["metal", "metals", "mXtals", "mXtXls"];
+		let fts = new FullTextSearch({fields: [{name: "body"}]});
+		for (let i = 0; i < docs.length; i++) {
+			fts.addDocument({
+				$loki: i,
+				body: docs[i]
+			});
+		}
+		let query = null;
 		query = new QueryBuilder().wildcard("body", "m?tal").build();
 		assertMatches(fts, query, 1);
 		query = new QueryBuilder().wildcard("body", "metal?").build();
@@ -44,27 +63,34 @@ describe('wildcard query', function () {
 	});
 
 	it('Tests if wildcard escaping works.', function (done) {
-		// TODO: Change splitter of fts.
-		let docs = ["foo*bar", "foo??bar", "fooCDbar", "fooSOMETHINGbar", "foo\\"];
-		let fts = new FullTextSearch({fields: ["body"]});
+		let docs = ["foo*bar", "foo??bar", "fooCDbar", "fooSOMETHINGbar", "foo\\", "foo\\\\"];
+
+		let tkz = new Tokenizer();
+		// Don't split the text.
+		tkz.setSplitter("nosplit", function (text) {
+			return [text];
+		});
+
+		let fts = new FullTextSearch({fields: [{name: "body", tokenizer: tkz}]});
 		for (let i = 0; i < docs.length; i++) {
 			fts.addDocument({
 				$loki: i,
 				body: docs[i]
 			});
 		}
-
-		//let query1 = new QueryBuilder().wildcard("body", "foo*bar").build();
-		let query2 = new QueryBuilder().wildcard("body", "foo\\*bar").build();
-		let query3 = new QueryBuilder().wildcard("body", "foo??bar").build();
-		let query4 = new QueryBuilder().wildcard("body", "foo\\?\\?bar").build();
-		let query5 = new QueryBuilder().wildcard("body", "foo\\").build();
-
-		//assertMatches(fts, query1, 4);
-		//assertMatches(fts, query2, 1);
-		//assertMatches(fts, query3, 2);
-		//assertMatches(fts, query4, 1);
-		//assertMatches(fts, query5, 1);
+		let query = null;
+		//query = new QueryBuilder().wildcard("body", "foo*bar").build();
+		//assertMatches(fts, query, 4); // * not implemented
+		query = new QueryBuilder().wildcard("body", "foo\\*bar").build();
+		assertMatches(fts, query, 1);
+		query = new QueryBuilder().wildcard("body", "foo??bar").build();
+		assertMatches(fts, query, 2);
+		query = new QueryBuilder().wildcard("body", "foo\\?\\?bar").build();
+		assertMatches(fts, query, 1);
+		query = new QueryBuilder().wildcard("body", "foo\\\\").build();
+		assertMatches(fts, query, 1);
+		query = new QueryBuilder().wildcard("body", "foo\\\\*").build();
+		assertMatches(fts, query, 2);
 
 		done();
 	});

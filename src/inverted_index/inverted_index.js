@@ -3,17 +3,20 @@ import {Tokenizer} from './tokenizer';
 /**
  * Inverted index class handles featured text search for specific document fields.
  * @constructor InvertedIndex
- * @param {object} options - a configuration object
- * @param {string|string[]} options.fields - string or array of field names to define featured text search for
  * @param {boolean} [options.store=true] - inverted index will be stored at serialization rather than rebuilt on load.
  */
 export class InvertedIndex {
-	constructor(fieldName) {
+	/**
+	 *
+	 * @param {string} fieldName
+	 * @param {Tokenizer} tokenizer
+	 */
+	constructor(fieldName, tokenizer = new Tokenizer) {
 		this._fieldName = fieldName;
 		this._docCount = 0;
 		this._docStore = {};
 		this._totalFieldLength = 0;
-		this._tokenizer = new Tokenizer();
+		this._tokenizer = tokenizer;
 		this._root = {};
 	}
 
@@ -44,6 +47,7 @@ export class InvertedIndex {
 	/**
 	 * Adds defined fields of a document to the inverted index.
 	 * @param {object} field - the field to add
+	 * @param {number} docId - the doc id of the field
 	 * @param {number} [boost=1] - object with field (key) specific boost (value)
 	 */
 	insert(field, docId, boost = 1) {
@@ -72,7 +76,7 @@ export class InvertedIndex {
 			// Calculate term frequency.
 			let tf = 0;
 			for (let j = 0; j < fieldTokens.length; j++) {
-				if (fieldTokens[j] == term) {
+				if (fieldTokens[j] === term) {
 					tf++;
 				}
 			}
@@ -129,6 +133,7 @@ export class InvertedIndex {
 
 			// Delete term branch if not used anymore.
 			if (index.df === 0) {
+				let keys = [];
 				do {
 					// Go tree upwards.
 					let parent = index.parent;
@@ -136,7 +141,7 @@ export class InvertedIndex {
 					delete index.parent;
 
 					// Iterate over all children.
-					var keys = Object.keys(parent);
+					keys = Object.keys(parent);
 					for (let k = 0; k < keys.length; k++) {
 						let key = keys[k];
 						if (key === 'df' || key === 'docs') {
@@ -255,7 +260,7 @@ export class InvertedIndex {
 			let keys = Object.keys(index);
 			for (let i = 0; i < keys.length; i++) {
 				// Found term, save in document store.
-				if (keys[i] == 'docs') {
+				if (keys[i] === 'docs') {
 					// Get documents of term.
 					let docIds = Object.keys(index.docs);
 					for (let j = 0; j < docIds.length; j++) {
@@ -269,7 +274,7 @@ export class InvertedIndex {
 						// Set reference to term index.
 						ref.termRefs.push(index);
 					}
-				} else if (keys[i] != 'df') {
+				} else if (keys[i] !== 'df') {
 					// Iterate over subtree.
 					regenerate(index[keys[i]], index);
 				}

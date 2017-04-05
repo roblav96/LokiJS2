@@ -360,7 +360,7 @@ class WildcardSearch {
 	 * @returns {Array} - array with all matching term indices.
 	 */
 	search(root) {
-		// Todo: Need an implementation for star operator.
+		// Todo: Need an implementation for star operator in the middle.
 		this._result = [];
 		this._recursive(root);
 		return this._result;
@@ -392,6 +392,11 @@ class WildcardSearch {
 			let others = InvertedIndex.getNextTermIndex(root);
 			for (let i = 0; i < others.length; i++) {
 				this._recursive(others[i].index, idx + 1, term + others[i].term);
+			}
+		} else if (!escaped && this._wildcard[idx] === '*') {
+			let all = InvertedIndex.extendTermIndex(root);
+			for (let i = 0; i < all.length; i++) {
+				this._recursive(all[i].index, idx + 1, term + all[i].term);
 			}
 		} else {
 			this._recursive(InvertedIndex.getTermIndex(this._wildcard[idx], root), idx + 1, term + this._wildcard[idx]);
