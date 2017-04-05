@@ -6,9 +6,14 @@ import {Tokenizer} from '../../../../src/inverted_index/tokenizer';
 describe('wildcard query', function () {
 	// from lucene 6.4.0 core: TestWildCard
 
-	let assertMatches = (searcher, query, result) => {
+	let assertMatches = (searcher, query, result, docIds = []) => {
 		let res = searcher.search(query);
 		expect(Object.keys(res).length).toEqual(result);
+		for (let i = 0; i < docIds.length; i++) {
+			expect(res).toHaveMember(String(docIds[i]));
+			delete res[String(docIds[i])];
+		}
+		expect(res).toEqual({});
 	};
 
 
@@ -23,15 +28,15 @@ describe('wildcard query', function () {
 		}
 		let query = null;
 		query = new QueryBuilder().wildcard("body", "metal*").build();
-		assertMatches(fts, query, 2);
+		assertMatches(fts, query, 2, [0, 1]);
 		query = new QueryBuilder().wildcard("body", "metals*").build();
-		assertMatches(fts, query, 1);
+		assertMatches(fts, query, 1, [1]);
 		query = new QueryBuilder().wildcard("body", "mx*").build();
-		assertMatches(fts, query, 2);
+		assertMatches(fts, query, 2, [2, 3]);
 		query = new QueryBuilder().wildcard("body", "mX*").build();
 		assertMatches(fts, query, 0);
 		query = new QueryBuilder().wildcard("body", "m*").build();
-		assertMatches(fts, query, 4);
+		assertMatches(fts, query, 4, [0, 1, 2, 3]);
 
 		done();
 	});
@@ -47,17 +52,17 @@ describe('wildcard query', function () {
 		}
 		let query = null;
 		query = new QueryBuilder().wildcard("body", "m?tal").build();
-		assertMatches(fts, query, 1);
+		assertMatches(fts, query, 1, [0]);
 		query = new QueryBuilder().wildcard("body", "metal?").build();
-		assertMatches(fts, query, 1);
+		assertMatches(fts, query, 1, [1]);
 		query = new QueryBuilder().wildcard("body", "metals?").build();
 		assertMatches(fts, query, 0);
 		query = new QueryBuilder().wildcard("body", "m?t?ls").build();
-		assertMatches(fts, query, 3);
+		assertMatches(fts, query, 3, [1, 2, 3]);
 		query = new QueryBuilder().wildcard("body", "M?t?ls").build();
 		assertMatches(fts, query, 0);
 		query = new QueryBuilder().wildcard("body", "meta??").build();
-		assertMatches(fts, query, 1);
+		assertMatches(fts, query, 1, [1]);
 
 		done();
 	});
@@ -82,15 +87,15 @@ describe('wildcard query', function () {
 		//query = new QueryBuilder().wildcard("body", "foo*bar").build();
 		//assertMatches(fts, query, 4); // * not implemented
 		query = new QueryBuilder().wildcard("body", "foo\\*bar").build();
-		assertMatches(fts, query, 1);
+		assertMatches(fts, query, 1, [0]);
 		query = new QueryBuilder().wildcard("body", "foo??bar").build();
-		assertMatches(fts, query, 2);
+		assertMatches(fts, query, 2, [1, 2]);
 		query = new QueryBuilder().wildcard("body", "foo\\?\\?bar").build();
-		assertMatches(fts, query, 1);
+		assertMatches(fts, query, 1, [1]);
 		query = new QueryBuilder().wildcard("body", "foo\\\\").build();
-		assertMatches(fts, query, 1);
+		assertMatches(fts, query, 1, [4]);
 		query = new QueryBuilder().wildcard("body", "foo\\\\*").build();
-		assertMatches(fts, query, 2);
+		assertMatches(fts, query, 2, [4, 5]);
 
 		done();
 	});
