@@ -5,28 +5,18 @@ import {Resultset} from './resultset';
 import {DynamicView} from './dynamic_view';
 import {clone, cloneObjectArray} from './clone';
 import {ltHelper, gtHelper} from './helper';
+import {Plugin} from './plugin'
 
 /*
- 'UniqueIndex' is not defined                 no-undef
- 'ExactIndex' is not defined                  no-undef
- 'ltHelper' is not defined                    no-undef
- 'gtHelper' is not defined                    no-undef
- 'DynamicView' is not defined                 no-undef
- 'clone' is not defined                       no-undef
- 'Resultset' is not defined                   no-undef
- 'cloneObjectArray' is not defined            no-undef
-
  'isDeepProperty' is not defined              no-undef
  'deepProperty' is not defined                no-undef
  'average' is not defined                     no-undef
  'standardDeviation' is not defined           no-undef
  'sub' is not defined                         no-undef
 
-
  byExample?
  indexing -> own class?
  remove data only?
-
  */
 
 /**
@@ -153,6 +143,13 @@ export class Collection extends LokiEventEmitter {
 			options.exact.forEach(function (prop) {
 				self.constraints.exact[prop] = new ExactIndex(prop);
 			});
+		}
+
+		// Inverted index
+		this._fullTextSearch = null;
+		if (Plugin.FullTextSearch !== undefined) {
+			this._fullTextSearch = options.hasOwnProperty('fullTextSearch')
+				? new Plugin.FullTextSearch(options.fullTextSearch) : null;
 		}
 
 		// if set to true we will optimally keep indices 'fresh' during insert/update/remove ops (never dirty/never needs rebuild)
@@ -683,7 +680,8 @@ export class Collection extends LokiEventEmitter {
 
 	/**
 	 * Applies a 'mongo-like' find query object and passes all results to an update function.
-	 * For filter function querying you should migrate to [updateWhere()]{@link Collection#updateWhere}.
+	 * For filter function querying you should migrate to [
+	 * Where()]{@link Collection#updateWhere}.
 	 *
 	 * @param {object|function} filterObject - 'mongo-like' query object (or deprecated filterFunction mode)
 	 * @param {function} updateFunction - update function to run against filtered documents
@@ -772,6 +770,11 @@ export class Collection extends LokiEventEmitter {
 		}
 		if (!this.add(obj)) {
 			return undefined;
+		}
+
+		// FullTextSearch.
+		if (this._fullTextSearch !== null) {
+			this._fullTextSearch.addDocument(doc);
 		}
 
 		// if cloning, give user back clone of 'cloned' object with $loki and meta
@@ -905,6 +908,11 @@ export class Collection extends LokiEventEmitter {
 
 			this.idIndex[position] = newInternal.$loki;
 			//this.flagBinaryIndexesDirty();
+
+			// FullTextSearch.
+			if (this._fullTextSearch !== null) {
+				this._fullTextSearch.updateDocument(doc);
+			}
 
 			this.commit();
 			this.dirty = true; // for autosave scenarios
@@ -1093,6 +1101,11 @@ export class Collection extends LokiEventEmitter {
 
 			// remove id from idIndex
 			this.idIndex.splice(position, 1);
+
+			// FullTextSearch.
+			if (this._fullTextSearch != null) {
+				this._fullTextSearch.removeDocument(doc);
+			}
 
 			this.commit();
 			this.dirty = true; // for autosave scenarios

@@ -2,23 +2,24 @@ import {InvertedIndex} from './inverted_index';
 import {IndexSearcher} from './index_searcher';
 import {Tokenizer} from './tokenizer';
 import * as Utils from './utils.js';
+import {Plugin} from '../core/plugin'
 
 export class FullTextSearch {
 	/**
 	 *
 	 * @param options
 	 */
-	constructor(options) {
-		if (options === undefined) {
-			throw new SyntaxError('Options needs to be defined!');
+	constructor(fields) {
+		if (fields === undefined) {
+			throw new SyntaxError('Fields needs to be defined!');
 		}
 
 		this._invIdxs = {};
 		// Get field names and tokenizers.
-		if (Array.isArray(options.fields)) {
-			for (let i = 0; i < options.fields.length; i++) {
-				let field = options.fields[i];
-				let name = Utils.asString(field.name, TypeError('Field name needs to be a string or an array of strings'));
+		if (Array.isArray(fields)) {
+			for (let i = 0; i < fields.length; i++) {
+				let field = fields[i];
+				let name = Utils.asString(field.name, TypeError('Field name needs to be a string.'));
 				let tokenizer = field.tokenizer;
 				if (tokenizer !== undefined) {
 					if (!(tokenizer instanceof Tokenizer)) {
@@ -27,11 +28,10 @@ export class FullTextSearch {
 				} else {
 					tokenizer = new Tokenizer();
 				}
-
 				this._invIdxs[field.name] = new InvertedIndex(name, tokenizer);
 			}
 		} else {
-			throw new TypeError('options.fields needs to be an array with field name and a tokenizer (optional).');
+			throw new TypeError('fields needs to be an array with field name and a tokenizer (optional).');
 		}
 
 		this._docs = new Set();
@@ -100,3 +100,5 @@ export class FullTextSearch {
 		this._idxSearcher.setDirty();
 	}
 }
+
+Plugin.FullTextSearch = FullTextSearch;

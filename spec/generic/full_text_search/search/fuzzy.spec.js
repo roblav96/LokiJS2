@@ -17,7 +17,7 @@ describe('fuzzy query', function () {
 
 	it('Tests Fuzzy queries fuzziness.', function (done) {
 		let docs = ["aaaaa", "aaaab", "aaabb", "aabbb", "abbbb", "bbbbb", "ddddd"];
-		let fts = new FullTextSearch({fields: [{name: "body"}]});
+		let fts = new FullTextSearch([{name: "body"}]);
 		for (let i = 0; i < docs.length; i++) {
 			fts.addDocument({
 				$loki: i,
@@ -102,7 +102,7 @@ describe('fuzzy query', function () {
 	it('Tests Fuzzy queries fuzziness 2.', function (done) {
 		let docs = ["lange", "lueth", "pirsing", "riegel", "trzecziak", "walker", "wbr", "we", "web", "webe", "weber",
 			"webere", "webree", "weberei", "wbre", "wittkopf", "wojnarowski", "wricke"];
-		let fts = new FullTextSearch({fields: [{name: "body"}]});
+		let fts = new FullTextSearch([{name: "body"}]);
 		for (let i = 0; i < docs.length; i++) {
 			fts.addDocument({
 				$loki: i,

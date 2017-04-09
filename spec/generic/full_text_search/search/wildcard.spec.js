@@ -19,7 +19,7 @@ describe('wildcard query', function () {
 
 	it('Tests Wildcard queries with an asterisk.', function (done) {
 		let docs = ["metal", "metals", "mXtals", "mXtXls"];
-		let fts = new FullTextSearch({fields: [{name: "body"}]});
+		let fts = new FullTextSearch([{name: "body"}]);
 		for (let i = 0; i < docs.length; i++) {
 			fts.addDocument({
 				$loki: i,
@@ -43,7 +43,7 @@ describe('wildcard query', function () {
 
 	it('Tests Wildcard queries with a question mark.', function (done) {
 		let docs = ["metal", "metals", "mXtals", "mXtXls"];
-		let fts = new FullTextSearch({fields: [{name: "body"}]});
+		let fts = new FullTextSearch([{name: "body"}]);
 		for (let i = 0; i < docs.length; i++) {
 			fts.addDocument({
 				$loki: i,
@@ -76,7 +76,7 @@ describe('wildcard query', function () {
 			return [text];
 		});
 
-		let fts = new FullTextSearch({fields: [{name: "body", tokenizer: tkz}]});
+		let fts = new FullTextSearch([{name: "body", tokenizer: tkz}]);
 		for (let i = 0; i < docs.length; i++) {
 			fts.addDocument({
 				$loki: i,
