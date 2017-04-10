@@ -5,7 +5,7 @@ import {Resultset} from './resultset';
 import {DynamicView} from './dynamic_view';
 import {clone, cloneObjectArray} from './clone';
 import {ltHelper, gtHelper} from './helper';
-import {Plugin} from './plugin'
+import {Plugin} from '../plugin';
 
 /*
  'isDeepProperty' is not defined              no-undef
@@ -147,9 +147,9 @@ export class Collection extends LokiEventEmitter {
 
 		// Inverted index
 		this._fullTextSearch = null;
-		if (Plugin.FullTextSearch !== undefined) {
+		if (Plugin.load("FullTextSearch") !== undefined) {
 			this._fullTextSearch = options.hasOwnProperty('fullTextSearch')
-				? new Plugin.FullTextSearch(options.fullTextSearch) : null;
+				? new (Plugin.load("FullTextSearch"))(options.fullTextSearch) : null;
 		}
 
 		// if set to true we will optimally keep indices 'fresh' during insert/update/remove ops (never dirty/never needs rebuild)

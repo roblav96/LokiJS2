@@ -13,8 +13,7 @@
 	},
 	"source": {
 		"include": [
-			"src/",
-			"src/inverted_index/"
+			"src/"
 		],
 		"includePattern": ".+\\.js$",
 		"excludePattern": "(^|\\/|\\\\)_"

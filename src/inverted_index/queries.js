@@ -676,7 +676,7 @@ export class QueryBuilder {
 	_prepare(queryType, ...args) {
 		this._child = new queryType(...args, this._data.query);
 		this._child.build = () => {
-			return this._data
+			return this._data;
 		};
 		return this._child;
 	}

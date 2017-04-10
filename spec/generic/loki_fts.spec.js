@@ -6,15 +6,15 @@ import {QueryBuilder} from '../../src/inverted_index/queries';
 describe('changesApi', function () {
 	it('does what it says on the tin', function () {
 		var db = new loki(),
-		options = {
-			asyncListeners: false,
-			disableChangesApi: true,
-			fullTextSearch: [
-				{
-					name: "abc",
-				}
-			]
-		};
+			options = {
+				asyncListeners: false,
+				disableChangesApi: true,
+				fullTextSearch: [
+					{
+						name: "abc",
+					}
+				]
+			};
 
 		var users = db.addCollection('users', options);
 		users.insert({abc: "123"});
@@ -24,11 +24,11 @@ describe('changesApi', function () {
 		console.log(users._fullTextSearch.search(new QueryBuilder().wildcard("abc", "12?").build()));
 
 		users.findAndUpdate({abc: "124"}, (doc) => {
-			doc.abc = "wow"
+			doc.abc = "wow";
 		});
 		console.log(users._fullTextSearch.search(new QueryBuilder().wildcard("abc", "wow").build()));
 
 		//users.find(query.queryObj)
 
-	})
-})
+	});
+});

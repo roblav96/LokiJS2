@@ -24,6 +24,9 @@ module.exports = function (config) {
 		browserNoActivityTimeout: 60000,
 
 		webpack: {
+			externals: {
+				"fs": "fs"
+			},
 			module: {
 				loaders: [
 					{

@@ -25,6 +25,9 @@ module.exports = function (config) {
 		},
 
 		webpack: {
+			externals: {
+				"fs": "fs"
+			},
 			module: {
 				loaders: [
 					{

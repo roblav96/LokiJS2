@@ -2,7 +2,6 @@ import {InvertedIndex} from './inverted_index';
 import {IndexSearcher} from './index_searcher';
 import {Tokenizer} from './tokenizer';
 import * as Utils from './utils.js';
-import {Plugin} from '../core/plugin'
 
 export class FullTextSearch {
 	/**
@@ -100,5 +99,3 @@ export class FullTextSearch {
 		this._idxSearcher.setDirty();
 	}
 }
-
-Plugin.FullTextSearch = FullTextSearch;
