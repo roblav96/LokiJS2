@@ -16,7 +16,7 @@ if (env === 'build') {
 	outputFile = libraryName + '.js';
 }
 
-var core = {
+let core = {
 	name: "core",
 	entry: {
 		core: __dirname + '/src/core/index.js',
@@ -63,21 +63,21 @@ if (env === 'build') {
 	outputFile = libraryName + '.[name].js';
 }
 
-var modules = {
-	name: "modules",
+let extensions = {
+	name: "extensions",
 	entry: {
-		fts: __dirname + '/src/inverted_index/index.js',
+		FullTextSearch: __dirname + '/src/inverted_index/index.js',
 	},
 	devtool: 'source-map',
 	output: {
 		path: path.join(__dirname, '/lib'),
 		filename: outputFile,
-		library: [libraryName + 'Modules', "[name]"],
+		library: [libraryName + ".[name]"],
 		libraryTarget: 'umd',
 		umdNamedDefine: true
 	},
 	externals: {
-		"fs": "fs"
+		"../core/loki": 'Loki'
 	},
 	eslint: {
 		configFile: 'config/eslintrc.js'
@@ -103,4 +103,4 @@ var modules = {
 	plugins: plugins
 };
 
-module.exports = [core, modules];
+module.exports = [core, extensions];

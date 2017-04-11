@@ -1,6 +1,3 @@
-import {Loki} from './lokicore';
-import {Plugin} from '../plugin';
-
-Plugin.initialize(Loki);
+import Loki from './loki';
 
 module.exports = Loki;

@@ -29,7 +29,7 @@ TBD:
  * @param {string} options.env - override environment detection as 'NODEJS', 'BROWSER', 'CORDOVA'
  * @param {boolean} options.verbose - enable console output (default is 'false')
  */
-export class Loki extends LokiEventEmitter {
+export default class Loki extends LokiEventEmitter {
 
 	constructor(filename, options) {
 		super();
@@ -1138,3 +1138,5 @@ export class Loki extends LokiEventEmitter {
 		}
 	}
 }
+
+Loki.Plugins = {};
