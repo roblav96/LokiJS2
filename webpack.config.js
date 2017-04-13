@@ -19,7 +19,7 @@ if (env === 'build') {
 let core = {
 	name: "core",
 	entry: {
-		core: __dirname + '/src/core/index.js',
+		core: __dirname + '/src/core/loki.js',
 	},
 	devtool: 'source-map',
 	output: {
@@ -32,28 +32,15 @@ let core = {
 	externals: {
 		"fs": "fs"
 	},
-	eslint: {
-    configFile: 'config/eslintrc.js'
-  },
 	module: {
 		loaders: [
-			{
-				test: /(\.js)$/,
-				loader: 'babel',
-				exclude: /(node_modules|bower_components)/
-			},
 			{
 				test: /(\.js)$/,
 				loader: "eslint-loader",
 				exclude: /(node_modules|bower_components)/
 			}
 		]
-	},
-	resolve: {
-		root: path.resolve('./src'),
-		extensions: ['', '.js']
-	},
-	plugins: plugins
+	}
 };
 
 if (env === 'build') {
@@ -79,28 +66,15 @@ let extensions = {
 	externals: {
 		"../core/loki": 'Loki'
 	},
-	eslint: {
-		configFile: 'config/eslintrc.js'
-	},
 	module: {
 		loaders: [
-			{
-				test: /(\.js)$/,
-				loader: 'babel',
-				exclude: /(node_modules|bower_components)/
-			},
 			{
 				test: /(\.js)$/,
 				loader: "eslint-loader",
 				exclude: /(node_modules|bower_components)/
 			}
 		]
-	},
-	resolve: {
-		root: path.resolve('./src'),
-		extensions: ['', '.js']
-	},
-	plugins: plugins
+	}
 };
 
 module.exports = [core, extensions];

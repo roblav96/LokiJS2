@@ -826,6 +826,21 @@ export class Resultset {
 			}
 		}
 
+		if (query.query) {
+			let res = this.collection._fullTextSearch.search(query);
+			let docIds = Object.keys(res);
+			let results = [];
+			for (let i = 0; i < docIds.length; i++) {
+				let docId = parseInt(docIds[i]);
+				for (let j = 0; j < this.collection.data.length; j++) {
+					if (this.collection.data[j].$loki === docId) {
+						results.push(this.collection.data[j]);
+					}
+				}
+			}
+			return results;
+		}
+
 		// if user is deep querying the object such as find('name.first': 'odin')
 		var usingDotNotation = (property.indexOf('.') !== -1);
 

@@ -5,7 +5,7 @@ import {Resultset} from './resultset';
 import {DynamicView} from './dynamic_view';
 import {clone, cloneObjectArray} from './clone';
 import {ltHelper, gtHelper} from './helper';
-import Loki from './loki';
+import {Loki} from './loki';
 
 /*
  'isDeepProperty' is not defined              no-undef

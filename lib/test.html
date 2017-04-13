@@ -1,12 +1,12 @@
 <html>
-  <head>
-    <title></title>
-    <meta content="">
-    <style></style>
-		<script src="Loki.js"></script>
-		<script src="Loki.fts.js"></script>
-    <script>
-		var db = new Loki();
+<head>
+	<title></title>
+	<meta content="">
+	<style></style>
+	<script src="Loki.js"></script>
+	<script src="Loki.FullTextSearch.js"></script>
+	<script>
+		var db = new Loki.Loki();
 		var options = {
 			asyncListeners: false,
 			disableChangesApi: true,
@@ -16,9 +16,25 @@
 				}
 			]
 		};
-		var coll = db.addCollection("myColl", options)
+		var coll = db.addCollection("myColl", options);
+		coll.insert({"abc": "hello"});
+		coll.insert({"abc": "hella"});
+		coll.insert({"abc": "helas"});
 
-    </script>
-  </head>
-  <body></body>
+		console.log(coll.data);
+
+		coll.removeWhere({"abc": "hella"});
+		console.log(coll.data);
+
+		var query = new Loki.Loki.QueryBuilder().wildcard("abc", "hela?").build();
+		console.log(query);
+		var res = coll.find(query);
+		console.log("---> ", res);
+
+		res = coll.find()
+		console.log(res);
+
+	</script>
+</head>
+<body></body>
 </html>

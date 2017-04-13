@@ -1,4 +1,4 @@
-import {Loki} from './lokicore';
+import {Loki} from './loki';
 
 /**
  * An adapter for adapters.  Converts a non reference mode adapter into a reference mode adapter

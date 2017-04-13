@@ -1,5 +1,5 @@
 /* global describe, it, expect, beforeEach */
-import {Loki as loki} from '../../../src/core/lokicore';
+import {Loki as loki} from '../../../src/core/loki';
 import {LokiMemoryAdapter} from '../../../src/core/memory_adapter';
 import {LokiPartitioningAdapter} from '../../../src/core/partitioning_adapter';
 

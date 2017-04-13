@@ -1,8 +1,14 @@
 import {FullTextSearch} from './full_text_search';
-import {Plugin} from '../plugin';
 import {Tokenizer} from './tokenizer';
+import {QueryBuilder} from './queries'
+import {Loki} from '../core/loki';
 
-Plugin.register("FullTextSearch", FullTextSearch);
-Plugin.register("Tokenizer", Tokenizer, true);
+Loki.Tokenizer = Tokenizer;
+Loki.Plugins.FullTextSearch = FullTextSearch;
+Loki.QueryBuilder = QueryBuilder;
 
-module.exports = FullTextSearch;
+class ABC {
+
+};
+
+export {ABC};

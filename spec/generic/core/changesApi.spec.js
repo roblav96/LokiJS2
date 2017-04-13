@@ -1,5 +1,5 @@
 /* global describe, it, expect */
-import {Loki as loki} from '../../../src/core/lokicore';
+import {Loki as loki} from '../../../src/core/loki';
 
 describe('changesApi', function () {
 	it('does what it says on the tin', function () {
