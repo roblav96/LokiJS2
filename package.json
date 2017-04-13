@@ -5,8 +5,8 @@
   "homepage": "http://lokijs.org",
   "main": "lib/library.js",
   "scripts": {
-    "build": "webpack --mode=build",
-    "dev": "webpack --mode=dev",
+    "build": "webpack",
+    "dev": "webpack -p",
     "lint": "eslint ./src/**/*.js ./bench/**/*.bench.js ./spec/**/*.spec.js -c config/eslintrc.js || true",
     "lint:fix": "eslint --fix ./src/**/*.js ./bench/**/*.bench.js ./spec/**/*.spec.js -c config/eslintrc.js || true",
     "test": "npm-run-all test:web test:node",

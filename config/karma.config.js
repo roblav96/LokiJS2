@@ -28,15 +28,6 @@ module.exports = function (config) {
 			externals: {
 				"fs": "fs"
 			},
-			module: {
-				loaders: [
-					/*{
-						test: /(\.js)$/,
-						loader: 'babel-loader',
-						exclude: /(node_modules|bower_components)/
-					}*/
-				]
-			},
 			watch: true
 		},
 		webpackServer: {

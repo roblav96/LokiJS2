@@ -3,10 +3,10 @@
 	<title></title>
 	<meta content="">
 	<style></style>
-	<script src="Loki.js"></script>
-	<script src="Loki.FullTextSearch.js"></script>
+	<script src="loki.js"></script>
+	<script src="loki.FullTextSearch.js"></script>
 	<script>
-		var db = new Loki.Loki();
+		var db = new Loki();
 		var options = {
 			asyncListeners: false,
 			disableChangesApi: true,
@@ -26,7 +26,7 @@
 		coll.removeWhere({"abc": "hella"});
 		console.log(coll.data);
 
-		var query = new Loki.Loki.QueryBuilder().wildcard("abc", "hela?").build();
+		var query = new Loki.QueryBuilder().wildcard("abc", "hela?").build();
 		console.log(query);
 		var res = coll.find(query);
 		console.log("---> ", res);

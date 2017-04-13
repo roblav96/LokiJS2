@@ -1,19 +1,14 @@
 var webpack = require('webpack');
-var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
-var CommonsChunkPlugin = webpack.optimize.CommonsChunkPlugin;
-var path = require('path');
-var env = require('yargs').argv.mode;
+const prod = process.argv.indexOf('-p') !== -1;
 
 var libraryName = 'Loki';
 
 var outputFile;
-var plugins = [];
 
-if (env === 'build') {
-	plugins.push(new UglifyJsPlugin({minimize: true}));
-	outputFile = libraryName + '.min.js';
+if (prod) {
+	outputFile = 'loki.min.js';
 } else {
-	outputFile = libraryName + '.js';
+	outputFile = 'loki.js';
 }
 
 let core = {
@@ -23,9 +18,8 @@ let core = {
 	},
 	devtool: 'source-map',
 	output: {
-		path: path.join(__dirname, '/lib'),
+		path: __dirname + '/lib',
 		filename: outputFile,
-		library: libraryName,
 		libraryTarget: 'umd',
 		umdNamedDefine: true
 	},
@@ -43,11 +37,10 @@ let core = {
 	}
 };
 
-if (env === 'build') {
-	plugins.push(new UglifyJsPlugin({minimize: true}));
-	outputFile = libraryName + '.[name].min.js';
+if (prod) {
+	outputFile = 'loki.[name].min.js';
 } else {
-	outputFile = libraryName + '.[name].js';
+	outputFile = 'loki.[name].js';
 }
 
 let extensions = {
@@ -57,14 +50,14 @@ let extensions = {
 	},
 	devtool: 'source-map',
 	output: {
-		path: path.join(__dirname, '/lib'),
+		path: __dirname + '/lib',
 		filename: outputFile,
-		library: [libraryName + ".[name]"],
+		library: [libraryName, '[name]'],
 		libraryTarget: 'umd',
 		umdNamedDefine: true
 	},
 	externals: {
-		"../core/loki": 'Loki'
+		"Loki": "Loki"
 	},
 	module: {
 		loaders: [
