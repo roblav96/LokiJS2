@@ -19,15 +19,20 @@ export class FullTextSearch {
 			for (let i = 0; i < fields.length; i++) {
 				let field = fields[i];
 				let name = Utils.asString(field.name, TypeError('Field name needs to be a string.'));
-				let tokenizer = field.tokenizer;
-				if (tokenizer !== undefined) {
-					if (!(tokenizer instanceof Tokenizer)) {
+
+				let store = field.hasOwnProperty("store") ?
+					Utils.asBoolean(field.store, TypeError("Field store flag needs to be a boolean")) : true;
+
+				let tokenizer = null;
+				if (field.hasOwnProperty("tokenizer")) {
+					if (!(field.tokenizer instanceof Tokenizer)) {
 						throw new TypeError("Field tokenizer needs to be a instance of tokenizer.");
 					}
+					tokenizer = field.tokenizer;
 				} else {
 					tokenizer = new Tokenizer();
 				}
-				this._invIdxs[field.name] = new InvertedIndex(name, tokenizer);
+				this._invIdxs[name] = new InvertedIndex(store, tokenizer);
 			}
 		} else {
 			throw new TypeError('fields needs to be an array with field name and a tokenizer (optional).');
@@ -86,12 +91,12 @@ export class FullTextSearch {
 		return serialized;
 	}
 
-	loadJSON(serialized) {
+	loadJSON(serialized, tokenizers) {
 		let db = JSON.parse(serialized);
 		let fieldNames = Object.keys(db);
 		for (let i = 0, fieldName; i < fieldNames.length, fieldName = fieldNames[i]; i++) {
-			this._invIdxs[fieldName] = new InvertedIndex({});
-			this._invIdxs[fieldName].loadJSON(db[fieldName]);
+			this._invIdxs[fieldName] = new InvertedIndex();
+			this._invIdxs[fieldName].loadJSON(db[fieldName], tokenizers[fieldName]);
 		}
 	}
 

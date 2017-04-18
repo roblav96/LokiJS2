@@ -147,9 +147,9 @@ export class Collection extends LokiEventEmitter {
 
 		// Inverted index
 		this._fullTextSearch = null;
-		if (Loki.Plugins.FullTextSearch !== undefined) {
+		if (Loki.FullTextSearch !== undefined) {
 			this._fullTextSearch = options.hasOwnProperty('fullTextSearch')
-				? new (Loki.Plugins.FullTextSearch)(options.fullTextSearch) : null;
+				? new (Loki.FullTextSearch.FullTextSearch)(options.fullTextSearch) : null;
 		}
 
 		// if set to true we will optimally keep indices 'fresh' during insert/update/remove ops (never dirty/never needs rebuild)

@@ -13,6 +13,7 @@
 			fullTextSearch: [
 				{
 					name: "abc",
+					store: false,
 				}
 			]
 		};
@@ -26,13 +27,16 @@
 		coll.removeWhere({"abc": "hella"});
 		console.log(coll.data);
 
-		var query = new Loki.QueryBuilder().wildcard("abc", "hela?").build();
+		var query = new Loki.FullTextSearch.QueryBuilder().wildcard("abc", "hela?").build();
 		console.log(query);
 		var res = coll.find(query);
 		console.log("---> ", res);
 
 		res = coll.find()
 		console.log(res);
+
+		var ll = db.serialize({serializationMethod: "destructured"})
+		var rl  =db.serialize()
 
 	</script>
 </head>

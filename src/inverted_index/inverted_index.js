@@ -7,17 +7,24 @@ import {Tokenizer} from './tokenizer';
  */
 export class InvertedIndex {
 	/**
-	 *
-	 * @param {string} fieldName
+	 * @param {boolean} store
 	 * @param {Tokenizer} tokenizer
 	 */
-	constructor(fieldName, tokenizer = new Tokenizer) {
-		this._fieldName = fieldName;
+	constructor(store = true, tokenizer = new Tokenizer) {
+		this._store = store;
+		this._tokenizer = tokenizer;
 		this._docCount = 0;
 		this._docStore = {};
 		this._totalFieldLength = 0;
-		this._tokenizer = tokenizer;
 		this._root = {};
+	}
+
+	get store() {
+		return this._store;
+	}
+
+	get tokenizer() {
+		return this._tokenizer;
 	}
 
 	get documentCount() {
@@ -30,14 +37,6 @@ export class InvertedIndex {
 
 	get totalFieldLength() {
 		return this._totalFieldLength;
-	}
-
-	get fieldName() {
-		return this._fieldName;
-	}
-
-	get tokenizer() {
-		return this._tokenizer;
 	}
 
 	get root() {
@@ -229,21 +228,28 @@ export class InvertedIndex {
 	 * @returns {{docStore: *, _fields: *, index: *}}
 	 */
 	toJSON() {
-		return this;
+		if (this._store) {
+			return this;
+		} else {
+			return {
+				_tokenizer: this._tokenizer,
+			};
+		}
 	}
 
 	/**
 	 * Deserialize the inverted index.
 	 * @param {{docStore: *, _fields: *, index: *}} serialized - The serialized inverted index.
+	 * @param {Object.<string, function>|Tokenizer} funcTok[undefined] - the depending functions with labels
+	 * 	or an equivalent tokenizer
 	 */
-	loadJSON(serialized) {
+	loadJSON(serialized, funcTok = undefined) {
 		let dbObject = serialized;
 
-		this._fieldName = dbObject._fieldName;
+		this._tokenizer = Tokenizer.fromJSON(dbObject._tokenizer, funcTok);
 		this._docCount = dbObject._docCount;
 		this._docStore = dbObject._docStore;
 		this._totalFieldLength = dbObject._totalFieldLength;
-		this._tokenizer = dbObject._tokenizer;
 		this._root = dbObject._root;
 
 		let self = this;

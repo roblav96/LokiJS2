@@ -109,7 +109,29 @@ describe('tokenizer', function () {
 		done();
 	});
 
-	it('serialize', function (done) {
+	it('serialize from tokenizer', function (done) {
+		let tkz = new Tokenizer();
+		tkz.add("f1", f1);
+		tkz.add("f2", f2);
+		tkz.add("f3", f3);
+
+		let serialized = tkz.toJSON();
+		expect(() => Tokenizer.fromJSON(serialized, tkz)).not.toThrowAnyError();
+
+		let tkz2 = new Tokenizer();
+		tkz.remove("f1");
+		expect(() => Tokenizer.fromJSON(serialized, tkz)).toThrowAnyError();
+
+		tkz2.setSplitter("MySplitter", splitter);
+		serialized = tkz2.toJSON();
+		expect(() => Tokenizer.fromJSON(serialized, tkz)).toThrowAnyError();
+		tkz.setSplitter("MySplitter", splitter);
+		Tokenizer.fromJSON(serialized, tkz);
+
+		done();
+	});
+
+	it('serialize from functions', function (done) {
 		let tkz = new Tokenizer();
 		tkz.add("f1", f1);
 		tkz.add("f2", f2);
@@ -125,18 +147,17 @@ describe('tokenizer', function () {
 			}
 		};
 
-		tkz = new Tokenizer();
-		tkz.loadJSON(serialized, funcs);
+		expect(() => Tokenizer.fromJSON(serialized, funcs)).not.toThrowAnyError();
 
-		tkz = new Tokenizer();
+		let tkz2 = new Tokenizer();
 		delete funcs.tokenizers.f1;
-		expect(() => tkz.loadJSON(serialized, funcs)).toThrowAnyError();
+		expect(() => Tokenizer.fromJSON(serialized, funcs)).toThrowAnyError();
 
-		tkz.setSplitter("MySplitter", splitter);
-		serialized = tkz.toJSON();
-		expect(() => tkz.loadJSON(serialized, funcs)).toThrowAnyError();
+		tkz2.setSplitter("MySplitter", splitter);
+		serialized = tkz2.toJSON();
+		expect(() => Tokenizer.fromJSON(serialized, funcs)).toThrowAnyError();
 		funcs.splitters["MySplitter"] = splitter;
-		tkz.loadJSON(serialized, funcs);
+		Tokenizer.fromJSON(serialized, funcs);
 
 		done();
 	});

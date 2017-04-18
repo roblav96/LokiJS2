@@ -3,7 +3,7 @@ import {InvertedIndex} from '../../../src/inverted_index/inverted_index';
 
 describe('inverted index', function () {
 
-	let ii = new InvertedIndex("chat");
+	let ii = new InvertedIndex();
 
 	// TODO: Better run value check.
 
@@ -17,7 +17,6 @@ describe('inverted index', function () {
 		expect(ii.documentCount).toBeNumber();
 		expect(ii.documentStore).toBeObject();
 		expect(ii.totalFieldLength).toBeNumber();
-		expect(ii.fieldName).toBeString();
 		expect(ii.tokenizer).toBeObject();
 		expect(ii.root).toBeObject();
 
@@ -72,18 +71,18 @@ describe('inverted index', function () {
 	});
 
 	it('serialize', function (done) {
-		let ii1 = new InvertedIndex("chat");
+		let ii1 = new InvertedIndex();
 		ii1.insert(field1, 1);
 		ii1.insert(field2, 2, 2.5);
 		ii1.insert(field3, 3, 0.5);
 
-		let ii2 = new InvertedIndex("chat");
+		let ii2 = new InvertedIndex();
 		ii2.insert(field1, 1);
 		ii2.insert(field2, 2, 2.5);
 		ii2.insert(field3, 3, 0.5);
 		ii2.insert(field4, 4);
 
-		let ii3 = new InvertedIndex("chat");
+		let ii3 = new InvertedIndex();
 		ii3.loadJSON(JSON.parse(JSON.stringify(ii2)));
 
 		expect(JSON.stringify(ii3)).toEqual(JSON.stringify(ii2));
@@ -118,6 +117,10 @@ describe('inverted index', function () {
 		expect(JSON.stringify(ii2)).toEqual(JSON.stringify(ii1));
 		expect(JSON.stringify(ii3)).toEqual(JSON.stringify(ii1));
 		expect(JSON.stringify(ii3)).toEqual(JSON.stringify(ii2));
+
+		// Check if still can be used
+		ii3.insert(field5, 6);
+		ii3.remove(6);
 
 		done();
 	});

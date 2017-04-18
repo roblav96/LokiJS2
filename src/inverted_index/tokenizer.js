@@ -61,7 +61,7 @@ export class Tokenizer {
 
 	/**
 	 * Gets the splitter.
-	 * @return {Array.<label, function>} - tuple with label and function
+	 * @return {Array.<string, function>} - tuple with label and function
 	 */
 	getSplitter() {
 		return [this._splitter[this._symbol], this._splitter];
@@ -75,11 +75,20 @@ export class Tokenizer {
 	}
 
 	/**
-	 * Gets a functionthrow new  from the queue.
+	 * Checks if a function is inside the queue.
+	 * @param {string|function} labelFunc - an existing label or function
+	 * @returns {boolean} true if exists, otherwise false
+	 */
+	has(labelFunc) {
+		return this._getPosition(labelFunc) !== -1;
+	}
+
+	/**
+	 * Gets a function from the queue.
 	 * Only the first found function gets returned if a label or a function is multiple used.
 	 *
 	 * @param {string|function} labelFunc - an existing label or function
-	 * @return {Array.<label, function>} - tuple with label and function
+	 * @return {Array.<string, function>} - tuple with label and function
 	 */
 	get(labelFunc) {
 		let pos = this._getPosition(labelFunc);
@@ -185,22 +194,43 @@ export class Tokenizer {
 	/**
 	 * Deserializes the tokenizer by reassign the correct function to each label.
 	 * @param {{splitter: string, tokenizers: string[]}} serialized - the serialized labels
-	 * @param {Object.<string, function>} functions - the depending functions with labels
+	 * @param {Object.<string, function>|Tokenizer} funcTok - the depending functions with labels
+	 * 	or an equivalent tokenizer
 	 */
-	loadJSON(serialized, functions) {
-		this.reset();
-		if (serialized.hasOwnProperty("splitter")) {
-			if (!functions.splitters.hasOwnProperty(serialized.splitter)) {
-				throw Error("Splitter function not found.");
+	static fromJSON(serialized, funcTok) {
+		let tokenizer = new Tokenizer();
+
+		if (funcTok !== undefined && funcTok instanceof Tokenizer) {
+			if (serialized.hasOwnProperty("splitter")) {
+				let splitter = funcTok.getSplitter();
+				if (serialized.splitter !== splitter[0]) {
+					throw Error("Splitter function not found.");
+				}
+				tokenizer.setSplitter(splitter[0], splitter[1]);
 			}
-			this.setSplitter(serialized.splitter, functions.splitters[serialized.splitter]);
-		}
-		for (let i = 0; i < serialized.tokenizers.length; i++) {
-			if (!functions.tokenizers.hasOwnProperty(serialized.tokenizers[i])) {
-				throw Error("Tokenizer function not found.");
+
+			for (let i = 0; i < serialized.tokenizers.length; i++) {
+				if (!funcTok.has(serialized.tokenizers[i])) {
+					throw Error("Tokenizer function not found.");
+				}
+				let labelFunc = funcTok.get(serialized.tokenizers[i]);
+				tokenizer.add(labelFunc[0], labelFunc[1]);
 			}
-			this.add(serialized.tokenizers[i], functions.tokenizers[serialized.tokenizers[i]]);
+		} else {
+			if (serialized.hasOwnProperty("splitter")) {
+				if (!funcTok.splitters.hasOwnProperty(serialized.splitter)) {
+					throw Error("Splitter function not found.");
+				}
+				tokenizer.setSplitter(serialized.splitter, funcTok.splitters[serialized.splitter]);
+			}
+			for (let i = 0; i < serialized.tokenizers.length; i++) {
+				if (!funcTok.tokenizers.hasOwnProperty(serialized.tokenizers[i])) {
+					throw Error("Tokenizer function not found.");
+				}
+				tokenizer.add(serialized.tokenizers[i], funcTok.tokenizers[serialized.tokenizers[i]]);
+			}
 		}
+		return tokenizer;
 	}
 
 	/**
