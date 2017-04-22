@@ -70,4 +70,31 @@ let extensions = {
 	}
 };
 
-module.exports = [core, extensions];
+let language = {
+	name: "extensions",
+	entry: {
+		LanguageDE: __dirname + '/src/inverted_index/language/de.js'
+	},
+	devtool: 'source-map',
+	output: {
+		path: __dirname + '/lib',
+		filename: outputFile,
+		library: [libraryName, '[name]'],
+		libraryTarget: 'umd',
+		umdNamedDefine: true
+	},
+	externals: {
+		"Loki": "Loki"
+	},
+	module: {
+		loaders: [
+			{
+				test: /(\.js)$/,
+				loader: "eslint-loader",
+				exclude: /(node_modules|bower_components)/
+			}
+		]
+	}
+};
+
+module.exports = [core, extensions, language];

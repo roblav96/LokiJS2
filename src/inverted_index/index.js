@@ -1,16 +1,11 @@
 import {FullTextSearch} from './full_text_search';
 import {Tokenizer} from './tokenizer';
 import {QueryBuilder} from './queries';
+import {tkz} from './language/de';
 
 export {
 	FullTextSearch,
 	Tokenizer,
-	QueryBuilder
+	QueryBuilder,
+	tkz,
 };
-//
-//
-//
-// Loki.Tokenizer = Tokenizer;
-// Loki.QueryBuilder = QueryBuilder;
-// Loki.Plugins.FullTextSearch = FullTextSearch;
-//

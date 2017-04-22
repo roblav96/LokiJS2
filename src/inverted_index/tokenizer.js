@@ -8,7 +8,7 @@ import * as Utils from './utils.js';
  */
 function defaultSplitter(str) {
 	let trimmedTokens = [];
-	let tokens = str.split(/[^\w]/);
+	let tokens = str.split(/[\s\-]+/);
 	for (let i = 0; i < tokens.length; i++) {
 		if (tokens[i] !== '') {
 			trimmedTokens.push(tokens[i].toLowerCase());
@@ -100,7 +100,7 @@ export class Tokenizer {
 
 	/**
 	 * Adds a function with defined label to the end of the queue.
-	 * The function must take an array of tokens as argument and return an array of tokens.
+	 * The function must take a token string as argument and return a token.
 	 *
 	 * @param {string} label - the label
 	 * @param {function} func - the function
@@ -111,7 +111,7 @@ export class Tokenizer {
 
 	/**
 	 * Adds a function with defined label before an existing function to the queue.
-	 * The function must take an array of tokens as argument and return an array of tokens.
+	 * The function must take a token string as argument and return a token.
 	 *
 	 * @param {string|function} labelFunc - an existing label or function
 	 * @param {string} label - the label
@@ -127,7 +127,7 @@ export class Tokenizer {
 
 	/**
 	 * Adds a function with defined label after an existing function to the queue.
-	 * The function must take an array of tokens as argument and return an array of tokens.
+	 * The function must take a token string as argument and return a token.
 	 *
 	 * @param {string|function} labelFunc - an existing label or function
 	 * @param {string} label - the label
@@ -170,7 +170,14 @@ export class Tokenizer {
 	tokenize(str) {
 		let tokens = this._splitter(str);
 		for (let i = 0; i < this._queue.length; i++) {
-			tokens = this._queue[i](tokens);
+			let newTokens = [];
+			for (let j = 0; j < tokens.length; j++) {
+				let token = this._queue[i](tokens[j]);
+				if (token) {
+					newTokens.push(token);
+				}
+			}
+			tokens = newTokens;
 		}
 		return tokens;
 	}
