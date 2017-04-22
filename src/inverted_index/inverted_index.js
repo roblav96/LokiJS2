@@ -130,8 +130,18 @@ export class InvertedIndex {
 			index.df -= 1;
 			delete index.docs[docId];
 
-			// Delete term branch if not used anymore.
+			// Check if no document is left for current tree.
 			if (index.df === 0) {
+				// Delete unused meta data of branch.
+				delete index.df;
+				delete index.docs;
+
+				// Check for sub branches.
+				if (Object.keys(index).length !== 0) {
+					continue;
+				}
+
+				// Delete term branch if not used anymore.
 				let keys = [];
 				do {
 					// Go tree upwards.
