@@ -132,7 +132,7 @@ export class IndexSearcher {
 			}
 			case "prefix": {
 				let termIdx = InvertedIndex.getTermIndex(query.value, root);
-				if (termIdx != null) {
+				if (termIdx !== null) {
 					termIdx = InvertedIndex.extendTermIndex(termIdx);
 				}
 				for (let i = 0; i < termIdx.length; i++) {
@@ -141,7 +141,7 @@ export class IndexSearcher {
 				break;
 			}
 			case "exists": {
-				if (root != null) {
+				if (root !== null) {
 					let docs = Object.keys(this._invIdxs[fieldName].documentStore);
 					for (let i = 0; i < docs.length; i++) {
 						this._scorer.scoreConstant(boost, docs[i], docResults);
@@ -183,8 +183,8 @@ export class IndexSearcher {
 				} else {
 					tmpQuery = tmpQuery.endMust();
 				}
+				docResults = this._recursive(tmpQuery.build().query, doScoring);
 
-				docResults = this._recursive(tmpQuery.build(), doScoring);
 				break;
 			}
 			default:
@@ -298,12 +298,12 @@ class FuzzySearch {
 		// Todo: Include levenshtein to reduce similar iterations.
 		// Tree tokens at same depth share same row until depth (should works if recursive).
 		// Pregenerate tree token ?
-		//var treeToken = Array(token.length + maxDistance);
+		// var treeToken = Array(token.length + maxDistance);
 
 		let start = root;
 		let pre = this._fuzzy.slice(0, this._prefixLength);
 		let fuzzy = this._fuzzy;
-		if (this._prefixLength != 0) {
+		if (this._prefixLength !== 0) {
 			start = InvertedIndex.getTermIndex(pre, start);
 			fuzzy = fuzzy.slice(this._prefixLength);
 		}

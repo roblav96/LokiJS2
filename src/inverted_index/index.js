@@ -1,11 +1,13 @@
 import {FullTextSearch} from './full_text_search';
 import {Tokenizer} from './tokenizer';
 import {QueryBuilder} from './queries';
-import {tkz} from './language/de';
+import {DE} from './language/de';
+import {InvertedIndex} from './inverted_index';
 
 export {
 	FullTextSearch,
 	Tokenizer,
 	QueryBuilder,
-	tkz,
+	DE,
+	InvertedIndex
 };

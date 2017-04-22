@@ -1,18 +1,21 @@
-import {LanguageSupport, Among, SnowballProgram} from './support.js'
+/*
+ * From MihaiValentin/lunr-languages.
+ * Last update from 04/16/2017 - 19af41fb9bd644d9081ad274f96f700b21464290
+ */
+import {generateTrimmer, generateStopWordFilter, Among, SnowballProgram} from './support.js'
 import {Tokenizer} from '../tokenizer'
 
 let wordCharacters = "A-Za-z\xAA\xBA\xC0-\xD6\xD8-\xF6\xF8-\u02B8\u02E0-\u02E4\u1D00-\u1D25\u1D2C-\u1D5C\u1D62-\u1D65\u1D6B-\u1D77\u1D79-\u1DBE\u1E00-\u1EFF\u2071\u207F\u2090-\u209C\u212A\u212B\u2132\u214E\u2160-\u2188\u2C60-\u2C7F\uA722-\uA787\uA78B-\uA7AD\uA7B0-\uA7B7\uA7F7-\uA7FF\uAB30-\uAB5A\uAB5C-\uAB64\uFB00-\uFB06\uFF21-\uFF3A\uFF41-\uFF5A";
-let trimmer = LanguageSupport.generateTrimmer(wordCharacters);
+let trimmer = generateTrimmer(wordCharacters);
 
-//export tkzer = new Tokenizer();
 let tkz = new Tokenizer();
 
 tkz.add('trimmer-de', trimmer);
 
 let stemmer = (function () {
 	/* create the wrapped stemmer object */
-	var st = new function GermanStemmer() {
-		var a_0 = [new Among("", -1, 6), new Among("U", 0, 2),
+	let st = new function GermanStemmer() {
+		let a_0 = [new Among("", -1, 6), new Among("U", 0, 2),
 				new Among("Y", 0, 1), new Among("\u00E4", 0, 3),
 				new Among("\u00F6", 0, 4), new Among("\u00FC", 0, 5)
 			],
@@ -63,7 +66,7 @@ let stemmer = (function () {
 		}
 
 		function r_prelude() {
-			var v_1 = sbp.cursor,
+			let v_1 = sbp.cursor,
 				v_2, v_3, v_4, v_5;
 			while (true) {
 				v_2 = sbp.cursor;
@@ -117,7 +120,7 @@ let stemmer = (function () {
 		function r_mark_regions() {
 			I_p1 = sbp.limit;
 			I_p2 = I_p1;
-			var c = sbp.cursor + 3;
+			let c = sbp.cursor + 3;
 			if (0 <= c && c <= sbp.limit) {
 				I_x = c;
 				if (!habr2()) {
@@ -131,7 +134,7 @@ let stemmer = (function () {
 		}
 
 		function r_postlude() {
-			var among_var, v_1;
+			let among_var, v_1;
 			while (true) {
 				v_1 = sbp.cursor;
 				sbp.bra = v_1;
@@ -171,7 +174,7 @@ let stemmer = (function () {
 		}
 
 		function r_standard_suffix() {
-			var among_var, v_1 = sbp.limit - sbp.cursor,
+			let among_var, v_1 = sbp.limit - sbp.cursor,
 				v_2, v_3, v_4;
 			sbp.ket = sbp.cursor;
 			among_var = sbp.find_among_b(a_1, 7);
@@ -210,7 +213,7 @@ let stemmer = (function () {
 							break;
 						case 2:
 							if (sbp.in_grouping_b(g_st_ending, 98, 116)) {
-								var c = sbp.cursor - 3;
+								let c = sbp.cursor - 3;
 								if (sbp.limit_backward <= c && c <= sbp.limit) {
 									sbp.cursor = c;
 									sbp.slice_del();
@@ -266,7 +269,7 @@ let stemmer = (function () {
 							among_var = sbp.find_among_b(a_3, 2);
 							if (among_var) {
 								sbp.bra = sbp.cursor;
-								if (r_R2() && among_var == 1)
+								if (r_R2() && among_var === 1)
 									sbp.slice_del();
 							}
 							break;
@@ -276,7 +279,7 @@ let stemmer = (function () {
 		}
 
 		this.stem = function () {
-			var v_1 = sbp.cursor;
+			let v_1 = sbp.cursor;
 			r_prelude();
 			sbp.cursor = v_1;
 			r_mark_regions();
@@ -291,25 +294,14 @@ let stemmer = (function () {
 
 	/* and return a function that stems a word for the current locale */
 	return function (token) {
-		// for lunr version 2
-		if (typeof token.update === "function") {
-			return token.update(function (word) {
-				st.setCurrent(word);
-				st.stem();
-				return st.getCurrent();
-			})
-		} else { // for lunr version <= 1
-			st.setCurrent(token);
-			st.stem();
-			return st.getCurrent();
-		}
+		st.setCurrent(token);
+		st.stem();return st.getCurrent();
 	}
 })();
 
 tkz.add('stemmer-de', stemmer);
 
-let stopWordFilter = LanguageSupport.generateStopWordFilter(["aber", "alle", "allem", "allen", "aller", "alles", "als", "also", "am", "an", "ander", "andere", "anderem", "anderen", "anderer", "anderes", "anderm", "andern", "anderr", "anders", "auch", "auf", "aus", "bei", "bin", "bis", "bist", "da", "damit", "dann", "das", "dasselbe", "dazu", "daß", "dein", "deine", "deinem", "deinen", "deiner", "deines", "dem", "demselben", "den", "denn", "denselben", "der", "derer", "derselbe", "derselben", "des", "desselben", "dessen", "dich", "die", "dies", "diese", "dieselbe", "dieselben", "diesem", "diesen", "dieser", "dieses", "dir", "doch", "dort", "du", "durch", "ein", "eine", "einem", "einen", "einer", "eines", "einig", "einige", "einigem", "einigen", "einiger", "einiges", "einmal", "er", "es", "etwas", "euch", "euer", "eure", "eurem", "euren", "eurer", "eures", "für", "gegen", "gewesen", "hab", "habe", "haben", "hat", "hatte", "hatten", "hier", "hin", "hinter", "ich", "ihm", "ihn", "ihnen", "ihr", "ihre", "ihrem", "ihren", "ihrer", "ihres", "im", "in", "indem", "ins", "ist", "jede", "jedem", "jeden", "jeder", "jedes", "jene", "jenem", "jenen", "jener", "jenes", "jetzt", "kann", "kein", "keine", "keinem", "keinen", "keiner", "keines", "können", "könnte", "machen", "man", "manche", "manchem", "manchen", "mancher", "manches", "mein", "meine", "meinem", "meinen", "meiner", "meines", "mich", "mir", "mit", "muss", "musste", "nach", "nicht", "nichts", "noch", "nun", "nur", "ob", "oder", "ohne", "sehr", "sein", "seine", "seinem", "seinen", "seiner", "seines", "selbst", "sich", "sie", "sind", "so", "solche", "solchem", "solchen", "solcher", "solches", "soll", "sollte", "sondern", "sonst", "um", "und", "uns", "unse", "unsem", "unsen", "unser", "unses", "unter", "viel", "vom", "von", "vor", "war", "waren", "warst", "was", "weg", "weil", "weiter", "welche", "welchem", "welchen", "welcher", "welches", "wenn", "werde", "werden", "wie", "wieder", "will", "wir", "wird", "wirst", "wo", "wollen", "wollte", "während", "würde", "würden", "zu", "zum", "zur", "zwar", "zwischen", "über"]);
-
+let stopWordFilter = generateStopWordFilter(["aber", "alle", "allem", "allen", "aller", "alles", "als", "also", "am", "an", "ander", "andere", "anderem", "anderen", "anderer", "anderes", "anderm", "andern", "anderr", "anders", "auch", "auf", "aus", "bei", "bin", "bis", "bist", "da", "damit", "dann", "das", "dasselbe", "dazu", "daß", "dein", "deine", "deinem", "deinen", "deiner", "deines", "dem", "demselben", "den", "denn", "denselben", "der", "derer", "derselbe", "derselben", "des", "desselben", "dessen", "dich", "die", "dies", "diese", "dieselbe", "dieselben", "diesem", "diesen", "dieser", "dieses", "dir", "doch", "dort", "du", "durch", "ein", "eine", "einem", "einen", "einer", "eines", "einig", "einige", "einigem", "einigen", "einiger", "einiges", "einmal", "er", "es", "etwas", "euch", "euer", "eure", "eurem", "euren", "eurer", "eures", "für", "gegen", "gewesen", "hab", "habe", "haben", "hat", "hatte", "hatten", "hier", "hin", "hinter", "ich", "ihm", "ihn", "ihnen", "ihr", "ihre", "ihrem", "ihren", "ihrer", "ihres", "im", "in", "indem", "ins", "ist", "jede", "jedem", "jeden", "jeder", "jedes", "jene", "jenem", "jenen", "jener", "jenes", "jetzt", "kann", "kein", "keine", "keinem", "keinen", "keiner", "keines", "können", "könnte", "machen", "man", "manche", "manchem", "manchen", "mancher", "manches", "mein", "meine", "meinem", "meinen", "meiner", "meines", "mich", "mir", "mit", "muss", "musste", "nach", "nicht", "nichts", "noch", "nun", "nur", "ob", "oder", "ohne", "sehr", "sein", "seine", "seinem", "seinen", "seiner", "seines", "selbst", "sich", "sie", "sind", "so", "solche", "solchem", "solchen", "solcher", "solches", "soll", "sollte", "sondern", "sonst", "um", "und", "uns", "unse", "unsem", "unsen", "unser", "unses", "unter", "viel", "vom", "von", "vor", "war", "waren", "warst", "was", "weg", "weil", "weiter", "welche", "welchem", "welchen", "welcher", "welches", "wenn", "werde", "werden", "wie", "wieder", "will", "wir", "wird", "wirst", "wo", "wollen", "wollte", "während", "würde", "würden", "zu", "zum", "zur", "zwar", "zwischen", "über"]);
 tkz.add('stopWordFilter-de', stopWordFilter);
 
-export {tkz};
+export {tkz as DE};

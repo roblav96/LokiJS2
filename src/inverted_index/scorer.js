@@ -9,7 +9,7 @@ export class Scorer {
 	}
 
 	prepare(fieldName, boost, termIdx, doScoring, docResults = {}, term = null) {
-		if (termIdx == null || !termIdx.hasOwnProperty('docs')) {
+		if (termIdx === null || !termIdx.hasOwnProperty('docs')) {
 			return null;
 		}
 
@@ -109,6 +109,7 @@ export class Scorer {
 
 	/**
 	 * Returns the idf by either calculate it or use a cached one.
+	 * @param {string} fieldName - the name of the field
 	 * @param {number} docFreq - the doc frequency of the term
 	 * @returns {number} the idf
 	 * @private

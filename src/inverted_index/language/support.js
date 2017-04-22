@@ -1,14 +1,15 @@
-export class LanguageSupport {
+/*
+ * From MihaiValentin/lunr-languages.
+ * Last update from 04/16/2017 - 19af41fb9bd644d9081ad274f96f700b21464290
+ */
+export function generateTrimmer(wordCharacters) {
+	const regex = new RegExp("^[^" + wordCharacters + "]+|[^" + wordCharacters + "]+$", "g");
+	return (token) => token.replace(regex, '');
+}
 
-	static generateTrimmer(wordCharacters) {
-		const regex = new RegExp("^[^" + wordCharacters + "]+|[^" + wordCharacters + "]+$", "g");
-		return (token) => token.replace(regex, '');
-	}
-
-	static generateStopWordFilter(stopWords) {
-		const words = new Set(stopWords);
-		return (token) => words.has(token) ? "" : token;
-	}
+export function generateStopWordFilter(stopWords) {
+	const words = new Set(stopWords);
+	return (token) => words.has(token) ? "" : token;
 }
 
 export class Among {
