@@ -101,6 +101,8 @@ export class TermsQuery extends BaseQuery {
  *
  * To escape a wildcard character, use _\_ (backslash), e.g. \?.
  *
+ * * To enable scoring for wildcard queries, use {@link WildcardQuery#enableScoring}.
+ *
  * See also [Lucene#WildcardQuery]{@link https://lucene.apache.org/core/6_4_0/core/org/apache/lucene/search/WildcardQuery.html}
  * and [Elasticsearch#WildcardQuery]{@link https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-wildcard-query.html}.
  *
@@ -124,6 +126,16 @@ export class WildcardQuery extends BaseQuery {
 		this._data.field = Utils.asString(field);
 		this._data.value = Utils.asString(wildcard);
 	}
+
+	/**
+	 * This flag enables scoring for wildcard results, similar to {@link TermQuery}.
+	 * @param {boolean} enable - flag to enable or disable scoring
+	 * @return {WildcardQuery}
+	 */
+	enableScoring(enable) {
+		this._data.enable_scoring = Utils.asBoolean(enable);
+		return this;
+	}
 }
 
 /**
@@ -134,7 +146,7 @@ export class WildcardQuery extends BaseQuery {
  * The edit distance is the minimum number of an insertion, deletion or substitution of a single character
  * or a transposition of two adjacent characters.
  *
- * * To set the maximal allowed edit distance, use {@link FuzzyQuery#fuzziness} (default is 2).
+ * * To set the maximal allowed edit distance, use {@link FuzzyQuery#fuzziness} (default is AUTO).
  * * To set the initial word length, which should ignored for fuzziness, use {@link FuzzyQuery#prefixLength}.
  *
  * See also [Lucene#FuzzyQuery]{@link https://lucene.apache.org/core/6_4_0/core/org/apache/lucene/search/FuzzyQuery.html}
@@ -162,12 +174,18 @@ export class FuzzyQuery extends BaseQuery {
 
 	/**
 	 * Sets the maximal allowed fuzziness.
-	 * @param {number} fuzziness - the fuzziness
+	 * @param {number|string} fuzziness - the edit distance as number or AUTO
+	 *
+	 * AUTO generates an edit distance based on the length of the term:
+	 * * 0..2 -> must match exactly
+	 * * 3..5 -> one edit allowed
+	 * * >5 two edits allowed
+	 *
 	 * @return {FuzzyQuery} - object itself for cascading
 	 */
 	fuzziness(fuzziness) {
-		if (!Utils.isNumber(fuzziness) || fuzziness < 0) {
-			throw TypeError("Fuzziness must be a positive number.");
+		if ((!Utils.isString(fuzziness) || fuzziness !== "AUTO") && (!Utils.isNumber(fuzziness) || fuzziness < 0)) {
+			throw TypeError("Fuzziness must be a positive number or AUTO.");
 		}
 		this._data.fuzziness = fuzziness;
 		return this;
@@ -190,6 +208,8 @@ export class FuzzyQuery extends BaseQuery {
 /**
  * A query which matches documents containing the prefix of a term inside a field.
  *
+ * * To enable scoring for wildcard queries, use {@link WildcardQuery#enableScoring}.
+ *
  * See also [Lucene#PrefixQuery]{@link https://lucene.apache.org/core/6_4_0/core/org/apache/lucene/search/PrefixQuery.html}
  * and [Elasticsearch#MatchQuery]{@link https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-prefix-query.html}
  *
@@ -209,6 +229,16 @@ export class PrefixQuery extends BaseQuery {
 		super("prefix", data);
 		this._data.field = Utils.asString(field);
 		this._data.value = Utils.asString(prefix);
+	}
+
+	/**
+	 * This flag enables scoring for wildcard results, similar to {@link TermQuery}.
+	 * @param {boolean} enable - flag to enable or disable scoring
+	 * @return {PrefixQuery}
+	 */
+	enableScoring(enable) {
+		this._data.enable_scoring = Utils.asBoolean(enable);
+		return this;
 	}
 }
 
@@ -305,10 +335,19 @@ export class MatchQuery extends BaseQuery {
 
 	/**
 	 * Sets the maximal allowed fuzziness.
-	 * @param {number} fuzziness - the fuzziness
-	 * @return {MatchQuery} object itself for cascading
+	 * @param {number|string} fuzziness - the edit distance as number or AUTO
+	 *
+	 * AUTO generates an edit distance based on the length of the term:
+	 * * 0..2 -> must match exactly
+	 * * 3..5 -> one edit allowed
+	 * * >5 two edits allowed
+	 *
+	 * @return {MatchQuery} - object itself for cascading
 	 */
 	fuzziness(fuzziness) {
+		if (!Utils.isString(fuzziness) || fuzziness !== "AUTO") {
+			throw TypeError("Fuzziness can only have AUTO as string parameter.");
+		}
 		if (!Utils.isNumber(fuzziness) || fuzziness < 0) {
 			throw TypeError("Fuzziness must be a positive number.");
 		}
@@ -597,11 +636,11 @@ export class QueryBuilder {
 
 	/**
 	 * The query performs a final scoring over all scored sub queries and rank documents by there relevant.
-	 * @param {boolean} enabled - flag to enable or disable final scoring
+	 * @param {boolean} enable - flag to enable or disable final scoring
 	 * @return {QueryBuilder}
 	 */
-	enableFinalScoring(enabled) {
-		this._data.final_scoring = Utils.asBoolean(enabled);
+	enableFinalScoring(enable) {
+		this._data.final_scoring = Utils.asBoolean(enable);
 		return this;
 	}
 

@@ -32,11 +32,9 @@ export class Scorer {
 					term: term
 				});
 			} else {
-				// TODO: Maybe only 1 constant store per document
-				docResults[docId].push({
-					type: "constant", value: 1, boost: boost, fieldName: fieldName,
-					term: term
-				});
+				docResults[docId] = [{
+					type: "constant", value: 1, boost: boost, fieldName: fieldName
+				}]
 			}
 		}
 
@@ -66,29 +64,28 @@ export class Scorer {
 				let res = 0;
 				switch (docResult.type) {
 					case 'BM25': {
-						let fieldLength = this._invIdxs[docResult.fieldName].documentStore[docId].fieldLength /
-							Math.pow(this._invIdxs[docResult.fieldName].documentStore[docId].boost, 2);
+						let fieldLength = this._calculateFieldLength(this._invIdxs[docResult.fieldName].documentStore[docId]);
 						let avgFieldLength = this._avgFieldLength(docResult.fieldName);
 						let tfNorm = ((k1 + 1) * docResult.tf) / (k1 * ((1 - b)
 							+ b * (fieldLength / avgFieldLength)) + docResult.tf);
 						res = docResult.idf * tfNorm * docResult.boost;
-						/*console.log(
-							docId + ":" + docResult.fieldName + ":" + docResult.term + " = " + res,
-							"\n\ttype: BM25",
-							"\n\tboost: " + docResult.boost,
-							"\n\tidf : " + docResult.idf,
-							"\n\ttfNorm : " + tfNorm,
-							"\n\ttf : " + docResult.tf,
-							"\n\tavg : " + avgFieldLength,
-							"\n\tfl : " + fieldLength);*/
+						// console.log(
+						// 	docId + ":" + docResult.fieldName + ":" + docResult.term + " = " + res,
+						// 	"\n\ttype: BM25",
+						// 	"\n\tboost: " + docResult.boost,
+						// 	"\n\tidf : " + docResult.idf,
+						// 	"\n\ttfNorm : " + tfNorm,
+						// 	"\n\ttf : " + docResult.tf,
+						// 	"\n\tavg : " + avgFieldLength,
+						// 	"\n\tfl : " + fieldLength);
 						break;
 					}
 					case 'constant':
 						res = docResult.value * docResult.boost;
 						/*console.log(
-							"Constant: " + res,
-							"\n\tboost: " + docResult.boost,
-							"\n\tvalue : " + docResult.value);*/
+						 "Constant: " + res,
+						 "\n\tboost: " + docResult.boost,
+						 "\n\tvalue : " + docResult.value);*/
 						break;
 				}
 				docScore += res;
@@ -97,6 +94,10 @@ export class Scorer {
 			result[docId] = docScore;
 		}
 		return result;
+	}
+
+	_calculateFieldLength(docInfo) {
+		return docInfo.fieldLength / Math.pow(docInfo.boost, 2);
 	}
 
 	_getCache(fieldName) {

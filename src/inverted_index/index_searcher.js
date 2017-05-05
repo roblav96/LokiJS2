@@ -32,6 +32,7 @@ export class IndexSearcher {
 		let docResults = {};
 		let boost = query.hasOwnProperty('boost') ? query.boost : 1;
 		let fieldName = query.hasOwnProperty("field") ? query.field : null;
+		let enableScoring = query.hasOwnProperty("enable_scoring") ? query.enable_scoring : false;
 
 		let root = null;
 		let tokenizer = null;
@@ -111,7 +112,7 @@ export class IndexSearcher {
 				let w = new WildcardSearch(query);
 				let a = w.search(root);
 				for (let i = 0; i < a.length; i++) {
-					this._scorer.prepare(fieldName, boost, a[i].index, doScoring, docResults, a[i].term);
+					this._scorer.prepare(fieldName, boost, a[i].index, doScoring && enableScoring, docResults, a[i].term);
 				}
 				break;
 			}
@@ -122,8 +123,8 @@ export class IndexSearcher {
 				break;
 			}
 			case "constant_score": {
-				docResults = this._getAll(query.filter.values, false);
-				let docs = Object.keys(docResults);
+				let tmpDocResults = this._getAll(query.filter.values, false);
+				let docs = Object.keys(tmpDocResults);
 				// Add to each document a constant score.
 				for (let i = 0; i < docs.length; i++) {
 					this._scorer.scoreConstant(boost, docs[i], docResults);
@@ -136,7 +137,7 @@ export class IndexSearcher {
 					termIdx = InvertedIndex.extendTermIndex(termIdx);
 				}
 				for (let i = 0; i < termIdx.length; i++) {
-					this._scorer.prepare(fieldName, boost, termIdx[i].index, doScoring, docResults, query.value + termIdx[i].term);
+					this._scorer.prepare(fieldName, boost, termIdx[i].index, doScoring && enableScoring, docResults, query.value + termIdx[i].term);
 				}
 				break;
 			}
@@ -238,7 +239,16 @@ export class IndexSearcher {
 class FuzzySearch {
 	constructor(query) {
 		this._fuzzy = query.value;
-		this._fuzziness = query.hasOwnProperty('fuzziness') ? query.fuzziness : 2;
+		this._fuzziness = query.hasOwnProperty('fuzziness') ? query.fuzziness : "AUTO";
+		if (this._fuzziness === "AUTO") {
+			if (this._fuzzy.length <= 2) {
+				this._fuzziness = 0;
+			} else if (this._fuzzy.length <= 5) {
+				this._fuzziness = 1;
+			} else {
+				this._fuzziness = 2;
+			}
+		}
 		this._prefixLength = query.hasOwnProperty('prefix_length') ? query.prefix_length : 2;
 	}
 
@@ -310,6 +320,10 @@ class FuzzySearch {
 		if (start === null) {
 			return [];
 		}
+		if (fuzzy.length === 0) {
+			// Return if prefixLength == this._fuzzy length.
+			return [{term: this._fuzziness, index: start, boost: 1}];
+		}
 
 		let similarTokens = [];
 
@@ -323,9 +337,10 @@ class FuzzySearch {
 			if (root.hasOwnProperty('df') && Math.abs(fuzzy.length - treeTerms.length) <= this._fuzziness) {
 				const distance = this.levenshtein_distance(fuzzy, treeTerms);
 				if (distance <= this._fuzziness) {
+					let term = pre + treeTerms;
 					// Calculate boost.
-					let boost = 1 - distance / (pre.length + treeTerms.length);
-					similarTokens.push({term: pre + treeTerms, index: root, boost: boost});
+					let boost = 1 - distance / Math.min(term.length, this._fuzzy.length);
+					similarTokens.push({term: term, index: root, boost: boost});
 				}
 			}
 
