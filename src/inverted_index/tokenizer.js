@@ -7,14 +7,11 @@ import * as Utils from './utils.js';
  * @private
  */
 function defaultSplitter(str) {
-	let trimmedTokens = [];
-	let tokens = str.split(/[\s\-]+/);
+	let tokens = str.split(/[^\w]+/);
 	for (let i = 0; i < tokens.length; i++) {
-		if (tokens[i] !== '') {
-			trimmedTokens.push(tokens[i].toLowerCase());
-		}
+		tokens[i] = tokens[i].toLowerCase();
 	}
-	return trimmedTokens;
+	return tokens;
 }
 
 /**
@@ -169,6 +166,7 @@ export class Tokenizer {
 	 */
 	tokenize(str) {
 		let tokens = this._splitter(str);
+		// Apply each token over the queue functions.
 		for (let i = 0; i < this._queue.length; i++) {
 			let newTokens = [];
 			for (let j = 0; j < tokens.length; j++) {
