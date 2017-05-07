@@ -42,7 +42,7 @@ export class FullTextSearch {
 		this._idxSearcher = new IndexSearcher(this._invIdxs, this._docs);
 	}
 
-	addDocument(doc, boosts = {}) {
+	addDocument(doc) {
 		if (!doc.hasOwnProperty('$loki')) {
 			throw new Error('Document is not stored in the collection.');
 		}
@@ -50,8 +50,7 @@ export class FullTextSearch {
 		let fieldNames = Object.keys(doc);
 		for (let i = 0, fieldName; i < fieldNames.length, fieldName = fieldNames[i]; i++) {
 			if (this._invIdxs.hasOwnProperty(fieldName)) {
-				let boost = boosts.hasOwnProperty(fieldName) ? boosts[fieldName] : 1;
-				this._invIdxs[fieldName].insert(doc[fieldName], doc.$loki, boost);
+				this._invIdxs[fieldName].insert(doc[fieldName], doc.$loki);
 			}
 		}
 
@@ -73,9 +72,9 @@ export class FullTextSearch {
 		this.setDirty();
 	}
 
-	updateDocument(doc, boosts = {}) {
+	updateDocument(doc) {
 		this.removeDocument(doc);
-		this.addDocument(doc, boosts);
+		this.addDocument(doc);
 	}
 
 	search(query) {

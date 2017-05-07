@@ -5,8 +5,6 @@ describe('inverted index', function () {
 
 	let ii = new InvertedIndex();
 
-	// TODO: Better run value check.
-
 	let field1 = "Hello world, how are you today?!";
 	let field2 = "Well done world...";
 	let field3 = "I am good, and you?";
@@ -33,8 +31,8 @@ describe('inverted index', function () {
 		});
 		ii.insert(field4, 3);
 		ii.tokenizer.remove("bad_tokenizer");
-		ii.insert(field4, 4, 2);
-		ii.insert(field5, 5, 2);
+		ii.insert(field4, 4);
+		ii.insert(field5, 5);
 
 		done();
 	});
@@ -73,13 +71,13 @@ describe('inverted index', function () {
 	it('serialize', function (done) {
 		let ii1 = new InvertedIndex();
 		ii1.insert(field1, 1);
-		ii1.insert(field2, 2, 2.5);
-		ii1.insert(field3, 3, 0.5);
+		ii1.insert(field2, 2);
+		ii1.insert(field3, 3);
 
 		let ii2 = new InvertedIndex();
 		ii2.insert(field1, 1);
-		ii2.insert(field2, 2, 2.5);
-		ii2.insert(field3, 3, 0.5);
+		ii2.insert(field2, 2);
+		ii2.insert(field3, 3);
 		ii2.insert(field4, 4);
 
 		let ii3 = new InvertedIndex();

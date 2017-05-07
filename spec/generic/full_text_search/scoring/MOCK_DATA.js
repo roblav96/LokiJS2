@@ -1,4 +1,4 @@
-module.exports = [
+export const DATA = [
 	{
 		"id": 1,
 		"msg": "varius nulla facilisi cras non velit nec nisi vulputate nonummy maecenas tincidunt lacus at velit vivamus vel nulla eget eros elementum pellentesque quisque porta volutpat erat quisque erat eros viverra eget congue eget semper rutrum nulla nunc purus"

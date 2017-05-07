@@ -47,9 +47,8 @@ export class InvertedIndex {
 	 * Adds defined fields of a document to the inverted index.
 	 * @param {object} field - the field to add
 	 * @param {number} docId - the doc id of the field
-	 * @param {number} [boost=1] - object with field (key) specific boost (value)
 	 */
-	insert(field, docId, boost = 1) {
+	insert(field, docId) {
 		if (this._docStore.hasOwnProperty(docId)) {
 			throw Error('Field already added.');
 		}
@@ -62,7 +61,7 @@ export class InvertedIndex {
 		this._totalFieldLength += fieldTokens.length;
 
 		let termRefs = [];
-		this._docStore[docId] = {fieldLength: fieldTokens.length, boost: boost};
+		this._docStore[docId] = {fieldLength: fieldTokens.length};
 		Object.defineProperties(this._docStore[docId], {
 			termRefs: {enumerable: false, configurable: true, writable: true, value: termRefs}
 		});

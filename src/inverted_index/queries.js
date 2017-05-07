@@ -345,11 +345,8 @@ export class MatchQuery extends BaseQuery {
 	 * @return {MatchQuery} - object itself for cascading
 	 */
 	fuzziness(fuzziness) {
-		if (!Utils.isString(fuzziness) || fuzziness !== "AUTO") {
-			throw TypeError("Fuzziness can only have AUTO as string parameter.");
-		}
-		if (!Utils.isNumber(fuzziness) || fuzziness < 0) {
-			throw TypeError("Fuzziness must be a positive number.");
+		if (!(Utils.isString(fuzziness) && fuzziness === "AUTO") && !(Utils.isNumber(fuzziness) && fuzziness >= 0)) {
+			throw TypeError("Fuzziness must be a positive number or AUTO.");
 		}
 		this._data.fuzziness = fuzziness;
 		return this;

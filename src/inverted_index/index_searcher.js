@@ -135,9 +135,9 @@ export class IndexSearcher {
 				let termIdx = InvertedIndex.getTermIndex(query.value, root);
 				if (termIdx !== null) {
 					termIdx = InvertedIndex.extendTermIndex(termIdx);
-				}
-				for (let i = 0; i < termIdx.length; i++) {
-					this._scorer.prepare(fieldName, boost, termIdx[i].index, doScoring && enableScoring, docResults, query.value + termIdx[i].term);
+					for (let i = 0; i < termIdx.length; i++) {
+						this._scorer.prepare(fieldName, boost, termIdx[i].index, doScoring && enableScoring, docResults, query.value + termIdx[i].term);
+					}
 				}
 				break;
 			}
