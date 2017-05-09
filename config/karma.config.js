@@ -4,8 +4,9 @@ module.exports = function (config) {
 	config.set({
 		browsers: ['Chrome'],
 		files: [
-			{pattern: '../spec/**/*.spec.js', watched: false},
-			{pattern: '../spec/**/*.helpers.js', watched: false}
+			{pattern: '../spec/generic/**/*.spec.js', watched: false},
+			{pattern: '../spec/web/**/*.spec.js', watched: false},
+			{pattern: '../spec/**/*.helpers.js', watched: false},
 		],
 
 		// coverage reporter generates the coverage
@@ -14,7 +15,8 @@ module.exports = function (config) {
 		frameworks: ['jasmine', 'jasmine-matchers'],
 
 		preprocessors: {
-			'../spec/**/*.spec.js': ['webpack'],
+			'../spec/generic/**/*.spec.js': ['webpack'],
+			'../spec/web/**/*.spec.js': ['webpack'],
 			'../spec/**/*.helpers.js': ['webpack']
 		},
 

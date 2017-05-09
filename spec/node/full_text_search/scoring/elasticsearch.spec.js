@@ -86,6 +86,7 @@ describe("Compare scoring against elasticsearch", function () {
 			index: INDEX_NAME
 		}).then(create, create);
 
+
 		function create() {
 			// Add documents.
 			return client.indices.create({
