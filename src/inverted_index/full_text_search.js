@@ -5,8 +5,12 @@ import * as Utils from './utils.js';
 
 export class FullTextSearch {
 	/**
-	 *
-	 * @param options
+	 * Initialize the full text search for the given fields.
+	 * @param {object[]} fields - the field options
+	 * @param {string} fields.name - the name of the field
+	 * @param {boolean=true} fields.store - flag to indicate if the full text search should be stored on serialization or
+	 *	rebuild on deserialization
+	 *@param {Tokenizer=Tokenizer} fields.tokenizer - the tokenizer of the field
 	 */
 	constructor(fields) {
 		if (fields === undefined) {

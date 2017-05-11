@@ -1,8 +1,9 @@
 /* global describe, it, expect */
-import {FullTextSearch} from '../../../../src/inverted_index/full_text_search';
-import {Client} from 'elasticsearch';
 import {DATA} from './MOCK_DATA'
 import {QUERIES} from './QUERIES'
+import {FullTextSearch} from '../../../../src/inverted_index/full_text_search';
+import {Tokenizer} from  '../../../../src/inverted_index/tokenizer';
+import {Client} from 'elasticsearch';
 
 const INDEX_NAME = "test_index";
 const INDEX_TYPE = "MockUp";
@@ -48,6 +49,9 @@ describe("Compare scoring against elasticsearch", function () {
 				(() => {
 					// Compare hit length.
 					expect(esHits.length).toEqual(ftsHitDocs.length);
+					if (esHits.length !== ftsHitDocs.length) {
+						return;
+					}
 
 					// Check if esHits should be empty.
 					if (query.hasOwnProperty("empty") && query.empty === true) {
@@ -59,6 +63,8 @@ describe("Compare scoring against elasticsearch", function () {
 					}
 
 					for (let j = 0; j < ftsHitDocs.length; j++) {
+						if (esHits[j] === undefined) {
+						}
 						let esID = esHits[j]._id;
 						expect(ftsHits).toHaveMember(esID);
 						if (!ftsHits.hasOwnProperty(esID)) {
@@ -68,7 +74,10 @@ describe("Compare scoring against elasticsearch", function () {
 						let esScore = Math.round(esHits[j]._score * COMPARE_PRECISION) / COMPARE_PRECISION;
 						let ftsScore = Math.round(ftsHits[esID] * COMPARE_PRECISION) / COMPARE_PRECISION;
 
-						expect(esScore).toEqual(ftsScore, esHits[j]._explanation, " !==", "TODO");
+						expect(esScore).toEqual(ftsScore);
+						if (esScore !== ftsScore) {
+							console.error(esID);
+						}
 					}
 				})();
 				done();
@@ -97,7 +106,18 @@ describe("Compare scoring against elasticsearch", function () {
 							properties: {
 								[FIELD_NAME_1]: {
 									type: "text",
-									index_options: "freqs"
+									index_options: "freqs",
+									analyzer: "my_analyzer"
+								},
+							}
+						}
+					},
+					settings: {
+						analysis: {
+							analyzer: {
+								my_analyzer: {
+									type: "standard",
+									stopwords: ["habitasse", "morbi"]
 								}
 							}
 						}
@@ -118,8 +138,12 @@ describe("Compare scoring against elasticsearch", function () {
 	}
 
 	function initFTS() {
+		let tkz = new Tokenizer();
+		tkz.add("stop-word", (token) => (token !== "habitasse" && token !== "morbi") ? token : "");
+
 		let fts = new FullTextSearch([{
-			name: FIELD_NAME_1
+			name: FIELD_NAME_1,
+			tokenizer: tkz
 		}]);
 
 		// Add documents.

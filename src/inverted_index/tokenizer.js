@@ -162,7 +162,7 @@ export class Tokenizer {
 	 * Tokenizes a string into tokens.
 	 * @param {string} str - the string
 	 * @return {string[]} the tokens
-	 * @protected
+	 * @private
 	 */
 	tokenize(str) {
 		let tokens = this._splitter(str);
@@ -183,7 +183,7 @@ export class Tokenizer {
 	/**
 	 * Serializes the tokenizer by returning the labels of the used functions.
 	 * @returns {{splitter: string?, tokenizers: string[]}} - the serialization
-	 * @protected
+	 * @private
 	 */
 	toJSON() {
 		let serialized = {tokenizers: []};
@@ -201,6 +201,7 @@ export class Tokenizer {
 	 * @param {{splitter: string, tokenizers: string[]}} serialized - the serialized labels
 	 * @param {Object.<string, function>|Tokenizer} funcTok - the depending functions with labels
 	 * 	or an equivalent tokenizer
+	 * @private
 	 */
 	static fromJSON(serialized, funcTok) {
 		let tokenizer = new Tokenizer();

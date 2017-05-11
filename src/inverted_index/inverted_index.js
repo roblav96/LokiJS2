@@ -242,6 +242,7 @@ export class InvertedIndex {
 		} else {
 			return {
 				_tokenizer: this._tokenizer,
+				_store: false
 			};
 		}
 	}

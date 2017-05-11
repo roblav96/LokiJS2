@@ -305,5 +305,15 @@ export const QUERIES = [
 				]
 			}
 		}
-	}
+	},
+	{
+		fts: new QB()
+			.match(FIELD_NAME_1, "orci habitasse eget")
+			.build(),
+		es: {
+			match: {
+				[FIELD_NAME_1]: "orci habitasse eget"
+			}
+		}
+	},
 ];

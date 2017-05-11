@@ -64,11 +64,12 @@ export class Scorer {
 				let res = 0;
 				switch (docResult.type) {
 					case 'BM25': {
+						let tf = docResult.tf;
 						let fieldLength = Scorer._calculateFieldLength(this._invIdxs[docResult.fieldName].documentStore[docId]
 							.fieldLength);
 						let avgFieldLength = this._avgFieldLength(docResult.fieldName);
-						let tfNorm = ((k1 + 1) * docResult.tf) / (k1 * ((1 - b)
-							+ b * (fieldLength / avgFieldLength)) + docResult.tf);
+						// tfNorm, computed as (freq * (k1 + 1)) / (freq + k1 * (1 - b + b * fieldLength / avgFieldLength)) from
+						let tfNorm = (tf * (k1 + 1)) / (tf + k1 * (1 - b + b * (fieldLength / avgFieldLength)));
 						res = docResult.idf * tfNorm * docResult.boost;
 						// console.log(
 						// 	docId + ":" + docResult.fieldName + ":" + docResult.term + " = " + res,
@@ -76,7 +77,7 @@ export class Scorer {
 						// 	"\n\tboost: " + docResult.boost,
 						// 	"\n\tidf : " + docResult.idf,
 						// 	"\n\ttfNorm : " + tfNorm,
-						// 	"\n\ttf : " + docResult.tf,
+						// 	"\n\ttf : " + tf,
 						// 	"\n\tavg : " + avgFieldLength,
 						// 	"\n\tfl : " + fieldLength);
 						break;
