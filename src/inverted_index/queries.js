@@ -1,7 +1,5 @@
 /**
  * Query builder
- * todo: Document scoring.
- * todo: Align description.
  */
 import * as Utils from './utils.js';
 
@@ -301,13 +299,20 @@ export class MatchQuery extends BaseQuery {
 	}
 
 	/**
-	 * Controls the amount of minimum matching token queries before a document will be considered.
+	 * Controls the amount of minimum matching sub queries before a document will be considered.
 	 * @param {number} minShouldMatch - number of minimum matching sub queries
+	 *   minShouldMatch >= 1: Indicates a fixed value regardless of the number of sub queries.
+	 *   minShouldMatch <= -1: Indicates that the number of sub queries, minus this number should be mandatory.
+	 *   minShouldMatch < 0: Indicates that this percent of the total number of sub queries can be missing.
+	 *     The number computed from the percentage is rounded down, before being subtracted from the total to determine
+	 *     the minimum.
+	 *   minShouldMatch < 1: Indicates that this percent of the total number of sub queries are necessary.
+	 *     The number computed from the percentage is rounded down and used as the minimum.
 	 * @return {MatchQuery} object itself for cascading
 	 */
 	minimumShouldMatch(minShouldMatch) {
-		if (!Utils.isNumber(minShouldMatch) || minShouldMatch < 0) {
-			throw TypeError("Value for minimum should match must be a positive number.");
+		if (!Utils.isNumber(minShouldMatch)) {
+			throw TypeError("Minimum should match must be a number or a string.");
 		}
 		if (this._data.hasOwnProperty("operator") && this._data.operator === "and") {
 			throw SyntaxError("Match query with \"and\" operator does not support minimum should match.");
@@ -595,11 +600,18 @@ export class BoolQuery extends BaseQuery {
 	/**
 	 * Controls the amount of minimum matching sub queries before a document will be considered.
 	 * @param {number} minShouldMatch - number of minimum matching sub queries
+	 *   minShouldMatch >= 1: Indicates a fixed value regardless of the number of sub queries.
+	 *   minShouldMatch <= -1: Indicates that the number of sub queries, minus this number should be mandatory.
+	 *   minShouldMatch < 0: Indicates that this percent of the total number of sub queries can be missing.
+	 *     The number computed from the percentage is rounded down, before being subtracted from the total to determine
+	 *     the minimum.
+	 *   minShouldMatch < 1: Indicates that this percent of the total number of sub queries are necessary.
+	 *     The number computed from the percentage is rounded down and used as the minimum.
 	 * @return {BoolQuery} object itself for cascading
 	 */
 	minimumShouldMatch(minShouldMatch) {
-		if (typeof(minShouldMatch) !== "number" || minShouldMatch < 0) {
-			throw TypeError("Minimum should match must be a number greater than zero.");
+		if (!Utils.isNumber(minShouldMatch)) {
+			throw TypeError("Minimum should match must be a number or a string.");
 		}
 		this._data.minimum_should_match = minShouldMatch;
 		return this;

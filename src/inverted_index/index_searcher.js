@@ -60,9 +60,20 @@ export class IndexSearcher {
 						empty = true;
 					}
 
-					let msm = query.hasOwnProperty("minimum_should_match") ? query.minimum_should_match : 1;
+					let msm = 1;
+					// TODO: Enable percent and ranges.
+					if (query.hasOwnProperty("minimum_should_match")) {
+						msm = query.minimum_should_match;
+						let shouldLength = query.should.values.length;
+						if (msm <= -1) {
+							msm = shouldLength + msm;
+						} else if (msm < 0) {
+							msm = shouldLength - Math.floor(shouldLength * -msm)
+						} else if (msm < 1) {
+							msm = Math.floor(shouldLength * msm);
+						}
+					}
 					// Remove all docs with fewer matches.
-					// TODO: Enable percent, negative values and ranges.
 					let docs = Object.keys(shouldDocs);
 					for (let i = 0, docId; i < docs.length, docId = docs[i]; i++) {
 						if (shouldDocs[docId].length >= msm) {

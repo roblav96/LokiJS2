@@ -106,7 +106,7 @@ describe('query builder', function () {
 		q = new Query.MatchQuery(2, 2).operator("or").minimumShouldMatch(3).build();
 		expect(q).toEqual({type: "match", field: "2", value: "2", operator: "or", minimum_should_match: 3});
 		q = new Query.MatchQuery(1, 1);
-		expect(() => q.minimumShouldMatch(-2)).toThrowErrorOfType("TypeError");
+		expect(() => q.minimumShouldMatch(-2)).not.toThrowErrorOfType("TypeError");
 		expect(() => q.minimumShouldMatch("4")).toThrowErrorOfType("TypeError");
 		expect(() => q.minimumShouldMatch(4)).not.toThrowAnyError();
 		expect(() => q.operator("and")).toThrowErrorOfType("SyntaxError");
@@ -153,7 +153,7 @@ describe('query builder', function () {
 		let q = new Query.BoolQuery().boost(8.5).build();
 		expect(q).toEqual({type: "bool", boost: 8.5});
 
-		expect(() => new Query.BoolQuery().minimumShouldMatch(-1)).toThrowErrorOfType("TypeError");
+		expect(() => new Query.BoolQuery().minimumShouldMatch(-2)).not.toThrowErrorOfType("TypeError");
 		expect(() => new Query.BoolQuery().minimumShouldMatch("123")).toThrowErrorOfType("TypeError");
 		expect(new Query.BoolQuery().minimumShouldMatch(2).build()).toEqual(
 			{type: 'bool', minimum_should_match: 2}

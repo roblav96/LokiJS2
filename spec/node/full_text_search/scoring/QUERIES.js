@@ -257,6 +257,162 @@ export const QUERIES = [
 	{
 		fts: new QB()
 			.bool()
+			.minimumShouldMatch(2)
+			.startShould()
+			.term(FIELD_NAME_1, "ac")
+			.term(FIELD_NAME_1, "enim")
+			.term(FIELD_NAME_1, "est")
+			.endShould()
+			.build(),
+		es: {
+			bool: {
+				should: [
+					{
+						term: {
+							[FIELD_NAME_1]: "ac"
+						}
+					},
+					{
+						term: {
+							[FIELD_NAME_1]: "enim"
+						}
+					},
+					{
+						term: {
+							[FIELD_NAME_1]: "est"
+						}
+					}
+				],
+				minimum_should_match: 2,
+			}
+		}
+	},
+	{
+		fts: new QB()
+			.bool()
+			.minimumShouldMatch(-2)
+			.startShould()
+			.term(FIELD_NAME_1, "ac")
+			.term(FIELD_NAME_1, "enim")
+			.term(FIELD_NAME_1, "est")
+			.endShould()
+			.build(),
+		es: {
+			bool: {
+				should: [
+					{
+						term: {
+							[FIELD_NAME_1]: "ac"
+						}
+					},
+					{
+						term: {
+							[FIELD_NAME_1]: "enim"
+						}
+					},
+					{
+						term: {
+							[FIELD_NAME_1]: "est"
+						}
+					}
+				],
+				minimum_should_match: -2,
+			}
+		}
+	},
+	{
+		fts: new QB()
+			.bool()
+			.minimumShouldMatch(0.75)
+			.startShould()
+			.term(FIELD_NAME_1, "ac")
+			.term(FIELD_NAME_1, "enim")
+			.term(FIELD_NAME_1, "est")
+			.term(FIELD_NAME_1, "at")
+			.term(FIELD_NAME_1, "sed")
+			.endShould()
+			.build(),
+		es: {
+			bool: {
+				should: [
+					{
+						term: {
+							[FIELD_NAME_1]: "ac"
+						}
+					},
+					{
+						term: {
+							[FIELD_NAME_1]: "enim"
+						}
+					},
+					{
+						term: {
+							[FIELD_NAME_1]: "est"
+						}
+					},
+					{
+						term: {
+							[FIELD_NAME_1]: "at"
+						}
+					},
+					{
+						term: {
+							[FIELD_NAME_1]: "sed"
+						}
+					}
+				],
+				minimum_should_match: "75%",
+			}
+		}
+	},
+	{
+		fts: new QB()
+			.bool()
+			.minimumShouldMatch(-0.25)
+			.startShould()
+			.term(FIELD_NAME_1, "ac")
+			.term(FIELD_NAME_1, "enim")
+			.term(FIELD_NAME_1, "est")
+			.term(FIELD_NAME_1, "at")
+			.term(FIELD_NAME_1, "sed")
+			.endShould()
+			.build(),
+		es: {
+			bool: {
+				should: [
+					{
+						term: {
+							[FIELD_NAME_1]: "ac"
+						}
+					},
+					{
+						term: {
+							[FIELD_NAME_1]: "enim"
+						}
+					},
+					{
+						term: {
+							[FIELD_NAME_1]: "est"
+						}
+					},
+					{
+						term: {
+							[FIELD_NAME_1]: "at"
+						}
+					},
+					{
+						term: {
+							[FIELD_NAME_1]: "sed"
+						}
+					}
+				],
+				minimum_should_match: "-25%",
+			}
+		}
+	},
+	{
+		fts: new QB()
+			.bool()
 			.startMust().matchAll().endMust()
 			.startNot().term(FIELD_NAME_1, "ac").endNot()
 			.build(),
@@ -313,6 +469,62 @@ export const QUERIES = [
 		es: {
 			match: {
 				[FIELD_NAME_1]: "orci habitasse eget"
+			}
+		}
+	},
+	{
+		fts: new QB()
+			.match(FIELD_NAME_1, "orci habitasse eget")
+			.operator("and")
+			.build(),
+		es: {
+			match: {
+				[FIELD_NAME_1]: {
+					query: "orci habitasse eget",
+					operator: "and"
+				}
+			}
+		}
+	},
+	{
+		fts: new QB()
+			.match(FIELD_NAME_1, "orca este")
+			.fuzziness("AUTO")
+			.build(),
+		es: {
+			match: {
+				[FIELD_NAME_1]: {
+					query: "orca este",
+					fuzziness: "AUTO"
+				}
+			}
+		}
+	},
+	{
+		fts: new QB()
+			.match(FIELD_NAME_1, "orci est")
+			.operator("and")
+			.build(),
+		es: {
+			match: {
+				[FIELD_NAME_1]: {
+					query: "orci est",
+					operator: "and"
+				}
+			}
+		}
+	},
+	{
+		fts: new QB()
+			.match(FIELD_NAME_1, "orci est in")
+			.minimumShouldMatch(0.33)
+			.build(),
+		es: {
+			match: {
+				[FIELD_NAME_1]: {
+					query: "orci est in",
+					minimum_should_match: "33%"
+				}
 			}
 		}
 	},
