@@ -58,7 +58,7 @@ export class LokiIndexedAdapter {
 	 * // LOAD
 	 * var idbAdapter = new LokiIndexedAdapter("finance");
 	 * var db = new loki("test", { adapter: idbAdapter });
-	 *   db.loadDatabase(function(result) {
+	 *   db.base(function(result) {
 	 *   console.log("done");
 	 * });
 	 *
@@ -69,21 +69,20 @@ export class LokiIndexedAdapter {
 	loadDatabase(dbname) {
 		var appName = this.app;
 		var adapter = this;
+		var self = this;
 
 		// lazy open/create db reference so dont -need- callback in constructor
 		if (this.catalog === null || this.catalog.db === null) {
 			return new Promise(function(resolve) {
 				adapter.catalog = new LokiCatalog(function(cat) {
 					adapter.catalog = cat;
-
 					resolve(adapter.loadDatabase(dbname));
 				});
 			});
 		}
-
 		// lookup up db string in AKV db
 		return new Promise(function(resolve) {
-			this.catalog.getAppKey(appName, dbname, function(result) {
+			self.catalog.getAppKey(appName, dbname, function(result) {
 				if (result.id === 0) {
 					resolve();
 					return;
@@ -172,6 +171,7 @@ export class LokiIndexedAdapter {
 	deleteDatabase(dbname) {
 		var appName = this.app;
 		var adapter = this;
+		var self = this;
 
 		// lazy open/create db reference and pass callback ahead
 		if (this.catalog === null || this.catalog.db === null) {
@@ -186,7 +186,7 @@ export class LokiIndexedAdapter {
 
 		// catalog was already initialized, so just lookup object and delete by id
 		return new Promise(function(resolve) {
-			this.catalog.getAppKey(appName, dbname, function(result) {
+			self.catalog.getAppKey(appName, dbname, function(result) {
 				var id = result.id;
 
 				if (id !== 0) {

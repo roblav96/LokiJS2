@@ -4,7 +4,7 @@ import {ExactIndex} from './exact_index';
 import {Resultset} from './resultset';
 import {DynamicView} from './dynamic_view';
 import {clone, cloneObjectArray} from './clone';
-import {ltHelper, gtHelper} from './helper';
+import {ltHelper, gtHelper, aeqHelper} from './helper';
 import {Loki} from './loki';
 
 /*
@@ -44,7 +44,7 @@ function average(array) {
 
 function standardDeviation(values) {
 	var avg = average(values);
-	var squareDiffs = values.map(function(value) {
+	var squareDiffs = values.map(function (value) {
 		var diff = value - avg;
 		var sqrDiff = diff * diff;
 		return sqrDiff;
@@ -83,6 +83,7 @@ function deepProperty(obj, property, isDeep) {
  * @param {boolean} options.disableChangesApi - default is true
  * @param {boolean} options.autoupdate - use Object.observe to update objects automatically (default: false)
  * @param {boolean} options.clone - specify whether inserts and queries clone to/from user
+ * @param {boolean} options.serializableIndices  - ensures indexed property values are serializable (default: true)
  * @param {string} options.cloneMethod - 'parse-stringify' (default), 'jquery-extend-deep', 'shallow'
  * @param {int} options.ttlInterval - time interval for clearing out 'aged' documents; not set by default.
  * @see {@link Loki#addCollection} for normal creation of collections
@@ -173,6 +174,11 @@ export class Collection extends LokiEventEmitter {
 
 		// option to observe objects and update them automatically, ignored if Object.observe is not supported
 		this.autoupdate = options.hasOwnProperty('autoupdate') ? options.autoupdate : false;
+
+		// by default, if you insert a document into a collection with binary indices, if those indexed properties contain
+		// a DateTime we will convert to epoch time format so that (across serializations) its value position will be the
+		// same 'after' serialization as it was 'before'.
+		this.serializableIndices = options.hasOwnProperty('serializableIndices') ? options.serializableIndices : true;
 
 		//option to activate a cleaner daemon - clears "aged" documents at set intervals.
 		this.ttl = {
@@ -275,9 +281,29 @@ export class Collection extends LokiEventEmitter {
 		 * If the changes API is disabled make sure only metadata is added without re-evaluating everytime if the changesApi is enabled
 		 */
 		function insertMeta(obj) {
+			var len, idx;
+
 			if (!obj) {
 				return;
 			}
+
+			// if batch insert
+			if (Array.isArray(obj)) {
+				len = obj.length;
+
+				for (idx = 0; idx < len; idx++) {
+					if (!obj[idx].hasOwnProperty('meta')) {
+						obj[idx].meta = {};
+					}
+
+					obj[idx].meta.created = (new Date()).getTime();
+					obj[idx].meta.revision = 0;
+				}
+
+				return;
+			}
+
+			// single object
 			if (!obj.meta) {
 				obj.meta = {};
 			}
@@ -728,7 +754,12 @@ export class Collection extends LokiEventEmitter {
 			}
 			results.push(obj);
 		}
-		this.emit('insert', doc);
+		// at the 'batch' level, if clone option is true then emitted docs are clones
+		this.emit('insert', results);
+
+		// if clone option is set, clone return values
+		results = this.cloneObjects ? clone(results, this.cloneMethod) : results;
+
 		return results.length === 1 ? results[0] : results;
 	}
 
@@ -764,7 +795,8 @@ export class Collection extends LokiEventEmitter {
 			};
 		}
 
-		// allow pre-insert to modify actual collection reference even if cloning
+		// both 'pre-insert' and 'insert' events are passed internal data reference even when cloning
+		// insert needs internal reference because that is where loki itself listens to add meta
 		if (!bulkInsert) {
 			this.emit('pre-insert', obj);
 		}
@@ -772,18 +804,18 @@ export class Collection extends LokiEventEmitter {
 			return undefined;
 		}
 
-		// FullTextSearch.
+		// FullTextSearch TODO.
 		if (this._fullTextSearch !== null) {
 			this._fullTextSearch.addDocument(doc);
 		}
 
-		// if cloning, give user back clone of 'cloned' object with $loki and meta
-		returnObj = this.cloneObjects ? clone(obj, this.cloneMethod) : obj;
+		returnObj = obj;
+		if (!bulkInsert) {
+			this.emit('insert', obj);
+			returnObj = this.cloneObjects ? clone(obj, this.cloneMethod) : obj;
+		}
 
 		this.addAutoUpdateObserver(returnObj);
-		if (!bulkInsert) {
-			this.emit('insert', returnObj);
-		}
 		return returnObj;
 	}
 
@@ -1210,8 +1242,14 @@ export class Collection extends LokiEventEmitter {
 	adaptiveBinaryIndexInsert(dataPosition, binaryIndexName) {
 		var index = this.binaryIndices[binaryIndexName].values;
 		var val = this.data[dataPosition][binaryIndexName];
-		//var rs = new Resultset(this, null, null);
-		var idxPos = this.calculateRangeStart(binaryIndexName, val);
+
+		// If you are inserting a javascript Date value into a binary index, convert to epoch time
+		if (this.serializableIndices === true && val instanceof Date) {
+			this.data[dataPosition][binaryIndexName] = val.getTime();
+			val = this.data[dataPosition][binaryIndexName];
+		}
+
+		var idxPos = (index.length === 0) ? 0 : this.calculateRangeStart(binaryIndexName, val, true);
 
 		// insert new data index into our binary index at the proper sorted location for relevant property calculated by idxPos.
 		// doing this after adjusting dataPositions so no clash with previous item at that position.
@@ -1277,10 +1315,20 @@ export class Collection extends LokiEventEmitter {
 	}
 
 	/**
-	 * Internal method used for index maintenance.  Given a prop (index name), and a value
-	 * (which may or may not yet exist) this will find the proper location where it can be added.
+	 * Internal method used for index maintenance and indexed searching.
+	 * Calculates the beginning of an index range for a given value.
+	 * For index maintainance (adaptive:true), we will return a valid index position to insert to.
+	 * For querying (adaptive:false/undefined), we will :
+	 *    return lower bound/index of range of that value (if found)
+	 *    return next lower index position if not found (hole)
+	 * If index is empty it is assumed to be handled at higher level, so
+	 * this method assumes there is at least 1 document in index.
+	 *
+	 * @param {string} prop - name of property which has binary index
+	 * @param {any} val - value to find within index
+	 * @param {bool?} adaptive - if true, we will return insert position
 	 */
-	calculateRangeStart(prop, val) {
+	calculateRangeStart(prop, val, adaptive) {
 		var rcd = this.data;
 		var index = this.binaryIndices[prop].values;
 		var min = 0;
@@ -1288,7 +1336,7 @@ export class Collection extends LokiEventEmitter {
 		var mid = 0;
 
 		if (index.length === 0) {
-			return 0;
+			return -1;
 		}
 
 		var minVal = rcd[index[min]][prop];
@@ -1307,11 +1355,18 @@ export class Collection extends LokiEventEmitter {
 
 		var lbound = min;
 
-		if (ltHelper(rcd[index[lbound]][prop], val, false)) {
-			return lbound + 1;
-		} else {
+		// found it... return it
+		if (aeqHelper(val, rcd[index[lbound]][prop])) {
 			return lbound;
 		}
+
+		// if not in index and our value is less than the found one
+		if (ltHelper(val, rcd[index[lbound]][prop], false)) {
+			return adaptive ? lbound : lbound - 1;
+		}
+
+		// not in index and our value is greater than the found one
+		return adaptive ? lbound + 1 : lbound;
 	}
 
 	/**
@@ -1326,7 +1381,7 @@ export class Collection extends LokiEventEmitter {
 		var mid = 0;
 
 		if (index.length === 0) {
-			return 0;
+			return -1;
 		}
 
 		var minVal = rcd[index[min]][prop];
@@ -1345,11 +1400,23 @@ export class Collection extends LokiEventEmitter {
 
 		var ubound = max;
 
-		if (gtHelper(rcd[index[ubound]][prop], val, false)) {
-			return ubound - 1;
-		} else {
+		// only eq if last element in array is our val
+		if (aeqHelper(val, rcd[index[ubound]][prop])) {
 			return ubound;
 		}
+
+		// if not in index and our value is less than the found one
+		if (gtHelper(val, rcd[index[ubound]][prop], false)) {
+			return ubound + 1;
+		}
+
+		// either hole or first nonmatch
+		if (aeqHelper(val, rcd[index[ubound - 1]][prop])) {
+			return ubound - 1;
+		}
+
+		// hole, so ubound if nearest gt than the val we were looking for
+		return ubound;
 	}
 
 	/**
@@ -1368,6 +1435,8 @@ export class Collection extends LokiEventEmitter {
 		var min = 0;
 		var max = index.length - 1;
 		var mid = 0;
+		var lbound, lval;
+		var ubound, uval;
 
 		// when no documents are in collection, return empty range condition
 		if (rcd.length === 0) {
@@ -1391,33 +1460,67 @@ export class Collection extends LokiEventEmitter {
 				}
 				break;
 			case '$gt':
+				// none are within range
 				if (gtHelper(val, maxVal, true)) {
 					return [0, -1];
 				}
+				// all are within range
+				if (gtHelper(minVal, val, false)) {
+					return [min, max];
+				}
 				break;
 			case '$gte':
+				// none are within range
 				if (gtHelper(val, maxVal, false)) {
 					return [0, -1];
 				}
+				// all are within range
+				if (gtHelper(minVal, val, true)) {
+					return [min, max];
+				}
 				break;
 			case '$lt':
+				// none are within range
 				if (ltHelper(val, minVal, true)) {
 					return [0, -1];
 				}
+				// all are within range
 				if (ltHelper(maxVal, val, false)) {
-					return [0, rcd.length - 1];
+					return [min, max];
 				}
 				break;
 			case '$lte':
+				// none are within range
 				if (ltHelper(val, minVal, false)) {
 					return [0, -1];
 				}
+				// all are within range
 				if (ltHelper(maxVal, val, true)) {
-					return [0, rcd.length - 1];
+					return [min, max];
 				}
 				break;
 			case '$between':
-				return ([this.calculateRangeStart(prop, val[0]), this.calculateRangeEnd(prop, val[1])]);
+				// none are within range (low range is greater)
+				if (gtHelper(val[0], maxVal, false)) {
+					return [0, -1];
+				}
+				// none are within range (high range lower)
+				if (ltHelper(val[1], minVal, false)) {
+					return [0, -1];
+				}
+
+				lbound = this.calculateRangeStart(prop, val[0]);
+				ubound = this.calculateRangeEnd(prop, val[1]);
+
+				if (lbound < 0) lbound++;
+				if (ubound > max) ubound--;
+
+				if (!gtHelper(rcd[index[lbound]][prop], val[0], true)) lbound++;
+				if (!ltHelper(rcd[index[ubound]][prop], val[1], true)) ubound--;
+
+				if (ubound < lbound) return [0, -1];
+
+				return ([lbound, ubound]);
 			case '$in':
 				var idxset = [],
 					segResult = [];
@@ -1435,88 +1538,93 @@ export class Collection extends LokiEventEmitter {
 				return segResult;
 		}
 
-		// hone in on start position of value
-		while (min < max) {
-			mid = (min + max) >> 1;
-
-			if (ltHelper(rcd[index[mid]][prop], val, false)) {
-				min = mid + 1;
-			} else {
-				max = mid;
-			}
+		// determine lbound where needed
+		switch (op) {
+			case '$eq':
+			case '$aeq':
+			case '$dteq':
+			case '$gte':
+			case '$lt':
+				lbound = this.calculateRangeStart(prop, val);
+				lval = rcd[index[lbound]][prop];
+				break;
+			default:
+				break;
 		}
 
-		var lbound = min;
-
-		// do not reset min, as the upper bound cannot be prior to the found low bound
-		max = index.length - 1;
-
-		// hone in on end position of value
-		while (min < max) {
-			mid = (min + max) >> 1;
-
-			if (ltHelper(val, rcd[index[mid]][prop], false)) {
-				max = mid;
-			} else {
-				min = mid + 1;
-			}
+		// determine ubound where needed
+		switch (op) {
+			case '$eq':
+			case '$aeq':
+			case '$dteq':
+			case '$lte':
+			case '$gt':
+				ubound = this.calculateRangeEnd(prop, val);
+				uval = rcd[index[ubound]][prop];
+				break;
+			default:
+				break;
 		}
 
-		var ubound = max;
-
-		var lval = rcd[index[lbound]][prop];
-		var uval = rcd[index[ubound]][prop];
 
 		switch (op) {
 			case '$eq':
-				if (lval !== val) {
-					return [0, -1];
-				}
-				if (uval !== val) {
-					ubound--;
-				}
-
-				return [lbound, ubound];
+			case '$aeq':
 			case '$dteq':
-				if (lval > val || lval < val) {
+				// if hole (not found)
+				//if (ltHelper(lval, val, false) || gtHelper(lval, val, false)) {
+				//  return [0, -1];
+				//}
+				if (!aeqHelper(lval, val)) {
 					return [0, -1];
-				}
-				if (uval > val || uval < val) {
-					ubound--;
 				}
 
 				return [lbound, ubound];
 
+			//case '$dteq':
+			// if hole (not found)
+			//  if (lval > val || lval < val) {
+			//    return [0, -1];
+			//  }
+
+			//  return [lbound, ubound];
 
 			case '$gt':
-				if (ltHelper(uval, val, true)) {
-					return [0, -1];
+				// (an eqHelper would probably be better test)
+				// if hole (not found) ub position is already greater
+				if (!aeqHelper(rcd[index[ubound]][prop], val)) {
+					//if (gtHelper(rcd[index[ubound]][prop], val, false)) {
+					return [ubound, max];
 				}
-
-				return [ubound, rcd.length - 1];
+				// otherwise (found) so ubound is still equal, get next
+				return [ubound + 1, max];
 
 			case '$gte':
-				if (ltHelper(lval, val, false)) {
-					return [0, -1];
+				// if hole (not found) lb position marks left outside of range
+				if (!aeqHelper(rcd[index[lbound]][prop], val)) {
+					//if (ltHelper(rcd[index[lbound]][prop], val, false)) {
+					return [lbound + 1, max];
 				}
-
-				return [lbound, rcd.length - 1];
+				// otherwise (found) so lb is first position where its equal
+				return [lbound, max];
 
 			case '$lt':
-				if (lbound === 0 && ltHelper(lval, val, false)) {
-					return [0, 0];
+				// if hole (not found) position already is less than
+				if (!aeqHelper(rcd[index[lbound]][prop], val)) {
+					//if (ltHelper(rcd[index[lbound]][prop], val, false)) {
+					return [min, lbound];
 				}
-				return [0, lbound - 1];
+				// otherwise (found) so lb marks left inside of eq range, get previous
+				return [min, lbound - 1];
 
 			case '$lte':
-				if (uval !== val) {
-					ubound--;
+				// if hole (not found) ub position marks right outside so get previous
+				if (!aeqHelper(rcd[index[ubound]][prop], val)) {
+					//if (gtHelper(rcd[index[ubound]][prop], val, false)) {
+					return [min, ubound - 1];
 				}
-
-				if (ubound === 0 && ltHelper(uval, val, false)) {
-					return [0, 0];
-				}
-				return [0, ubound];
+				// otherwise (found) so ub is last position where its still equal
+				return [min, ubound];
 
 			default:
 				return [0, rcd.length - 1];

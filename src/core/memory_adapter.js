@@ -2,14 +2,26 @@
  * In in-memory persistence adapter for an in-memory database.
  * This simple 'key/value' adapter is intended for unit testing and diagnostics.
  *
+ * @param {object=} options - memory adapter options
+ * @param {boolean} options.asyncResponses - whether callbacks are invoked asynchronously (default: false)
+ * @param {int} options.asyncTimeout - timeout in ms to queue callbacks (default: 50)
+ *
  * @constructor LokiMemoryAdapter
  */
 export class LokiMemoryAdapter {
 
-	constructor() {
+	constructor(options) {
 		this.hashStore = {};
-	}
+		this.options = options || {};
 
+		if (!this.options.hasOwnProperty('asyncResponses')) {
+			this.options.asyncResponses = false;
+		}
+
+		if (!this.options.hasOwnProperty('asyncTimeout')) {
+			this.options.asyncTimeout = 50; // 50 ms default
+		}
+	}
 
 	/**
 	 * Loads a serialized database from its in-memory store.
@@ -20,10 +32,27 @@ export class LokiMemoryAdapter {
 	 * @memberof LokiMemoryAdapter
 	 */
 	loadDatabase(dbname) {
-		if (this.hashStore.hasOwnProperty(dbname)) {
-			return Promise.resolve(this.hashStore[dbname].value);
-		} else {
-			return Promise.reject(new Error("unable to load database, " + dbname + " was not found in memory adapter"));
+		var self = this;
+
+		if (this.options.asyncResponses) {
+			return new Promise(function(resolve, reject) {
+				setTimeout(function () {
+					if (self.hashStore.hasOwnProperty(dbname)) {
+						resolve(self.hashStore[dbname].value);
+					}
+					else {
+						reject(new Error("unable to load database, " + dbname + " was not found in memory adapter"));
+					}
+				}, self.options.asyncTimeout);
+			});
+		}
+		else {
+			if (this.hashStore.hasOwnProperty(dbname)) {
+				return Promise.resolve(this.hashStore[dbname].value);
+			}
+			else {
+				return Promise.reject(new Error("unable to load database, " + dbname + " was not found in memory adapter"));
+			}
 		}
 	}
 
@@ -36,15 +65,34 @@ export class LokiMemoryAdapter {
 	 * @memberof LokiMemoryAdapter
 	 */
 	saveDatabase(dbname, dbstring) {
-		var saveCount = (this.hashStore.hasOwnProperty(dbname) ? this.hashStore[dbname].savecount : 0);
+		var self=this;
+		var saveCount;
 
-		this.hashStore[dbname] = {
-			savecount: saveCount + 1,
-			lastsave: new Date(),
-			value: dbstring
-		};
+		if (this.options.asyncResponses) {
+			return new Promise(function(resolve, reject) {
+				setTimeout(function () {
+					saveCount = (self.hashStore.hasOwnProperty(dbname) ? self.hashStore[dbname].savecount : 0);
 
-		return Promise.resolve();
+					self.hashStore[dbname] = {
+						savecount: saveCount + 1,
+						lastsave: new Date(),
+						value: dbstring
+					};
+
+					resolve();
+				}, self.options.asyncTimeout);
+			});
+		} else {
+			saveCount = (this.hashStore.hasOwnProperty(dbname) ? this.hashStore[dbname].savecount : 0);
+
+			this.hashStore[dbname] = {
+				savecount: saveCount + 1,
+				lastsave: new Date(),
+				value: dbstring
+			};
+
+			return Promise.resolve();
+		}
 	}
 
 	/**
@@ -61,5 +109,4 @@ export class LokiMemoryAdapter {
 
 		return Promise.resolve();
 	}
-
 }

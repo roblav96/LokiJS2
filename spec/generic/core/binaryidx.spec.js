@@ -6,19 +6,19 @@ describe('binary indices', function () {
 
 	beforeEach(function () {
 		testRecords = [
-			{name: 'mjolnir', owner: 'thor', maker: 'dwarves'},
-			{name: 'gungnir', owner: 'odin', maker: 'elves'},
-			{name: 'tyrfing', owner: 'Svafrlami', maker: 'dwarves'},
-			{name: 'draupnir', owner: 'odin', maker: 'elves'}
+			{ name : 'mjolnir', owner: 'thor', maker: 'dwarves' },
+			{ name : 'gungnir', owner: 'odin', maker: 'elves' },
+			{ name : 'tyrfing', owner: 'Svafrlami', maker: 'dwarves' },
+			{ name : 'draupnir', owner: 'odin', maker: 'elves' }
 		];
 	});
 
-	describe('collection.clear affects binary indices correctly', function () {
+	describe('collection.clear affects binary indices correctly', function() {
 		it('works', function () {
 			var db = new loki('idxtest');
 			var t2 = JSON.parse(JSON.stringify(testRecords));
 
-			var items = db.addCollection('users', {indices: ['name']});
+			var items = db.addCollection('users', { indices: ['name'] });
 			items.insert(testRecords);
 			expect(items.binaryIndices.name.values.length).toBe(4);
 			items.clear();
@@ -26,20 +26,44 @@ describe('binary indices', function () {
 			expect(items.binaryIndices.name.values.length).toBe(0);
 			items.insert(t2);
 			expect(items.binaryIndices.name.values.length).toBe(4);
-			items.clear({removeIndices: true});
+			items.clear({ removeIndices: true });
 			expect(items.binaryIndices.hasOwnProperty('name')).toEqual(false);
 		});
 	});
 
-	describe('index maintained across inserts', function () {
+	describe('binary index loosly but reliably works across datatypes', function() {
+		it('works', function() {
+			var db = new loki('ugly.db');
+
+			// Add a collection to the database
+			var dirtydata = db.addCollection('dirtydata', { indices: ['b'] });
+
+			// Add some documents to the collection
+			dirtydata.insert({ a : 0 });
+			var b4 = { a : 1, b: 4 }; dirtydata.insert(b4);
+			dirtydata.insert({ a : 2, b: undefined});
+			dirtydata.insert({ a: 3, b: 3.14});
+			dirtydata.insert({ a: 4, b: new Date() });
+			dirtydata.insert({ a: 5, b: false });
+			dirtydata.insert({ a: 6, b: true });
+			dirtydata.insert({ a: 7, b: null });
+			dirtydata.insert({ a : 8, b: '0'});
+			dirtydata.insert({ a : 9, b: 0});
+			dirtydata.insert({ a : 10, b: 3});
+			dirtydata.insert({ a : 11, b: '3'});
+			dirtydata.insert({ a : 12, b: '4'});
+		});
+	});
+
+	describe('index maintained across inserts', function() {
 		it('works', function () {
 
 			var db = new loki('idxtest');
-			var items = db.addCollection('users', {indices: ['name']});
+			var items = db.addCollection('users', { indices: ['name'] });
 			items.insert(testRecords);
 
 			// force index build
-			items.find({name: 'mjolnir'});
+			items.find({ name: 'mjolnir'});
 
 			var bi = items.binaryIndices.name;
 			expect(bi.values.length).toBe(4);
@@ -48,10 +72,10 @@ describe('binary indices', function () {
 			expect(bi.values[2]).toBe(0);
 			expect(bi.values[3]).toBe(2);
 
-			items.insert({name: 'gjallarhorn', owner: 'heimdallr', maker: 'Gjöll'});
+			items.insert({ name : 'gjallarhorn', owner: 'heimdallr', maker: 'Gjöll' });
 
 			// force index build
-			items.find({name: 'mjolnir'});
+			items.find({ name: 'mjolnir'});
 
 			// reaquire values array
 			bi = items.binaryIndices.name;
@@ -64,15 +88,15 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('index maintained across removes', function () {
+	describe('index maintained across removes', function() {
 		it('works', function () {
 
 			var db = new loki('idxtest');
-			var items = db.addCollection('users', {indices: ['name']});
+			var items = db.addCollection('users', { indices: ['name'] });
 			items.insert(testRecords);
 
 			// force index build
-			items.find({name: 'mjolnir'});
+			items.find({ name: 'mjolnir'});
 
 			var bi = items.binaryIndices.name;
 			expect(bi.values.length).toBe(4);
@@ -85,7 +109,7 @@ describe('binary indices', function () {
 			items.remove(tyrfing);
 
 			// force index build
-			items.find({name: 'mjolnir'});
+			items.find({ name: 'mjolnir'});
 
 			// reaquire values array
 			bi = items.binaryIndices.name;
@@ -97,15 +121,15 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('index maintained across updates', function () {
+	describe('index maintained across updates', function() {
 		it('works', function () {
 
 			var db = new loki('idxtest');
-			var items = db.addCollection('users', {indices: ['name']});
+			var items = db.addCollection('users', { indices: ['name'] });
 			items.insert(testRecords);
 
 			// force index build
-			items.find({name: 'mjolnir'});
+			items.find({ name: 'mjolnir'});
 
 			var bi = items.binaryIndices.name;
 			expect(bi.values.length).toBe(4);
@@ -119,7 +143,7 @@ describe('binary indices', function () {
 			items.update(tyrfing);
 
 			// force index build
-			items.find({name: 'mjolnir'});
+			items.find({ name: 'mjolnir'});
 
 			// reaquire values array
 			bi = items.binaryIndices.name;
@@ -131,7 +155,7 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('positional lookup using get works', function () {
+	describe('positional lookup using get works', function() {
 		it('works', function () {
 
 			// Since we use coll.get's ability to do a positional lookup of a loki id during adaptive indexing we will test it here
@@ -139,11 +163,11 @@ describe('binary indices', function () {
 			// let's base this off of our 'remove' test so data is more meaningful
 
 			var db = new loki('idxtest');
-			var items = db.addCollection('users', {indices: ['name']});
+			var items = db.addCollection('users', { indices: ['name'] });
 			items.insert(testRecords);
 
 			// force index build
-			items.find({name: 'mjolnir'});
+			items.find({ name: 'mjolnir'});
 
 			var item, dataPosition;
 
@@ -164,7 +188,7 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('positional index lookup using getBinaryIndexPosition works', function () {
+	describe('positional index lookup using getBinaryIndexPosition works', function() {
 		it('works', function () {
 
 			// Since our indexes contain -not loki id values- but coll.data[] positions
@@ -172,11 +196,11 @@ describe('binary indices', function () {
 			// index value based on data array position function (obtained via get)
 
 			var db = new loki('idxtest');
-			var items = db.addCollection('users', {indices: ['name']});
+			var items = db.addCollection('users', { indices: ['name'] });
 			items.insert(testRecords);
 
 			// force index build
-			items.find({name: 'mjolnir'});
+			items.find({ name: 'mjolnir'});
 
 			// tyrfing should be in coll.data[2] since it was third added item and we have not deleted yet
 			var pos = items.getBinaryIndexPosition(2, 'name');
@@ -184,11 +208,11 @@ describe('binary indices', function () {
 			expect(pos).toBe(3);
 
 			// now remove draupnir
-			var draupnir = items.findOne({name: 'draupnir'});
+			var draupnir = items.findOne({ name: 'draupnir' });
 			items.remove(draupnir);
 
 			// force index build
-			items.find({name: 'mjolnir'});
+			items.find({ name: 'mjolnir'});
 
 			// tyrfing should be in coll.data[2] since it was third added item and we have not deleted yet
 			var pos = items.getBinaryIndexPosition(2, 'name');
@@ -198,34 +222,34 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('calculateRangeStart works for inserts', function () {
+	describe('calculateRangeStart works for inserts', function() {
 		it('works', function () {
 
 			// calculateRangeStart is helper function for adaptive inserts/updates
 			// we will use it to find position within index where (new) nonexistent value should be inserted into index
 
 			var db = new loki('idxtest');
-			var items = db.addCollection('users', {indices: ['name']});
+			var items = db.addCollection('users', { indices: ['name'] });
 			items.insert(testRecords);
 
 			// force index build
-			items.find({name: 'mjolnir'});
+			items.find({ name: 'mjolnir'});
 
-			var pos = items.calculateRangeStart('name', 'fff');
+			var pos = items.calculateRangeStart('name', 'fff', true);
 			expect(pos).toBe(1);
 
-			var pos = items.calculateRangeStart('name', 'zzz');
+			var pos = items.calculateRangeStart('name', 'zzz', true);
 			expect(pos).toBe(4);
 
-			var pos = items.calculateRangeStart('name', 'aaa');
+			var pos = items.calculateRangeStart('name', 'aaa', true);
 			expect(pos).toBe(0);
 
-			var pos = items.calculateRangeStart('name', 'gungnir');
+			var pos = items.calculateRangeStart('name', 'gungnir', true);
 			expect(pos).toBe(1);
 		});
 	});
 
-	describe('adaptiveBinaryIndexInsert works', function () {
+	describe('adaptiveBinaryIndexInsert works', function() {
 		it('works', function () {
 
 			// Since we use coll.get's ability to do a positional lookup of a loki id during adaptive indexing we will test it here
@@ -239,7 +263,7 @@ describe('binary indices', function () {
 			items.insert(testRecords);
 
 			// force index build
-			items.find({name: 'mjolnir'});
+			items.find({ name: 'mjolnir'});
 
 			// we know this will go in coll.data[4] as fifth document
 			items.insert({
@@ -256,7 +280,7 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('adaptiveBinaryIndexUpdate works', function () {
+	describe('adaptiveBinaryIndexUpdate works', function() {
 		it('works', function () {
 
 			var db = new loki('idxtest');
@@ -268,7 +292,7 @@ describe('binary indices', function () {
 			items.insert(testRecords);
 
 			// force index build
-			items.find({name: 'mjolnir'});
+			items.find({ name: 'mjolnir'});
 
 			expect(items.binaryIndices.name.values[0]).toBe(3);
 			expect(items.binaryIndices.name.values[1]).toBe(1);
@@ -288,7 +312,7 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('adaptiveBinaryIndexRemove works', function () {
+	describe('adaptiveBinaryIndexRemove works', function() {
 		it('works', function () {
 
 			// Since we use coll.get's ability to do a positional lookup of a loki id during adaptive indexing we will test it here
@@ -296,11 +320,11 @@ describe('binary indices', function () {
 			// let's base this off of our 'remove' test so data is more meaningful
 
 			var db = new loki('idxtest');
-			var items = db.addCollection('users', {indices: ['name']});
+			var items = db.addCollection('users', { indices: ['name'] });
 			items.insert(testRecords);
 
 			// force index build
-			items.find({name: 'mjolnir'});
+			items.find({ name: 'mjolnir'});
 
 			// at this point lets break convention and use internal method directly, without calling higher level remove() to remove
 			// from both data[] and index[].  We are not even removing from data we are just testing adaptiveBinaryIndexRemove as if we did/will.
@@ -315,7 +339,7 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('adaptiveBinaryIndex high level operability test', function () {
+	describe('adaptiveBinaryIndex high level operability test', function() {
 		it('works', function () {
 
 			var db = new loki('idxtest');
@@ -327,7 +351,7 @@ describe('binary indices', function () {
 			var idx, result;
 
 			// add 1000 records
-			for (idx = 0; idx < 1000; idx++) {
+			for (idx=0; idx<1000; idx++) {
 				coll.insert({
 					customIdx: idx,
 					originalIdx: idx,
@@ -337,7 +361,7 @@ describe('binary indices', function () {
 
 			// update 1000 records causing index to move first in ordered list to last, one at a time
 			// when finding each document we are also verifying it gave us back the correct document
-			for (idx = 0; idx < 1000; idx++) {
+			for(idx=0; idx<1000; idx++) {
 				result = coll.findOne({customIdx: idx});
 				expect(result).not.toEqual(null);
 				expect(result.customIdx).toBe(idx);
@@ -346,29 +370,29 @@ describe('binary indices', function () {
 			}
 
 			// find each document again (by its new customIdx), verify it is who we thought it was, then remove it
-			for (idx = 0; idx < 1000; idx++) {
-				result = coll.findOne({customIdx: idx + 1000});
+			for(idx=0; idx<1000; idx++) {
+				result = coll.findOne({customIdx: idx+1000});
 				expect(result).not.toEqual(null);
-				expect(result.customIdx).toBe(idx + 1000);
+				expect(result.customIdx).toBe(idx+1000);
 				coll.remove(result);
 			}
 
 			// all documents should be gone
-			expect(coll.count()).toBe(0);
+			expect (coll.count()).toBe(0);
 
 			// with empty collection , insert some records
-			var one = coll.insert({customIdx: 100});
-			var two = coll.insert({customIdx: 200});
-			var three = coll.insert({customIdx: 300});
-			var four = coll.insert({customIdx: 400});
-			var five = coll.insert({customIdx: 500});
+			var one = coll.insert({ customIdx: 100 });
+			var two = coll.insert({ customIdx: 200 });
+			var three = coll.insert({ customIdx: 300 });
+			var four = coll.insert({ customIdx: 400 });
+			var five = coll.insert({ customIdx: 500 });
 
 			// intersperse more records before and after previous each element
-			coll.insert({customIdx: 7});
-			coll.insert({customIdx: 123});
-			coll.insert({customIdx: 234});
-			coll.insert({customIdx: 345});
-			coll.insert({customIdx: 567});
+			coll.insert({customIdx:7});
+			coll.insert({customIdx:123});
+			coll.insert({customIdx:234});
+			coll.insert({customIdx:345});
+			coll.insert({customIdx:567});
 
 			// verify some sampling returns correct objects
 			expect(coll.findOne({customIdx: 300}).customIdx).toBe(300);
@@ -396,7 +420,7 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('adaptiveBinaryIndex high level random stress test', function () {
+	describe('adaptiveBinaryIndex high level random stress test', function() {
 		it('works', function () {
 
 			var db = new loki('idxtest');
@@ -405,12 +429,12 @@ describe('binary indices', function () {
 				indices: ['customIdx']
 			});
 
-			var idx, result, minVal = 1, maxVal = 1000;
+			var idx, result, minVal=1, maxVal=1000;
 
 			var currId, idVector = [];
 
 			// add 1000 records
-			for (idx = 0; idx < 1000; idx++) {
+			for (idx=0; idx<1000; idx++) {
 				currId = Math.floor(Math.random() * (maxVal - minVal) + minVal);
 
 				coll.insert({
@@ -424,7 +448,7 @@ describe('binary indices', function () {
 
 			// update 1000 records causing index to move first in ordered list to last, one at a time
 			// when finding each document we are also verifying it gave us back the correct document
-			for (idx = 0; idx < 1000; idx++) {
+			for(idx=0; idx<1000; idx++) {
 				currId = idVector.pop();
 				result = coll.findOne({customIdx: currId});
 				expect(result).not.toEqual(null);
@@ -434,7 +458,7 @@ describe('binary indices', function () {
 
 	});
 
-	describe('adaptiveBinaryIndex collection serializes correctly', function () {
+	describe('adaptiveBinaryIndex collection serializes correctly', function() {
 		it('works', function () {
 
 			var db = new loki('idxtest');
@@ -442,7 +466,7 @@ describe('binary indices', function () {
 				adaptiveBinaryIndices: true,
 				indices: ['customIdx']
 			});
-			coll.insert({customIdx: 1});
+			coll.insert({ customIdx: 1 });
 
 			var jsonString = db.serialize();
 
@@ -458,7 +482,7 @@ describe('binary indices', function () {
 				adaptiveBinaryIndices: false,
 				indices: ['customIdx']
 			});
-			coll.insert({customIdx: 1});
+			coll.insert({ customIdx: 1 });
 
 			jsonString = db.serialize();
 			newDatabase = new loki('idxtest');

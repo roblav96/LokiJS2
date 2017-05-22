@@ -6,7 +6,10 @@
 export class LokiFsAdapter {
 
 	constructor() {
-		this.fs = undefined; //TODO require('fs');
+		// TODO
+		if (typeof global !== "undefined" && ({}).toString.call(global) === '[object global]') {
+			this.fs = require('fs');
+		}
 	}
 
 	/**

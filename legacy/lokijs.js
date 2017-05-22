@@ -72,119 +72,196 @@
       }
     };
 
+    function aeqHelper(prop1, prop2) {
+      var cv1, cv2, t1, t2;
+
+      if (prop1 === prop2) return true;
+
+      // 'falsy' and Boolean handling
+      if (!prop1 || !prop2 || prop1 === true || prop2 === true || prop1 !== prop1 || prop2 !== prop2) {
+        // dates and NaN conditions (typed dates before serialization)
+        switch (prop1) {
+          case undefined: t1 = 1; break;
+          case null: t1 = 1; break;
+          case false: t1 = 3; break;
+          case true: t1 = 4; break;
+          case "": t1 = 5; break;
+          default: t1 = (prop1 === prop1)?9:0; break;
+        }
+
+        switch (prop2) {
+          case undefined: t2 = 1; break;
+          case null: t2 = 1; break;
+          case false: t2 = 3; break;
+          case true: t2 = 4; break;
+          case "": t2 = 5; break;
+          default: t2 = (prop2 === prop2)?9:0; break;
+        }
+
+        // one or both is edge case
+        if (t1 !== 9 || t2 !== 9) {
+          return (t1===t2);
+        }
+      }
+
+      // Handle 'Number-like' comparisons
+      cv1 = Number(prop1);
+      cv2 = Number(prop2);
+
+      // if one or both are 'number-like'...
+      if (cv1 === cv1 || cv2 === cv2) {
+        return (cv1 === cv2);
+      }
+
+      // not strict equal nor less than nor gt so must be mixed types, convert to string and use that to compare
+      cv1 = prop1.toString();
+      cv2 = prop2.toString();
+
+      return (cv1 == cv2);
+    }
+
     /** Helper function for determining 'less-than' conditions for ops, sorting, and binary indices.
      *     In the future we might want $lt and $gt ops to use their own functionality/helper.
      *     Since binary indices on a property might need to index [12, NaN, new Date(), Infinity], we
      *     need this function (as well as gtHelper) to always ensure one value is LT, GT, or EQ to another.
      */
     function ltHelper(prop1, prop2, equal) {
-      var cv1, cv2;
+      var cv1, cv2, t1, t2;
 
-      // 'falsy' and Boolean handling
-      if (!prop1 || !prop2 || prop1 === true || prop2 === true) {
-        if ((prop1 === true || prop1 === false) && (prop2 === true || prop2 === false)) {
-          if (equal) {
-            return prop1 === prop2;
-          } else {
-            if (prop1) {
-              return false;
-            } else {
-              return prop2;
-            }
-          }
+      // if one of the params is falsy or strictly true or not equal to itself
+      // 0, 0.0, "", NaN, null, undefined, not defined, false, true
+      if (!prop1 || !prop2 || prop1 === true || prop2 === true || prop1 !== prop1 || prop2 !== prop2) {
+        switch (prop1) {
+          case undefined: t1 = 1; break;
+          case null: t1 = 1; break;
+          case false: t1 = 3; break;
+          case true: t1 = 4; break;
+          case "": t1 = 5; break;
+          // if strict equal probably 0 so sort higher, otherwise probably NaN so sort lower than even null
+          default: t1 = (prop1 === prop1)?9:0; break;
         }
 
-        if (prop2 === undefined || prop2 === null || prop1 === true || prop2 === false) {
-          return equal;
+        switch (prop2) {
+          case undefined: t2 = 1; break;
+          case null: t2 = 1; break;
+          case false: t2 = 3; break;
+          case true: t2 = 4; break;
+          case "": t2 = 5; break;
+          default: t2 = (prop2 === prop2)?9:0; break;
         }
-        if (prop1 === undefined || prop1 === null || prop1 === false || prop2 === true) {
-          return true;
+
+        // one or both is edge case
+        if (t1 !== 9 || t2 !== 9) {
+          return (t1===t2)?equal:(t1<t2);
         }
       }
 
-      if (prop1 === prop2) {
+      // if both are numbers (string encoded or not), compare as numbers
+      cv1 = Number(prop1);
+      cv2 = Number(prop2);
+
+      if (cv1 === cv1 && cv2 === cv2) {
+        if (cv1 < cv2) return true;
+        if (cv1 > cv2) return false;
         return equal;
       }
 
-      if (prop1 < prop2) {
+      if (cv1 === cv1 && cv2 !== cv2) {
         return true;
       }
 
-      if (prop1 > prop2) {
+      if (cv2 === cv2 && cv1 !== cv1) {
         return false;
       }
+
+      if (prop1 < prop2) return true;
+      if (prop1 > prop2) return false;
+      if (prop1 == prop2) return equal;
 
       // not strict equal nor less than nor gt so must be mixed types, convert to string and use that to compare
       cv1 = prop1.toString();
       cv2 = prop2.toString();
 
-      if (cv1 == cv2) {
-        return equal;
-      }
-
       if (cv1 < cv2) {
         return true;
+      }
+
+      if (cv1 == cv2) {
+        return equal;
       }
 
       return false;
     }
 
     function gtHelper(prop1, prop2, equal) {
-      var cv1, cv2;
+      var cv1, cv2, t1, t2;
 
       // 'falsy' and Boolean handling
-      if (!prop1 || !prop2 || prop1 === true || prop2 === true) {
-        if ((prop1 === true || prop1 === false) && (prop2 === true || prop2 === false)) {
-          if (equal) {
-            return prop1 === prop2;
-          } else {
-            if (prop1) {
-              return !prop2;
-            } else {
-              return false;
-            }
-          }
+      if (!prop1 || !prop2 || prop1 === true || prop2 === true || prop1 !== prop1 || prop2 !== prop2) {
+        switch (prop1) {
+          case undefined: t1 = 1; break;
+          case null: t1 = 1; break;
+          case false: t1 = 3; break;
+          case true: t1 = 4; break;
+          case "": t1 = 5; break;
+          // NaN 0
+          default: t1 = (prop1 === prop1)?9:0; break;
         }
 
-        if (prop1 === undefined || prop1 === null || prop1 === false || prop2 === true) {
-          return equal;
+        switch (prop2) {
+          case undefined: t2 = 1; break;
+          case null: t2 = 1; break;
+          case false: t2 = 3; break;
+          case true: t2 = 4; break;
+          case "": t2 = 5; break;
+          default: t2 = (prop2 === prop2)?9:0; break;
         }
-        if (prop2 === undefined || prop2 === null || prop1 === true || prop2 === false) {
-          return true;
+
+        // one or both is edge case
+        if (t1 !== 9 || t2 !== 9) {
+          return (t1===t2)?equal:(t1>t2);
         }
       }
 
-      if (prop1 === prop2) {
+      // if both are numbers (string encoded or not), compare as numbers
+      cv1 = Number(prop1);
+      cv2 = Number(prop2);
+      if (cv1 === cv1 && cv2 === cv2) {
+        if (cv1 > cv2) return true;
+        if (cv1 < cv2) return false;
         return equal;
       }
 
-      if (prop1 > prop2) {
-        return true;
-      }
-
-      if (prop1 < prop2) {
+      if (cv1 === cv1 && cv2 !== cv2) {
         return false;
       }
 
-      // not strict equal nor less than nor gt so must be mixed types, convert to string and use that to compare
+      if (cv2 === cv2 && cv1 !== cv1) {
+        return true;
+      }
+
+      if (prop1 > prop2) return true;
+      if (prop1 < prop2) return false;
+      if (prop1 == prop2) return equal;
+
+      // not strict equal nor less than nor gt so must be dates or mixed types
+      // convert to string and use that to compare
       cv1 = prop1.toString();
       cv2 = prop2.toString();
 
-      if (cv1 == cv2) {
-        return equal;
-      }
-
       if (cv1 > cv2) {
         return true;
+      }
+
+      if (cv1 == cv2) {
+        return equal;
       }
 
       return false;
     }
 
     function sortHelper(prop1, prop2, desc) {
-      if (prop1 === prop2) {
-        return 0;
-      }
+      if (aeqHelper(prop1, prop2)) return 0;
 
       if (ltHelper(prop1, prop2, false)) {
         return (desc) ? (1) : (-1);
@@ -324,6 +401,12 @@
         return ltHelper(a, b, true);
       },
 
+      // ex : coll.find({'orderCount': {$between: [10, 50]}});
+      $between: function (a, vals) {
+        if (a === undefined || a === null) return false;
+        return (gtHelper(a, vals[0], true) && ltHelper(a, vals[1], true));
+      },
+
       $in: function (a, b) {
         return b.indexOf(a) !== -1;
       },
@@ -388,6 +471,10 @@
         return (typeof b !== 'object') ? (type === b) : doQueryOp(type, b);
       },
 
+      $finite: function(a, b) {
+        return (b === isFinite(a));
+      },
+
       $size: function (a, b) {
         if (Array.isArray(a)) {
           return (typeof b !== 'object') ? (a.length === b) : doQueryOp(a.length, b);
@@ -433,10 +520,26 @@
       }
     };
 
-    // making indexing opt-in... our range function knows how to deal with these ops :
-    var indexedOpsList = ['$eq', '$aeq', '$dteq', '$gt', '$gte', '$lt', '$lte'];
+    // if an op is registered in this object, our 'calculateRange' can use it with our binary indices.
+    // if the op is registered to a function, we will run that function/op as a 2nd pass filter on results.
+    // those 2nd pass filter functions should be similar to LokiOps functions, accepting 2 vals to compare.
+    var indexedOps = {
+      $eq: LokiOps.$eq,
+      $aeq: true,
+      $dteq: true,
+      $gt: true,
+      $gte: true,
+      $lt: true,
+      $lte: true,
+      $in: true,
+      $between: true
+    };
 
     function clone(data, method) {
+      if (data === null || data === undefined) {
+        return null;
+      }
+
       var cloneMethod = method || 'parse-stringify',
         cloned;
 
@@ -457,9 +560,6 @@
         break;
       }
 
-      //if (cloneMethod === 'parse-stringify') {
-      //  cloned = JSON.parse(JSON.stringify(data));
-      //}
       return cloned;
     }
 
@@ -563,6 +663,16 @@
     };
 
     /**
+     * Alias of LokiEventEmitter.prototype.on
+     * addListener(eventName, listener) - adds a listener to the queue of callbacks associated to an event
+     * @param {string|string[]} eventName - the name(s) of the event(s) to listen to
+     * @param {function} listener - callback function of listener to attach
+     * @returns {int} the index of the callback in the array of listeners for a particular event
+     * @memberof LokiEventEmitter
+     */
+    LokiEventEmitter.prototype.addListener = LokiEventEmitter.prototype.on;
+
+    /**
      * removeListener() - removes the listener at position 'index' from the event 'eventName'
      * @param {string|string[]} eventName - the name(s) of the event(s) which the listener is attached to
      * @param {function} listener - the listener callback function to remove from emitter
@@ -570,10 +680,13 @@
      */
     LokiEventEmitter.prototype.removeListener = function (eventName, listener) {
       var self = this;
+
       if (Array.isArray(eventName)) {
         eventName.forEach(function(currentEventName) {
-          self.removeListener(currentEventName, listen);
+          self.removeListener(currentEventName, listener);
         });
+
+        return;
       }
 
       if (this.events[eventName]) {
@@ -597,16 +710,20 @@
 
       // persist version of code which created the database to the database.
       // could use for upgrade scenarios
-      this.databaseVersion = 1.1;
-      this.engineVersion = 1.1;
+      this.databaseVersion = 1.441;
+      this.engineVersion = 1.441;
 
       // autosave support (disabled by default)
       // pass autosave: true, autosaveInterval: 6000 in options to set 6 second autosave
       this.autosave = false;
       this.autosaveInterval = 5000;
       this.autosaveHandle = null;
+      this.throttledSaves = true;
 
-      this.options = {};
+      this.options = {
+        serializationMethod: options && options.hasOwnProperty('serializationMethod') ? options.serializationMethod : 'normal',
+        destructureDelimiter: options && options.hasOwnProperty('destructureDelimiter') ? options.destructureDelimiter : '$<\n'
+      };
 
       // currently keeping persistenceMethod and persistenceAdapter as loki level properties that
       // will not or cannot be deserialized.  You are required to configure persistence every time
@@ -619,6 +736,10 @@
 
       // retain reference to optional (non-serializable) persistenceAdapter 'instance'
       this.persistenceAdapter = null;
+
+      // flags used to throttle saves
+      this.throttledSaveRunning = null;
+      this.throttledSavePending = null;
 
       // enable console output if verbose flag is set (disabled by default)
       this.verbose = options && options.hasOwnProperty('verbose') ? options.verbose : false;
@@ -633,6 +754,15 @@
       };
 
       var getENV = function () {
+        if (typeof global !== 'undefined' && (global.android || global.NSObject)) {
+           // If no adapter is set use the default nativescript adapter
+           if (!options.adapter) {
+             //var LokiNativescriptAdapter = require('./loki-nativescript-adapter');
+             //options.adapter=new LokiNativescriptAdapter();
+           }
+           return 'NATIVESCRIPT'; //nativescript
+        }
+
         if (typeof window === 'undefined') {
           return 'NODEJS';
         }
@@ -666,6 +796,7 @@
 
     // db class is an EventEmitter
     Loki.prototype = new LokiEventEmitter();
+    Loki.prototype.constructor = Loki;
 
     // experimental support for browserify's abstract syntax scan to pick up dependency of indexed adapter.
     // Hopefully, once this hits npm a browserify require of lokijs should scan the main file and detect this indexed adapter reference.
@@ -689,6 +820,10 @@
      * @param {int} options.autosaveInterval - time interval (in milliseconds) between saves (if dirty)
      * @param {boolean} options.autoload - enables autoload on loki instantiation
      * @param {object} options.inflate - options that are passed to loadDatabase if autoload enabled
+     * @param {string} options.serializationMethod - ['normal', 'pretty', 'destructured']
+     * @param {string} options.destructureDelimiter - string delimiter used for destructured serialization
+     * @param {boolean} options.throttledSaves - if true, it batches multiple calls to to saveDatabase reducing number of disk I/O operations
+     *   and guaranteeing proper serialization of the calls. Default value is true.
      * @returns {Promise} a Promise that resolves after initialization and (if enabled) autoloading the database
      * @memberof Loki
      */
@@ -697,11 +832,13 @@
       var defaultPersistence = {
           'NODEJS': 'fs',
           'BROWSER': 'localStorage',
-          'CORDOVA': 'localStorage'
+          'CORDOVA': 'localStorage',
+          'MEMORY': 'memory'
         },
         persistenceMethods = {
           'fs': LokiFsAdapter,
-          'localStorage': LokiLocalStorageAdapter
+          'localStorage': LokiLocalStorageAdapter,
+          'memory': LokiMemoryAdapter
         };
 
       this.options = options || {};
@@ -719,6 +856,16 @@
           this.persistenceAdapter = new persistenceMethods[this.options.persistenceMethod]();
         }
         // should be throw an error here, or just fall back to defaults ??
+      }
+
+      // ensure defaults exists for options which were not set
+      if (!this.options.hasOwnProperty('serializationMethod')) {
+        this.options.serializationMethod = 'normal';
+      }
+
+      // ensure passed or default option exists
+      if (!this.options.hasOwnProperty('destructureDelimiter')) {
+        this.options.destructureDelimiter = '$<\n';
       }
 
       // if by now there is no adapter specified by user nor derived from persistenceMethod: use sensible defaults
@@ -739,6 +886,10 @@
         this.autosaveInterval = parseInt(this.options.autosaveInterval, 10);
       }
 
+      if (this.options.hasOwnProperty('throttledSaves')) {
+        this.throttledSaves = this.options.throttledSaves;
+      }
+
       this.autosaveDisable();
 
       var loaded;
@@ -756,6 +907,38 @@
           self.autosaveEnable();
         }
       });
+    };
+
+    /**
+     * Copies 'this' database into a new Loki instance. Object references are shared to make lightweight.
+     *
+     * @param {object} options - apply or override collection level settings
+     * @param {bool} options.removeNonSerializable - nulls properties not safe for serialization.
+     * @memberof Loki
+     */
+    Loki.prototype.copy = function(options) {
+      // in case running in an environment without accurate environment detection, pass 'NA'
+      var databaseCopy = new Loki(this.filename, { env: "NA" });
+      var clen, idx;
+
+      options = options || {};
+
+      // currently inverting and letting loadJSONObject do most of the work
+      databaseCopy.loadJSONObject(this, { retainDirtyFlags: true });
+
+      // since our JSON serializeReplacer is not invoked for reference database adapters, this will let us mimic
+      if(options.hasOwnProperty("removeNonSerializable") && options.removeNonSerializable === true) {
+        databaseCopy.autosaveHandle = null;
+        databaseCopy.persistenceAdapter = null;
+
+        clen = databaseCopy.collections.length;
+        for (idx=0; idx<clen; idx++) {
+          databaseCopy.collections[idx].constraints = null;
+          databaseCopy.collections[idx].ttl = null;
+        }
+      }
+
+      return databaseCopy;
     };
 
     /**
@@ -899,11 +1082,363 @@
      * @returns {string} Stringified representation of the loki database.
      * @memberof Loki
      */
-    Loki.prototype.serialize = function () {
-      return JSON.stringify(this, this.serializeReplacer, 2);
+    Loki.prototype.serialize = function (options) {
+      options = options || {};
+
+      if (!options.hasOwnProperty("serializationMethod")) {
+        options.serializationMethod = this.options.serializationMethod;
+      }
+
+      switch(options.serializationMethod) {
+        case "normal": return JSON.stringify(this, this.serializeReplacer);
+        case "pretty": return JSON.stringify(this, this.serializeReplacer, 2);
+        case "destructured": return this.serializeDestructured(); // use default options
+        default: return JSON.stringify(this, this.serializeReplacer);
+      }
     };
+
     // alias of serialize
     Loki.prototype.toJson = Loki.prototype.serialize;
+
+    /**
+     * Destructured JSON serialization routine to allow alternate serialization methods.
+     * Internally, Loki supports destructuring via loki "serializationMethod' option and
+     * the optional LokiPartitioningAdapter class. It is also available if you wish to do
+     * your own structured persistence or data exchange.
+     *
+     * @param {object=} options - output format options for use externally to loki
+     * @param {bool=} options.partitioned - (default: false) whether db and each collection are separate
+     * @param {int=} options.partition - can be used to only output an individual collection or db (-1)
+     * @param {bool=} options.delimited - (default: true) whether subitems are delimited or subarrays
+     * @param {string=} options.delimiter - override default delimiter
+     *
+     * @returns {string|array} A custom, restructured aggregation of independent serializations.
+     * @memberof Loki
+     */
+    Loki.prototype.serializeDestructured = function(options) {
+      var idx, sidx, result, resultlen;
+      var reconstruct = [];
+      var dbcopy;
+
+      options = options || {};
+
+      if (!options.hasOwnProperty("partitioned")) {
+        options.partitioned = false;
+      }
+
+      if (!options.hasOwnProperty("delimited")) {
+        options.delimited = true;
+      }
+
+      if (!options.hasOwnProperty("delimiter")) {
+        options.delimiter = this.options.destructureDelimiter;
+      }
+
+      // 'partitioned' along with 'partition' of 0 or greater is a request for single collection serialization
+      if (options.partitioned === true && options.hasOwnProperty("partition") && options.partition >= 0) {
+        return this.serializeCollection({
+          delimited: options.delimited,
+          delimiter: options.delimiter,
+          collectionIndex: options.partition
+        });
+      }
+
+      // not just an individual collection, so we will need to serialize db container via shallow copy
+      dbcopy = new Loki(this.filename);
+      dbcopy.loadJSONObject(this);
+
+      for(idx=0; idx < dbcopy.collections.length; idx++) {
+        dbcopy.collections[idx].data = [];
+      }
+
+      // if we -only- wanted the db container portion, return it now
+      if (options.partitioned === true && options.partition === -1) {
+        // since we are deconstructing, override serializationMethod to normal for here
+        return dbcopy.serialize({
+          serializationMethod: "normal"
+        });
+      }
+
+      // at this point we must be deconstructing the entire database
+      // start by pushing db serialization into first array element
+      reconstruct.push(dbcopy.serialize({
+          serializationMethod: "normal"
+      }));
+
+      dbcopy = null;
+
+      // push collection data into subsequent elements
+      for(idx=0; idx < this.collections.length; idx++) {
+        result = this.serializeCollection({
+          delimited: options.delimited,
+          delimiter: options.delimiter,
+          collectionIndex: idx
+        });
+
+        // NDA : Non-Delimited Array : one iterable concatenated array with empty string collection partitions
+        if (options.partitioned === false && options.delimited === false) {
+          if (!Array.isArray(result)) {
+            throw new Error("a nondelimited, non partitioned collection serialization did not return an expected array");
+          }
+
+          // Array.concat would probably duplicate memory overhead for copying strings.
+          // Instead copy each individually, and clear old value after each copy.
+          // Hopefully this will allow g.c. to reduce memory pressure, if needed.
+          resultlen = result.length;
+
+          for (sidx=0; sidx < resultlen; sidx++) {
+            reconstruct.push(result[sidx]);
+            result[sidx] = null;
+          }
+
+          reconstruct.push("");
+        }
+        else {
+          reconstruct.push(result);
+        }
+      }
+
+      // Reconstruct / present results according to four combinations : D, DA, NDA, NDAA
+      if (options.partitioned) {
+        // DA : Delimited Array of strings [0] db [1] collection [n] collection { partitioned: true, delimited: true }
+        // useful for simple future adaptations of existing persistence adapters to save collections separately
+        if (options.delimited) {
+          return reconstruct;
+        }
+        // NDAA : Non-Delimited Array with subArrays. db at [0] and collection subarrays at [n] { partitioned: true, delimited : false }
+        // This format might be the most versatile for 'rolling your own' partitioned sync or save.
+        // Memory overhead can be reduced by specifying a specific partition, but at this code path they did not, so its all.
+        else {
+          return reconstruct;
+        }
+      }
+      else {
+        // D : one big Delimited string { partitioned: false, delimited : true }
+        // This is the method Loki will use internally if 'destructured'.
+        // Little memory overhead improvements but does not require multiple asynchronous adapter call scheduling
+        if (options.delimited) {
+          // indicate no more collections
+          reconstruct.push("");
+
+          return reconstruct.join(options.delimiter);
+        }
+        // NDA : Non-Delimited Array : one iterable array with empty string collection partitions { partitioned: false, delimited: false }
+        // This format might be best candidate for custom synchronous syncs or saves
+        else {
+          // indicate no more collections
+          reconstruct.push("");
+
+          return reconstruct;
+        }
+      }
+
+      reconstruct.push("");
+
+      return reconstruct.join(delim);
+    };
+
+    /**
+     * Utility method to serialize a collection in a 'destructured' format
+     *
+     * @param {object} options - used to determine output of method
+     * @param {int=} options.delimited - whether to return single delimited string or an array
+     * @param {string=} options.delimiter - (optional) if delimited, this is delimiter to use
+     * @param {int} options.collectionIndex -  specify which collection to serialize data for
+     *
+     * @returns {string|array} A custom, restructured aggregation of independent serializations for a single collection.
+     * @memberof Loki
+     */
+    Loki.prototype.serializeCollection = function(options) {
+      var doccount,
+        docidx,
+        resultlines = [];
+
+      options = options || {};
+
+      if (!options.hasOwnProperty("delimited")) {
+        options.delimited = true;
+      }
+
+      if (!options.hasOwnProperty("collectionIndex")) {
+        throw new Error("serializeCollection called without 'collectionIndex' option");
+      }
+
+      doccount = this.collections[options.collectionIndex].data.length;
+
+      resultlines = [];
+
+      for(docidx=0; docidx<doccount; docidx++) {
+        resultlines.push(JSON.stringify(this.collections[options.collectionIndex].data[docidx]));
+      }
+
+      // D and DA
+      if (options.delimited) {
+         // indicate no more documents in collection (via empty delimited string)
+        resultlines.push("");
+
+        return resultlines.join(options.delimiter);
+      }
+      else {
+        // NDAA and NDA
+        return resultlines;
+      }
+    };
+
+    /**
+     * Destructured JSON deserialization routine to minimize memory overhead.
+     * Internally, Loki supports destructuring via loki "serializationMethod' option and
+     * the optional LokiPartitioningAdapter class. It is also available if you wish to do
+     * your own structured persistence or data exchange.
+     *
+     * @param {string|array} destructuredSource - destructured json or array to deserialize from
+     * @param {object=} options - source format options
+     * @param {bool=} options.partitioned - (default: false) whether db and each collection are separate
+     * @param {int=} options.partition - can be used to deserialize only a single partition
+     * @param {bool=} options.delimited - (default: true) whether subitems are delimited or subarrays
+     * @param {string=} options.delimiter - override default delimiter
+     *
+     * @returns {object|array} An object representation of the deserialized database, not yet applied to 'this' db or document array
+     * @memberof Loki
+     */
+    Loki.prototype.deserializeDestructured = function(destructuredSource, options) {
+      var workarray=[];
+      var len, cdb;
+      var idx, collIndex=0, collCount, lineIndex=1, done=false;
+      var currLine, currObject;
+
+      options = options || {};
+
+      if (!options.hasOwnProperty("partitioned")) {
+        options.partitioned = false;
+      }
+
+      if (!options.hasOwnProperty("delimited")) {
+        options.delimited = true;
+      }
+
+      if (!options.hasOwnProperty("delimiter")) {
+        options.delimiter = this.options.destructureDelimiter;
+      }
+
+      // Partitioned
+      // DA : Delimited Array of strings [0] db [1] collection [n] collection { partitioned: true, delimited: true }
+      // NDAA : Non-Delimited Array with subArrays. db at [0] and collection subarrays at [n] { partitioned: true, delimited : false }
+      // -or- single partition
+      if (options.partitioned) {
+        // handle single partition
+        if (options.hasOwnProperty('partition')) {
+          // db only
+          if (options.partition === -1) {
+            cdb = JSON.parse(destructuredSource[0]);
+
+            return cdb;
+          }
+
+          // single collection, return doc array
+          return this.deserializeCollection(destructuredSource[options.partition+1], options);
+        }
+
+        // Otherwise we are restoring an entire partitioned db
+        cdb = JSON.parse(destructuredSource[0]);
+        collCount = cdb.collections.length;
+        for(collIndex=0; collIndex<collCount; collIndex++) {
+          // attach each collection docarray to container collection data, add 1 to collection array index since db is at 0
+          cdb.collections[collIndex].data = this.deserializeCollection(destructuredSource[collIndex+1], options);
+        }
+
+        return cdb;
+      }
+
+      // Non-Partitioned
+      // D : one big Delimited string { partitioned: false, delimited : true }
+      // NDA : Non-Delimited Array : one iterable array with empty string collection partitions { partitioned: false, delimited: false }
+
+      // D
+      if (options.delimited) {
+        workarray = destructuredSource.split(options.delimiter);
+        destructuredSource = null; // lower memory pressure
+        len = workarray.length;
+
+        if (len === 0) {
+          return null;
+        }
+      }
+      // NDA
+      else {
+        workarray = destructuredSource;
+      }
+
+      // first line is database and collection shells
+      cdb = JSON.parse(workarray[0]);
+      collCount = cdb.collections.length;
+      workarray[0] = null;
+
+      while (!done) {
+        currLine = workarray[lineIndex];
+
+        // empty string indicates either end of collection or end of file
+        if (workarray[lineIndex] === "") {
+          // if no more collections to load into, we are done
+          if (++collIndex > collCount) {
+            done = true;
+          }
+        }
+        else {
+          currObject = JSON.parse(workarray[lineIndex]);
+          cdb.collections[collIndex].data.push(currObject);
+        }
+
+        // lower memory pressure and advance iterator
+        workarray[lineIndex++] = null;
+      }
+
+      return cdb;
+    };
+
+    /**
+     * Deserializes a destructured collection.
+     *
+     * @param {string|array} destructuredSource - destructured representation of collection to inflate
+     * @param {object} options - used to describe format of destructuredSource input
+     * @param {int} options.delimited - whether source is delimited string or an array
+     * @param {string} options.delimiter - (optional) if delimited, this is delimiter to use
+     *
+     * @returns {array} an array of documents to attach to collection.data.
+     * @memberof Loki
+     */
+    Loki.prototype.deserializeCollection = function(destructuredSource, options) {
+      var workarray=[];
+      var idx, len;
+
+      options = options || {};
+
+      if (!options.hasOwnProperty("partitioned")) {
+        options.partitioned = false;
+      }
+
+      if (!options.hasOwnProperty("delimited")) {
+        options.delimited = true;
+      }
+
+      if (!options.hasOwnProperty("delimiter")) {
+        options.delimiter = this.options.destructureDelimiter;
+      }
+
+      if (options.delimited) {
+        workarray = destructuredSource.split(options.delimiter);
+        workarray.pop();
+      }
+      else {
+        workarray = destructuredSource;
+      }
+
+      len = workarray.length;
+      for (idx=0; idx < len; idx++) {
+        workarray[idx] = JSON.parse(workarray[idx]);
+      }
+
+      return workarray;
+    };
 
     /**
      * Inflates a loki database from a serialized JSON string
@@ -917,7 +1452,13 @@
       if (serializedDb.length === 0) {
         dbObject = {};
       } else {
-        dbObject = JSON.parse(serializedDb);
+        // using option defined in instantiated db not what was in serialized db
+        switch (this.options.serializationMethod) {
+          case "normal":
+          case "pretty": dbObject = JSON.parse(serializedDb); break;
+          case "destructured": dbObject = this.deserializeDestructured(serializedDb); break;
+          default:  dbObject = JSON.parse(serializedDb); break;
+        }
       }
 
       this.loadJSONObject(dbObject, options);
@@ -928,6 +1469,7 @@
      *
      * @param {object} dbObject - a serialized loki database string
      * @param {object} options - apply or override collection level settings
+     * @param {bool?} options.retainDirtyFlags - whether collection dirty flags will be preserved
      * @memberof Loki
      */
     Loki.prototype.loadJSONObject = function (dbObject, options) {
@@ -943,10 +1485,10 @@
       this.name = dbObject.name;
 
       // restore database version
-      this.databaseVersion = 1.0;
-      if (dbObject.hasOwnProperty('databaseVersion')) {
-        this.databaseVersion = dbObject.databaseVersion;
-      }
+      // this.databaseVersion = 1.0;
+      // if (dbObject.hasOwnProperty('databaseVersion')) {
+      //   this.databaseVersion = dbObject.databaseVersion;
+      // }
 
       this.collections = [];
 
@@ -969,15 +1511,23 @@
 
       for (i; i < len; i += 1) {
         coll = dbObject.collections[i];
-        copyColl = this.addCollection(coll.name);
+
+        copyColl = this.addCollection(coll.name, { disableChangesApi: coll.disableChangesApi });
 
         copyColl.adaptiveBinaryIndices = coll.hasOwnProperty('adaptiveBinaryIndices')?(coll.adaptiveBinaryIndices === true): false;
         copyColl.transactional = coll.transactional;
         copyColl.asyncListeners = coll.asyncListeners;
-        copyColl.disableChangesApi = coll.disableChangesApi;
         copyColl.cloneObjects = coll.cloneObjects;
         copyColl.cloneMethod = coll.cloneMethod || "parse-stringify";
         copyColl.autoupdate = coll.autoupdate;
+        copyColl.changes = coll.changes;
+
+        if (options && options.retainDirtyFlags === true) {
+          copyColl.dirty = coll.dirty;
+        }
+        else {
+          copyColl.dirty = false;
+        }
 
         // load each element individually
         clen = coll.data.length;
@@ -998,7 +1548,7 @@
           }
         }
 
-        copyColl.maxId = (coll.data.length === 0) ? 0 : coll.maxId;
+        copyColl.maxId = (typeof coll.maxId === 'undefined') ? 0 : coll.maxId;
         copyColl.idIndex = coll.idIndex;
         if (typeof (coll.binaryIndices) !== 'undefined') {
           copyColl.binaryIndices = coll.binaryIndices;
@@ -1042,6 +1592,13 @@
             removeWhereFilters: true
           });
         }
+
+        // Upgrade Logic for binary index refactoring at version 1.4.4
+        if (dbObject.databaseVersion < 1.441) {
+          // rebuild all indices
+          copyColl.ensureAllIndexes(true);
+          copyColl.dirty = true;
+        }
       }
     };
 
@@ -1065,11 +1622,7 @@
         }
       }
 
-      if (!saved) {
-        saved = Promise.resolve();
-      }
-
-      return saved.then(function () {
+      return Promise.resolve(saved).then(function () {
         self.emit('close');
       });
     };
@@ -1133,12 +1686,416 @@
     | PERSISTENCE       |
     -------------------*/
 
-
     /** there are two build in persistence adapters for internal use
      * fs             for use in Nodejs type environments
      * localStorage   for use in browser environment
      * defined as helper classes here so its easy and clean to use
      */
+
+    /**
+     * In in-memory persistence adapter for an in-memory database.
+     * This simple 'key/value' adapter is intended for unit testing and diagnostics.
+     *
+     * @param {object=} options - memory adapter options
+     * @param {boolean} options.asyncResponses - whether callbacks are invoked asynchronously (default: false)
+     * @param {int} options.asyncTimeout - timeout in ms to queue callbacks (default: 50)
+     *
+     * @constructor LokiMemoryAdapter
+     */
+    function LokiMemoryAdapter(options) {
+      this.hashStore = {};
+      this.options = options || {};
+
+      if (!this.options.hasOwnProperty('asyncResponses')) {
+        this.options.asyncResponses = false;
+      }
+
+      if (!this.options.hasOwnProperty('asyncTimeout')) {
+        this.options.asyncTimeout = 50; // 50 ms default
+      }
+    }
+
+    /**
+     * Loads a serialized database from its in-memory store.
+     * (Loki persistence adapter interface function)
+     *
+     * @param {string} dbname - name of the database (filename/keyname)
+     * @returns {Promise} a Promise that resolves after the database was loaded
+     * @memberof LokiMemoryAdapter
+     */
+    LokiMemoryAdapter.prototype.loadDatabase = function (dbname) {
+      var self = this;
+
+      if (this.options.asyncResponses) {
+        return new Promise(function(resolve, reject) {
+          setTimeout(function () {
+            if (self.hashStore.hasOwnProperty(dbname)) {
+              resolve(self.hashStore[dbname].value);
+            }
+            else {
+              reject(new Error("unable to load database, " + dbname + " was not found in memory adapter"));
+            }
+          }, self.options.asyncTimeout);
+        });
+      }
+      else {
+        if (this.hashStore.hasOwnProperty(dbname)) {
+          return Promise.resolve(this.hashStore[dbname].value);
+        }
+        else {
+          return Promise.reject(new Error("unable to load database, " + dbname + " was not found in memory adapter"));
+        }
+      }
+    };
+
+    /**
+     * Saves a serialized database to its in-memory store.
+     * (Loki persistence adapter interface function)
+     *
+     * @param {string} dbname - name of the database (filename/keyname)
+     * @returns {Promise} a Promise that resolves after the database was persisted
+     * @memberof LokiMemoryAdapter
+     */
+    LokiMemoryAdapter.prototype.saveDatabase = function (dbname, dbstring) {
+      var self=this;
+      var saveCount;
+
+      if (this.options.asyncResponses) {
+        return new Promise(function(resolve, reject) {
+          setTimeout(function () {
+            saveCount = (self.hashStore.hasOwnProperty(dbname) ? self.hashStore[dbname].savecount : 0);
+
+            self.hashStore[dbname] = {
+              savecount: saveCount + 1,
+              lastsave: new Date(),
+              value: dbstring
+            };
+
+            resolve();
+          }, self.options.asyncTimeout);
+        });
+      } else {
+        saveCount = (this.hashStore.hasOwnProperty(dbname) ? this.hashStore[dbname].savecount : 0);
+
+        this.hashStore[dbname] = {
+          savecount: saveCount + 1,
+          lastsave: new Date(),
+          value: dbstring
+        };
+
+        return Promise.resolve();
+      }
+    };
+
+    /**
+     * Deletes a database from its in-memory store.
+     *
+     * @param {string} dbname - name of the database (filename/keyname)
+     * @returns {Promise} a Promise that resolves after the database was deleted
+     * @memberof LokiMemoryAdapter
+     */
+    LokiMemoryAdapter.prototype.deleteDatabase = function(dbname) {
+      if (this.hashStore.hasOwnProperty(dbname)) {
+        delete this.hashStore[dbname];
+      }
+
+      return Promise.resolve();
+    };
+
+    /**
+     * An adapter for adapters.  Converts a non reference mode adapter into a reference mode adapter
+     * which can perform destructuring and partioning.  Each collection will be stored in its own key/save and
+     * only dirty collections will be saved.  If you  turn on paging with default page size of 25megs and save
+     * a 75 meg collection it should use up roughly 3 save slots (key/value pairs sent to inner adapter).
+     * A dirty collection that spans three pages will save all three pages again
+     * Paging mode was added mainly because Chrome has issues saving 'too large' of a string within a
+     * single indexeddb row.  If a single document update causes the collection to be flagged as dirty, all
+     * of that collection's pages will be written on next save.
+     *
+     * @param {object} adapter - reference to a 'non-reference' mode loki adapter instance.
+     * @param {object=} options - configuration options for partitioning and paging
+     * @param {bool} options.paging - (default: false) set to true to enable paging collection data.
+     * @param {int} options.pageSize - (default : 25MB) you can use this to limit size of strings passed to inner adapter.
+     * @param {string} options.delimiter - allows you to override the default delimeter
+     * @constructor LokiPartitioningAdapter
+     */
+    function LokiPartitioningAdapter(adapter, options) {
+      this.mode = "reference";
+      this.adapter = null;
+      this.options = options || {};
+      this.dbref = null;
+      this.dbname = "";
+      this.pageIterator = {};
+
+      // verify user passed an appropriate adapter
+      if (adapter) {
+        if (adapter.mode === "reference") {
+          throw new Error("LokiPartitioningAdapter cannot be instantiated with a reference mode adapter");
+        }
+        else {
+          this.adapter = adapter;
+        }
+      }
+      else {
+        throw new Error("LokiPartitioningAdapter requires a (non-reference mode) adapter on construction");
+      }
+
+      // set collection paging defaults
+      if (!this.options.hasOwnProperty("paging")) {
+        this.options.paging = false;
+      }
+
+      // default to page size of 25 megs (can be up to your largest serialized object size larger than this)
+      if (!this.options.hasOwnProperty("pageSize")) {
+        this.options.pageSize = 25*1024*1024;
+      }
+
+      if (!this.options.hasOwnProperty("delimiter")) {
+        this.options.delimiter = '$<\n';
+      }
+    }
+
+    /**
+     * Loads a database which was partitioned into several key/value saves.
+     * (Loki persistence adapter interface function)
+     *
+     * @param {string} dbname - name of the database (filename/keyname)
+     * @returns {Promise} a Promise that resolves after the database was loaded
+     * @memberof LokiMemoryAdapter
+     */
+    LokiPartitioningAdapter.prototype.loadDatabase = function (dbname) {
+      var self=this;
+      this.dbname = dbname;
+      this.dbref = new Loki(dbname);
+
+      // load the db container (without data)
+      return this.adapter.loadDatabase(dbname).then(function(result) {
+        if (typeof result !== "string") {
+          throw new Error("LokiPartitioningAdapter received an unexpected response from inner adapter loadDatabase()");
+        }
+
+        // I will want to use loki destructuring helper methods so i will inflate into typed instance
+        var db = JSON.parse(result);
+        self.dbref.loadJSONObject(db);
+        db = null;
+
+        var clen = self.dbref.collections.length;
+
+        if (self.dbref.collections.length === 0) {
+          return self.dbref;
+        }
+
+        self.pageIterator = {
+          collection: 0,
+          pageIndex: 0
+        };
+
+        return self.loadNextPartition(0).then(function() {
+          return self.dbref;
+        });
+      });
+    };
+
+    /**
+     * Used to sequentially load each collection partition, one at a time.
+     *
+     * @param {int} partition - ordinal collection position to load next
+     * @returns {Promise} a Promise that resolves after the next partition is loaded
+     */
+    LokiPartitioningAdapter.prototype.loadNextPartition = function(partition) {
+      var keyname = this.dbname + "." + partition;
+      var self=this;
+
+      if (this.options.paging === true) {
+        this.pageIterator.pageIndex = 0;
+        return this.loadNextPage();
+      }
+
+      return this.adapter.loadDatabase(keyname).then(function(result) {
+        var data = self.dbref.deserializeCollection(result, { delimited: true, collectionIndex: partition });
+        self.dbref.collections[partition].data = data;
+
+        if (++partition < self.dbref.collections.length) {
+          return self.loadNextPartition(partition);
+        }
+      });
+    };
+
+    /**
+     * Used to sequentially load the next page of collection partition, one at a time.
+     *
+     * @returns {Promise} a Promise that resolves after the next page is loaded
+     */
+    LokiPartitioningAdapter.prototype.loadNextPage = function() {
+      // calculate name for next saved page in sequence
+      var keyname = this.dbname + "." + this.pageIterator.collection + "." + this.pageIterator.pageIndex;
+      var self=this;
+
+      // load whatever page is next in sequence
+      return this.adapter.loadDatabase(keyname).then(function(result) {
+        var data = result.split(self.options.delimiter);
+        result = ""; // free up memory now that we have split it into array
+        var dlen = data.length;
+        var idx;
+
+        // detect if last page by presence of final empty string element and remove it if so
+        var isLastPage = (data[dlen-1] === "");
+        if (isLastPage) {
+          data.pop();
+          dlen = data.length;
+          // empty collections are just a delimiter meaning two blank items
+          if (data[dlen-1] === "" && dlen === 1) {
+            data.pop();
+            dlen = data.length;
+          }
+        }
+
+        // convert stringified array elements to object instances and push to collection data
+        for(idx=0; idx < dlen; idx++) {
+          self.dbref.collections[self.pageIterator.collection].data.push(JSON.parse(data[idx]));
+          data[idx] = null;
+        }
+        data = [];
+
+        // if last page, we are done with this partition
+        if (isLastPage) {
+          // if there are more partitions, kick off next partition load
+          if (++self.pageIterator.collection < self.dbref.collections.length) {
+            return self.loadNextPartition(self.pageIterator.collection);
+          }
+        }
+        else {
+          self.pageIterator.pageIndex++;
+          return self.loadNextPage();
+        }
+      });
+    };
+
+    /**
+     * Saves a database by partioning into separate key/value saves.
+     * (Loki 'reference mode' persistence adapter interface function)
+     *
+     * @param {string} dbname - name of the database (filename/keyname)
+     * @param {object} dbref - reference to database which we will partition and save.
+     * @returns {Promise} a Promise that resolves after the database was deleted
+     *
+     * @memberof LokiPartitioningAdapter
+     */
+    LokiPartitioningAdapter.prototype.exportDatabase = function(dbname, dbref) {
+      var self=this;
+      var idx, clen = dbref.collections.length;
+
+      this.dbref = dbref;
+      this.dbname = dbname;
+
+      // queue up dirty partitions to be saved
+      this.dirtyPartitions = [-1];
+      for(idx=0; idx<clen; idx++) {
+        if (dbref.collections[idx].dirty) {
+          this.dirtyPartitions.push(idx);
+        }
+      }
+
+      return this.saveNextPartition();
+    };
+
+    /**
+     * Helper method used internally to save each dirty collection, one at a time.
+     *
+     * @returns {Promise} a Promise that resolves after the next partition is saved
+     */
+    LokiPartitioningAdapter.prototype.saveNextPartition = function() {
+      var self=this;
+      var partition = this.dirtyPartitions.shift();
+      var keyname = this.dbname + ((partition===-1)?"":("." + partition));
+
+      // if we are doing paging and this is collection partition
+      if (this.options.paging && partition !== -1) {
+        this.pageIterator = {
+          collection: partition,
+          docIndex: 0,
+          pageIndex: 0
+        };
+
+        // since saveNextPage recursively calls itself until done, our callback means this whole paged partition is finished
+        return this.saveNextPage().then(function() {
+          if (self.dirtyPartitions.length !== 0) {
+            return self.saveNextPartition();
+          }
+        });
+      }
+
+      // otherwise this is 'non-paged' partioning...
+      var result = this.dbref.serializeDestructured({
+        partitioned : true,
+        delimited: true,
+        partition: partition
+      });
+
+      return this.adapter.saveDatabase(keyname, result).then(function() {
+        if (self.dirtyPartitions.length !== 0) {
+          return self.saveNextPartition();
+        }
+      });
+    };
+
+    /**
+     * Helper method used internally to generate and save the next page of the current (dirty) partition.
+     *
+     * @returns {Promise} a Promise that resolves after the next partition is saved
+     */
+    LokiPartitioningAdapter.prototype.saveNextPage = function() {
+      var self=this;
+      var coll = this.dbref.collections[this.pageIterator.collection];
+      var keyname = this.dbname + "." + this.pageIterator.collection + "." + this.pageIterator.pageIndex;
+      var pageLen=0,
+        cdlen = coll.data.length,
+        delimlen = this.options.delimiter.length;
+      var serializedObject = "",
+        pageBuilder = "";
+      var doneWithPartition=false,
+        doneWithPage=false;
+
+      var pageSaveCallback = function() {
+        pageBuilder = "";
+
+        // update meta properties then continue process by invoking callback
+        if (!doneWithPartition) {
+          self.pageIterator.pageIndex++;
+          return self.saveNextPage();
+        }
+      };
+
+      if (coll.data.length === 0) {
+        doneWithPartition = true;
+      }
+
+      while (true) {
+        if (!doneWithPartition) {
+          // serialize object
+          serializedObject = JSON.stringify(coll.data[this.pageIterator.docIndex]);
+          pageBuilder += serializedObject;
+          pageLen += serializedObject.length;
+
+          // if no more documents in collection to add, we are done with partition
+          if (++this.pageIterator.docIndex >= cdlen) doneWithPartition = true;
+        }
+        // if our current page is bigger than defined pageSize, we are done with page
+        if (pageLen >= this.options.pageSize) doneWithPage = true;
+
+        // if not done with current page, need delimiter before next item
+        // if done with partition we also want a delmiter to indicate 'end of pages' final empty row
+        if (!doneWithPage || doneWithPartition) {
+          pageBuilder += this.options.delimiter;
+          pageLen += delimlen;
+        }
+
+        // if we are done with page save it and pass off to next recursive call or callback
+        if (doneWithPartition || doneWithPage) {
+          return this.adapter.saveDatabase(keyname, pageBuilder).then(pageSaveCallback);
+        }
+      }
+    };
 
     /**
      * A loki persistence adapter which persists using node fs module
@@ -1186,13 +2143,20 @@
      */
     LokiFsAdapter.prototype.saveDatabase = function saveDatabase(dbname, dbstring) {
       var self = this;
+      var tmpdbname = dbname + '~';
 
       return new Promise(function (resolve, reject) {
-        self.fs.writeFile(dbname, dbstring, function (err) {
+        self.fs.writeFile(tmpdbname, dbstring, function (err) {
           if (err) {
             reject(err);
           } else {
-            resolve();
+            self.fs.rename(tmpdbname, dbname, function (err) {
+              if (err) {
+                reject(err);
+              } else {
+                resolve();
+              }
+            });
           }
         });
       });
@@ -1205,7 +2169,7 @@
      * @returns {Promise} a Promise that resolves after the database was deleted
      * @memberof LokiFsAdapter
      */
-    LokiFsAdapter.prototype.deleteDatabase = function deleteDatabase(dbname, callback) {
+    LokiFsAdapter.prototype.deleteDatabase = function deleteDatabase(dbname) {
       var self = this;
 
       return new Promise(function (resolve, reject) {
@@ -1275,13 +2239,72 @@
     };
 
     /**
-     * Handles loading from file system, local storage, or adapter (indexeddb).
+     * Wait for throttledSaves to complete and invoke your callback when drained or duration is met.
+     *
+     * @param {object=} options - configuration options
+     * @param {boolean} options.recursiveWait - (default: true) if after queue is drained, another save was kicked off, wait for it
+     * @param {bool} options.recursiveWaitLimit - (default: false) limit our recursive waiting to a duration
+     * @param {int} options.recursiveWaitLimitDelay - (default: 2000) cutoff in ms to stop recursively re-draining
+     * @returns {Promise} a Promise that resolves when save queue is drained, it is passed a sucess parameter value
+     * @memberof Loki
+     */
+    Loki.prototype.throttledSaveDrain = function(options) {
+      var self = this;
+      var now = (new Date()).getTime();
+
+      if (!this.throttledSaves) {
+        return Promise.resolve();
+      }
+
+      options = options || {};
+      if (!options.hasOwnProperty('recursiveWait')) {
+        options.recursiveWait = true;
+      }
+      if (!options.hasOwnProperty('recursiveWaitLimit')) {
+        options.recursiveWaitLimit = false;
+      }
+      if (!options.hasOwnProperty('recursiveWaitLimitDuration')) {
+        options.recursiveWaitLimitDuration = 2000;
+      }
+      if (!options.hasOwnProperty('started')) {
+        options.started = (new Date()).getTime();
+      }
+
+      // if save is pending
+      if (this.throttledSaves && this.throttledSaveRunning !== null) {
+        // if we want to wait until we are in a state where there are no pending saves at all
+        if (options.recursiveWait) {
+          // queue the following meta callback for when it completes
+          return Promise.resolve(Promise.all([this.throttledSaveRunning, this.throttledSavePending])).then(function() {
+            if (self.throttledSaveRunning !== null || self.throttledSavePending !== null) {
+              if (options.recursiveWaitLimit && (now - options.started > options.recursiveWaitLimitDuration)) {
+                return Promise.reject();
+              }
+              return self.throttledSaveDrain(options);
+            } else {
+              return Promise.resolve();
+            }
+          });
+        }
+        // just notify when current queue is depleted
+        else {
+          return Promise.resolve(this.throttledSaveRunning);
+        }
+      }
+      // no save pending, just callback
+      else {
+        return Promise.resolve();
+      }
+    };
+
+    /**
+     * Internal load logic, decoupled from throttling/contention logic
      *
      * @param {object} options - an object containing inflation options for each collection
      * @returns {Promise} a Promise that resolves after the database is loaded
      * @memberof Loki
      */
-    Loki.prototype.loadDatabase = function (options) {
+    Loki.prototype.loadDatabaseInternal = function (options) {
       var self = this;
 
       // the persistenceAdapter should be present if all is ok, but check to be sure.
@@ -1289,7 +2312,7 @@
         return Promise.reject(new Error('persistenceAdapter not configured'));
       }
 
-      return this.persistenceAdapter.loadDatabase(this.filename)
+      return Promise.resolve(this.persistenceAdapter.loadDatabase(this.filename))
         .then(function loadDatabaseCallback(dbString) {
           if (typeof (dbString) === 'string') {
             self.loadJSON(dbString, options || {});
@@ -1310,12 +2333,40 @@
     };
 
     /**
-     * Handles saving to file system, local storage, or adapter (indexeddb)
+     * Handles loading from file system, local storage, or adapter (indexeddb)
+     *    This method utilizes loki configuration options (if provided) to determine which
+     *    persistence method to use, or environment detection (if configuration was not provided).
+     *    To avoid contention with any throttledSaves, we will drain the save queue first.
      *
+     * @param {object} options - if throttling saves and loads, this controls how we drain save queue before loading
+     * @param {boolean} options.recursiveWait - (default: true) wait recursively until no saves are queued
+     * @param {bool} options.recursiveWaitLimit - (default: false) limit our recursive waiting to a duration
+     * @param {int} options.recursiveWaitLimitDelay - (default: 2000) cutoff in ms to stop recursively re-draining
+     * @returns {Promise} a Promise that resolves after the database is loaded
      * @memberof Loki
-     * @returns {Promise} a Promise that resolves after the database is persisted
      */
-    Loki.prototype.saveDatabase = function () {
+    Loki.prototype.loadDatabase = function (options) {
+      var self=this;
+
+      // if throttling disabled, just call internal
+      if (!this.throttledSaves) {
+        return this.loadDatabaseInternal(options);
+      }
+
+      // try to drain any pending saves in the queue to lock it for loading
+      return this.throttledSaveDrain(options).then(function() {
+        // pause/throttle saving until loading is done
+        self.throttledSaveRunning  = self.loadDatabaseInternal(options).then(function() {
+          // now that we are finished loading, if no saves were throttled, disable flag
+          self.throttledSaveRunning = null;
+        });
+        return self.throttledSaveRunning;
+      }, function() {
+        throw new Error("Unable to pause save throttling long enough to read database");
+      });
+    };
+
+    Loki.prototype.saveDatabaseInternal = function () {
       var self = this;
 
       // the persistenceAdapter should be present if all is ok, but check to be sure.
@@ -1328,17 +2379,51 @@
       // check if the adapter is requesting (and supports) a 'reference' mode export
       if (this.persistenceAdapter.mode === "reference" && typeof this.persistenceAdapter.exportDatabase === "function") {
         // filename may seem redundant but loadDatabase will need to expect this same filename
-        saved = this.persistenceAdapter.exportDatabase(this.filename, this);
+        saved = this.persistenceAdapter.exportDatabase(this.filename, this.copy({removeNonSerializable: true}));
       }
       // otherwise just pass the serialized database to adapter
       else {
         saved = this.persistenceAdapter.saveDatabase(this.filename, self.serialize());
       }
 
-      return saved.then(function () {
+      return Promise.resolve(saved).then(function () {
         self.autosaveClearFlags();
         self.emit("save");
       });
+    };
+
+    /**
+     * Handles saving to file system, local storage, or adapter (indexeddb)
+     *    This method utilizes loki configuration options (if provided) to determine which
+     *    persistence method to use, or environment detection (if configuration was not provided).
+     *
+     * @memberof Loki
+     * @returns {Promise} a Promise that resolves after the database is persisted
+     */
+    Loki.prototype.saveDatabase = function () {
+      if (!this.throttledSaves) {
+        return this.saveDatabaseInternal();
+      }
+      var self = this;
+
+      // if the db save is currently running, a new promise for a next db save is created
+      // all calls to save db will get this new promise which will be processed right after
+      // the current db save is finished
+      if (this.throttledSaveRunning !== null && this.throttledSavePending === null) {
+        this.throttledSavePending = Promise.resolve(this.throttledSaveRunning).then(function() {
+          self.throttledSaveRunning = null;
+          self.throttledSavePending = null;
+          return self.saveDatabase();
+        });
+      }
+      if (this.throttledSavePending !== null) {
+        return this.throttledSavePending;
+      }
+      this.throttledSaveRunning = this.saveDatabaseInternal().then(function() {
+        self.throttledSaveRunning = null;
+      });
+
+      return this.throttledSaveRunning;
     };
 
     // alias
@@ -1356,7 +2441,7 @@
         return Promise.reject(new Error('persistenceAdapter not configured'));
       }
 
-      return this.persistenceAdapter.deleteDatabase(this.filename);
+      return Promise.resolve(this.persistenceAdapter.deleteDatabase(this.filename));
     };
 
     /**
@@ -1634,6 +2719,39 @@
     };
 
     /**
+     * Instances a new anonymous collection with the documents contained in the current resultset.
+     *
+     * @param {object} collectionOptions - Options to pass to new anonymous collection construction.
+     * @returns {Collection} A reference to an anonymous collection initialized with resultset data().
+     * @memberof Resultset
+     */
+    Resultset.prototype.instance = function(collectionOptions) {
+      var docs = this.data();
+      var idx,
+        doc;
+
+      collectionOptions = collectionOptions || {};
+
+      var instanceCollection = new Collection(collectionOptions);
+
+      for(idx=0; idx<docs.length; idx++) {
+        if (this.collection.cloneObjects) {
+          doc = docs[idx];
+        }
+        else {
+          doc = clone(docs[idx], this.collection.cloneMethod);
+        }
+
+        delete doc.$loki;
+        delete doc.meta;
+
+        instanceCollection.insert(doc);
+      }
+
+      return instanceCollection;
+    };
+
+    /**
      * User supplied compare function is provided two documents to compare. (chainable)
      * @example
      *    rslt.sort(function(obj1, obj2) {
@@ -1674,13 +2792,30 @@
      * @memberof Resultset
      */
     Resultset.prototype.simplesort = function (propname, isdesc) {
-      // if this is chained resultset with no filters applied, just we need to populate filteredrows first
-      if (this.searchIsChained && !this.filterInitialized && this.filteredrows.length === 0) {
-        this.filteredrows = this.collection.prepareFullDocIndex();
-      }
-
       if (typeof (isdesc) === 'undefined') {
         isdesc = false;
+      }
+
+      // if this is chained resultset with no filters applied, just we need to populate filteredrows first
+      if (this.searchIsChained && !this.filterInitialized && this.filteredrows.length === 0) {
+        // if we have a binary index and no other filters applied, we can use that instead of sorting (again)
+        if (this.collection.binaryIndices.hasOwnProperty(propname)) {
+          // make sure index is up-to-date
+          this.collection.ensureIndex(propname);
+          // copy index values into filteredrows
+          this.filteredrows = this.collection.binaryIndices[propname].values.slice(0);
+
+          if (isdesc) {
+            this.filteredrows.reverse();
+          }
+
+          // we are done, return this (resultset) for further chain ops
+          return this;
+        }
+        // otherwise initialize array for sort below
+        else {
+          this.filteredrows = this.collection.prepareFullDocIndex();
+        }
       }
 
       var wrappedComparer =
@@ -1928,8 +3063,7 @@
       var doIndexCheck = !usingDotNotation &&
         (!this.searchIsChained || !this.filterInitialized);
 
-      if (doIndexCheck && this.collection.binaryIndices[property] &&
-        indexedOpsList.indexOf(operator) !== -1) {
+      if (doIndexCheck && this.collection.binaryIndices[property] && indexedOps[operator]) {
         // this is where our lazy index rebuilding will take place
         // basically we will leave all indexes dirty until we need them
         // so here we will rebuild only the index tied to this property
@@ -1948,7 +3082,8 @@
       // "shortcut" for collection data
       var t = this.collection.data;
       // filter data length
-      var i = 0;
+      var i = 0,
+        len = 0;
 
       // Query executed differently depending on :
       //    - whether it is chained or not
@@ -2010,8 +3145,21 @@
             return [];
           }
 
-          for (i = seg[0]; i <= seg[1]; i++) {
-            result.push(t[index.values[i]]);
+          if (operator !== '$in') {
+            for (i = seg[0]; i <= seg[1]; i++) {
+              if (indexedOps[operator] !== true) {
+                if (indexedOps[operator](t[index.values[i]][property], value)) {
+                  result.push(t[index.values[i]]);
+                }
+              }
+              else {
+                result.push(t[index.values[i]]);
+              }
+            }
+          } else {
+            for (i = 0, len = seg.length; i < len; i++) {
+              result.push(t[index.values[seg[i]]]);
+            }
           }
         }
 
@@ -2021,25 +3169,26 @@
 
 
       // Otherwise this is a chained query
+      // Chained queries now preserve results ordering at expense on slightly reduced unindexed performance
 
       var filter, rowIdx = 0;
 
       // If the filteredrows[] is already initialized, use it
       if (this.filterInitialized) {
         filter = this.filteredrows;
-        i = filter.length;
+        len = filter.length;
 
         // currently supporting dot notation for non-indexed conditions only
         if (usingDotNotation) {
           property = property.split('.');
-          while (i--) {
+          for(i=0; i<len; i++) {
             rowIdx = filter[i];
             if (dotSubScan(t[rowIdx], property, fun, value)) {
               result.push(rowIdx);
             }
           }
         } else {
-          while (i--) {
+          for(i=0; i<len; i++) {
             rowIdx = filter[i];
             if (fun(t[rowIdx][property], value)) {
               result.push(rowIdx);
@@ -2051,17 +3200,17 @@
       else {
         // if not searching by index
         if (!searchByIndex) {
-          i = t.length;
+          len = t.length;
 
           if (usingDotNotation) {
             property = property.split('.');
-            while (i--) {
+            for(i=0; i<len; i++) {
               if (dotSubScan(t[i], property, fun, value)) {
                 result.push(i);
               }
             }
           } else {
-            while (i--) {
+            for(i=0; i<len; i++) {
               if (fun(t[i][property], value)) {
                 result.push(i);
               }
@@ -2071,8 +3220,22 @@
           // search by index
           var segm = this.collection.calculateRange(operator, property, value);
 
-          for (i = segm[0]; i <= segm[1]; i++) {
-            result.push(index.values[i]);
+          if (operator !== '$in') {
+            for (i = segm[0]; i <= segm[1]; i++) {
+              if (indexedOps[operator] !== true) {
+                // must be a function, implying 2nd phase filtering of results from calculateRange
+                if (indexedOps[operator](t[index.values[i]][property], value)) {
+                  result.push(index.values[i]);
+                }
+              }
+              else {
+                result.push(index.values[i]);
+              }
+            }
+          } else {
+            for (i = 0, len = segm.length; i < len; i++) {
+              result.push(index.values[segm[i]]);
+            }
           }
         }
 
@@ -2543,13 +3706,17 @@
     /**
      * removeFilters() - Used to clear pipeline and reset dynamic view to initial state.
      *     Existing options should be retained.
+     * @param {object=} options - configure removeFilter behavior
+     * @param {boolean=} options.queueSortPhase - (default: false) if true we will async rebuild view (maybe set default to true in future?)
      * @memberof DynamicView
      */
-    DynamicView.prototype.removeFilters = function () {
+    DynamicView.prototype.removeFilters = function (options) {
+      options = options || {};
+
       this.rebuildPending = false;
       this.resultset.reset();
       this.resultdata = [];
-      this.resultsdirty = false;
+      this.resultsdirty = true;
 
       this.cachedresultset = null;
 
@@ -2561,6 +3728,10 @@
       this.sortFunction = null;
       this.sortCriteria = null;
       this.sortDirty = false;
+
+      if (options.queueSortPhase === true) {
+        this.queueSortPhase();
+      }
     };
 
     /**
@@ -2821,9 +3992,13 @@
      * @memberof DynamicView
      */
     DynamicView.prototype.count = function () {
-      if (this.options.persistent) {
-        return this.resultdata.length;
+      // in order to be accurate we will pay the minimum cost (and not alter dv state management)
+      // recurring resultset data resolutions should know internally its already up to date.
+      // for persistent data this will not update resultdata nor fire rebuild event.
+      if (this.resultsdirty) {
+        this.resultdata = this.resultset.data();
       }
+
       return this.resultset.count();
     };
 
@@ -3118,6 +4293,7 @@
      * @param {boolean} options.disableChangesApi - default is true
      * @param {boolean} options.autoupdate - use Object.observe to update objects automatically (default: false)
      * @param {boolean} options.clone - specify whether inserts and queries clone to/from user
+		 * @param {boolean} options.serializableIndices  - ensures indexed property values are serializable (default: true)
      * @param {string} options.cloneMethod - 'parse-stringify' (default), 'jquery-extend-deep', 'shallow'
      * @param {int} options.ttlInterval - time interval for clearing out 'aged' documents; not set by default.
      * @see {@link Loki#addCollection} for normal creation of collections
@@ -3198,6 +4374,11 @@
 
       // option to observe objects and update them automatically, ignored if Object.observe is not supported
       this.autoupdate = options.hasOwnProperty('autoupdate') ? options.autoupdate : false;
+
+			// by default, if you insert a document into a collection with binary indices, if those indexed properties contain
+			// a DateTime we will convert to epoch time format so that (across serializations) its value position will be the
+			// same 'after' serialization as it was 'before'.
+			this.serializableIndices = options.hasOwnProperty('serializableIndices') ? options.serializableIndices : true;
 
       //option to activate a cleaner daemon - clears "aged" documents at set intervals.
       this.ttl = {
@@ -3299,9 +4480,29 @@
        * If the changes API is disabled make sure only metadata is added without re-evaluating everytime if the changesApi is enabled
        */
       function insertMeta(obj) {
+        var len, idx;
+
         if (!obj) {
           return;
         }
+
+        // if batch insert
+        if (Array.isArray(obj)) {
+          len = obj.length;
+
+          for(idx=0; idx<len; idx++) {
+            if (!obj[idx].hasOwnProperty('meta')) {
+              obj[idx].meta = {};
+            }
+
+            obj[idx].meta.created = (new Date()).getTime();
+            obj[idx].meta.revision = 0;
+          }
+
+          return;
+        }
+
+        // single object
         if (!obj.meta) {
           obj.meta = {};
         }
@@ -3535,6 +4736,11 @@
         if (!this.binaryIndices[property].dirty) return;
       }
 
+      // if the index is already defined and we are using adaptiveBinaryIndices and we are not forcing a rebuild, return.
+      if (this.adaptiveBinaryIndices === true && this.binaryIndices.hasOwnProperty(property) && !force) {
+        return;
+      }
+
       var index = {
         'name': property,
         'dirty': true,
@@ -3690,26 +4896,30 @@
     };
 
     /**
-     * find and update: pass a filtering function to select elements to be updated
-     * and apply the updatefunctino to those elements iteratively
-     * @param {function} filterFunction - filter function whose results will execute update
+     * Applies a 'mongo-like' find query object and passes all results to an update function.
+     * For filter function querying you should migrate to [updateWhere()]{@link Collection#updateWhere}.
+     *
+     * @param {object|function} filterObject - 'mongo-like' query object (or deprecated filterFunction mode)
      * @param {function} updateFunction - update function to run against filtered documents
      * @memberof Collection
      */
-    Collection.prototype.findAndUpdate = function (filterFunction, updateFunction) {
-      var results = this.where(filterFunction),
-        i = 0,
-        obj;
-      try {
-        for (i; i < results.length; i++) {
-          obj = updateFunction(results[i]);
-          this.update(obj);
-        }
-
-      } catch (err) {
-        this.rollback();
-        this.console.error(err.message);
+    Collection.prototype.findAndUpdate = function (filterObject, updateFunction) {
+      if (typeof (filterObject) === "function") {
+        this.updateWhere(filterObject, updateFunction);
       }
+      else {
+        this.chain().find(filterObject).update(updateFunction);
+      }
+    };
+
+    /**
+     * Applies a 'mongo-like' find query object removes all documents which match that filter.
+     *
+     * @param {object} filterObject - 'mongo-like' query object
+     * @memberof Collection
+     */
+    Collection.prototype.findAndRemove = function(filterObject) {
+      this.chain().find(filterObject).remove();
     };
 
     /**
@@ -3735,7 +4945,13 @@
         }
         results.push(obj);
       }
-      this.emit('insert', doc);
+
+      // at the 'batch' level, if clone option is true then emitted docs are clones
+      this.emit('insert', results);
+
+      // if clone option is set, clone return values
+      results = this.cloneObjects ? clone(results, this.cloneMethod) : results;
+
       return results.length === 1 ? results[0] : results;
     };
 
@@ -3771,10 +4987,8 @@
         };
       }
 
-      // if cloning, give user back clone of 'cloned' object with $loki and meta
-      returnObj = this.cloneObjects ? clone(obj, this.cloneMethod) : obj;
-
-      // allow pre-insert to modify actual collection reference even if cloning
+      // both 'pre-insert' and 'insert' events are passed internal data reference even when cloning
+      // insert needs internal reference because that is where loki itself listens to add meta
       if (!bulkInsert) {
         this.emit('pre-insert', obj);
       }
@@ -3782,27 +4996,66 @@
         return undefined;
       }
 
-      this.addAutoUpdateObserver(returnObj);
+      returnObj = obj;
       if (!bulkInsert) {
-        this.emit('insert', returnObj);
+        this.emit('insert', obj);
+        returnObj = this.cloneObjects ? clone(obj, this.cloneMethod) : obj;
       }
+
+      this.addAutoUpdateObserver(returnObj);
       return returnObj;
     };
 
     /**
      * Empties the collection.
+     * @param {object=} options - configure clear behavior
+     * @param {bool=} options.removeIndices - (default: false)
      * @memberof Collection
      */
-    Collection.prototype.clear = function () {
+    Collection.prototype.clear = function (options) {
+      var self = this;
+
+      options = options || {};
+
       this.data = [];
       this.idIndex = [];
-      this.binaryIndices = {};
       this.cachedIndex = null;
       this.cachedBinaryIndex = null;
       this.cachedData = null;
       this.maxId = 0;
       this.DynamicViews = [];
       this.dirty = true;
+
+      // if removing indices entirely
+      if (options.removeIndices === true) {
+        this.binaryIndices = {};
+
+        this.constraints = {
+          unique: {},
+          exact: {}
+        };
+        this.uniqueNames = [];
+      }
+      // clear indices but leave definitions in place
+      else {
+        // clear binary indices
+        var keys = Object.keys(this.binaryIndices);
+        keys.forEach(function(biname) {
+          self.binaryIndices[biname].dirty = false;
+          self.binaryIndices[biname].values = [];
+        });
+
+        // clear entire unique indices definition
+        this.constraints = {
+          unique: {},
+          exact: {}
+        };
+
+        // add definitions back
+        this.uniqueNames.forEach(function(uiname) {
+          self.ensureUniqueIndex(uiname);
+        });
+      }
     };
 
     /**
@@ -3832,15 +5085,16 @@
           position,
           self = this;
 
+        if (!arr) {
+          throw new Error('Trying to update a document not in collection.');
+        }
+
         oldInternal = arr[0]; // -internal- obj ref
         position = arr[1]; // position in data array
 
         // if configured to clone, do so now... otherwise just use same obj reference
         newInternal = this.cloneObjects ? clone(doc, this.cloneMethod) : doc;
 
-        if (!arr) {
-          throw new Error('Trying to update a document not in collection.');
-        }
         this.emit('pre-update', doc);
 
         Object.keys(this.constraints.unique).forEach(function (key) {
@@ -3963,20 +5217,42 @@
     };
 
     /**
-     * Remove all documents matching supplied filter object
-     * @param {object} query - query object to filter on
+     * Applies a filter function and passes all results to an update function.
+     *
+     * @param {function} filterFunction - filter function whose results will execute update
+     * @param {function} updateFunction - update function to run against filtered documents
+     * @memberof Collection
+     */
+    Collection.prototype.updateWhere = function(filterFunction, updateFunction) {
+      var results = this.where(filterFunction),
+        i = 0,
+        obj;
+      try {
+        for (i; i < results.length; i++) {
+          obj = updateFunction(results[i]);
+          this.update(obj);
+        }
+
+      } catch (err) {
+        this.rollback();
+        this.console.error(err.message);
+      }
+    };
+
+    /**
+     * Remove all documents matching supplied filter function.
+     * For 'mongo-like' querying you should migrate to [findAndRemove()]{@link Collection#findAndRemove}.
+     * @param {function|object} query - query object to filter on
      * @memberof Collection
      */
     Collection.prototype.removeWhere = function (query) {
       var list;
       if (typeof query === 'function') {
         list = this.data.filter(query);
+        this.remove(list);
       } else {
-        list = new Resultset(this, {
-          queryObj: query
-        });
+        this.chain().find(query).remove();
       }
-      this.remove(list);
     };
 
     Collection.prototype.removeDataOnly = function () {
@@ -4146,8 +5422,14 @@
     Collection.prototype.adaptiveBinaryIndexInsert = function(dataPosition, binaryIndexName) {
       var index = this.binaryIndices[binaryIndexName].values;
       var val = this.data[dataPosition][binaryIndexName];
-      //var rs = new Resultset(this, null, null);
-      var idxPos = this.calculateRangeStart(binaryIndexName, val);
+
+			// If you are inserting a javascript Date value into a binary index, convert to epoch time
+			if (this.serializableIndices === true && val instanceof Date) {
+				this.data[dataPosition][binaryIndexName] = val.getTime();
+				val = this.data[dataPosition][binaryIndexName];
+			}
+
+			var idxPos = (index.length === 0)?0:this.calculateRangeStart(binaryIndexName, val, true);
 
       // insert new data index into our binary index at the proper sorted location for relevant property calculated by idxPos.
       // doing this after adjusting dataPositions so no clash with previous item at that position.
@@ -4213,10 +5495,20 @@
     };
 
     /**
-     * Internal method used for index maintenance.  Given a prop (index name), and a value
-     * (which may or may not yet exist) this will find the proper location where it can be added.
+     * Internal method used for index maintenance and indexed searching.
+     * Calculates the beginning of an index range for a given value.
+     * For index maintainance (adaptive:true), we will return a valid index position to insert to.
+     * For querying (adaptive:false/undefined), we will :
+     *    return lower bound/index of range of that value (if found)
+     *    return next lower index position if not found (hole)
+     * If index is empty it is assumed to be handled at higher level, so
+     * this method assumes there is at least 1 document in index.
+     *
+     * @param {string} prop - name of property which has binary index
+     * @param {any} val - value to find within index
+     * @param {bool?} adaptive - if true, we will return insert position
      */
-    Collection.prototype.calculateRangeStart = function (prop, val) {
+    Collection.prototype.calculateRangeStart = function (prop, val, adaptive) {
       var rcd = this.data;
       var index = this.binaryIndices[prop].values;
       var min = 0;
@@ -4224,7 +5516,7 @@
       var mid = 0;
 
       if (index.length === 0) {
-        return 0;
+        return -1;
       }
 
       var minVal = rcd[index[min]][prop];
@@ -4243,12 +5535,68 @@
 
       var lbound = min;
 
-      if (ltHelper(rcd[index[lbound]][prop], val, false)) {
-        return lbound+1;
-      }
-      else {
+      // found it... return it
+      if (aeqHelper(val, rcd[index[lbound]][prop])) {
         return lbound;
       }
+
+      // if not in index and our value is less than the found one
+      if (ltHelper(val, rcd[index[lbound]][prop], false)) {
+        return adaptive?lbound:lbound-1;
+      }
+
+      // not in index and our value is greater than the found one
+      return adaptive?lbound+1:lbound;
+    };
+
+    /**
+     * Internal method used for indexed $between.  Given a prop (index name), and a value
+     * (which may or may not yet exist) this will find the final position of that upper range value.
+     */
+    Collection.prototype.calculateRangeEnd = function (prop, val) {
+      var rcd = this.data;
+      var index = this.binaryIndices[prop].values;
+      var min = 0;
+      var max = index.length - 1;
+      var mid = 0;
+
+      if (index.length === 0) {
+        return -1;
+      }
+
+      var minVal = rcd[index[min]][prop];
+      var maxVal = rcd[index[max]][prop];
+
+      // hone in on start position of value
+      while (min < max) {
+        mid = (min + max) >> 1;
+
+        if (ltHelper(val, rcd[index[mid]][prop], false)) {
+          max = mid;
+        } else {
+          min = mid + 1;
+        }
+      }
+
+      var ubound = max;
+
+      // only eq if last element in array is our val
+      if (aeqHelper(val, rcd[index[ubound]][prop])) {
+        return ubound;
+      }
+
+      // if not in index and our value is less than the found one
+      if (gtHelper(val, rcd[index[ubound]][prop], false)) {
+        return ubound+1;
+      }
+
+      // either hole or first nonmatch
+      if (aeqHelper(val, rcd[index[ubound-1]][prop])) {
+        return ubound-1;
+      }
+
+      // hole, so ubound if nearest gt than the val we were looking for
+      return ubound;
     };
 
     /**
@@ -4267,6 +5615,8 @@
       var min = 0;
       var max = index.length - 1;
       var mid = 0;
+      var lbound, lval;
+      var ubound, uval;
 
       // when no documents are in collection, return empty range condition
       if (rcd.length === 0) {
@@ -4290,118 +5640,172 @@
         }
         break;
       case '$gt':
+        // none are within range
         if (gtHelper(val, maxVal, true)) {
           return [0, -1];
         }
+        // all are within range
+        if (gtHelper(minVal, val, false)) {
+          return [min, max];
+        }
         break;
       case '$gte':
+        // none are within range
         if (gtHelper(val, maxVal, false)) {
           return [0, -1];
         }
+        // all are within range
+        if (gtHelper(minVal, val, true)) {
+          return [min, max];
+        }
         break;
       case '$lt':
+        // none are within range
         if (ltHelper(val, minVal, true)) {
           return [0, -1];
         }
+        // all are within range
         if (ltHelper(maxVal, val, false)) {
-          return [0, rcd.length - 1];
+          return [min, max];
         }
         break;
       case '$lte':
+        // none are within range
         if (ltHelper(val, minVal, false)) {
           return [0, -1];
         }
+        // all are within range
         if (ltHelper(maxVal, val, true)) {
-          return [0, rcd.length - 1];
+          return [min, max];
         }
         break;
-      }
-
-      // hone in on start position of value
-      while (min < max) {
-        mid = (min + max) >> 1;
-
-        if (ltHelper(rcd[index[mid]][prop], val, false)) {
-          min = mid + 1;
-        } else {
-          max = mid;
+      case '$between':
+        // none are within range (low range is greater)
+        if (gtHelper(val[0], maxVal, false)) {
+          return [0, -1];
         }
-      }
-
-      var lbound = min;
-
-      // do not reset min, as the upper bound cannot be prior to the found low bound
-      max = index.length - 1;
-
-      // hone in on end position of value
-      while (min < max) {
-        mid = (min + max) >> 1;
-
-        if (ltHelper(val, rcd[index[mid]][prop], false)) {
-          max = mid;
-        } else {
-          min = mid + 1;
+        // none are within range (high range lower)
+        if (ltHelper(val[1], minVal, false)) {
+          return [0, -1];
         }
+
+        lbound = this.calculateRangeStart(prop, val[0]);
+        ubound = this.calculateRangeEnd(prop, val[1]);
+
+        if (lbound < 0) lbound++;
+        if (ubound > max) ubound--;
+
+        if (!gtHelper(rcd[index[lbound]][prop], val[0], true)) lbound++;
+        if (!ltHelper(rcd[index[ubound]][prop], val[1], true)) ubound--;
+
+        if (ubound < lbound) return [0, -1];
+
+        return ([lbound, ubound]);
+      case '$in':
+        var idxset = [],
+          segResult = [];
+        // query each value '$eq' operator and merge the seqment results.
+        for (var j = 0, len = val.length; j < len; j++) {
+            var seg = this.calculateRange('$eq', prop, val[j]);
+
+            for (var i = seg[0]; i <= seg[1]; i++) {
+                if (idxset[i] === undefined) {
+                    idxset[i] = true;
+                    segResult.push(i);
+                }
+            }
+        }
+        return segResult;
       }
 
-      var ubound = max;
+      // determine lbound where needed
+      switch (op) {
+        case '$eq':
+        case '$aeq':
+        case '$dteq':
+        case '$gte':
+        case '$lt':
+          lbound = this.calculateRangeStart(prop, val);
+          lval = rcd[index[lbound]][prop];
+          break;
+        default: break;
+      }
 
-      var lval = rcd[index[lbound]][prop];
-      var uval = rcd[index[ubound]][prop];
+      // determine ubound where needed
+      switch (op) {
+        case '$eq':
+        case '$aeq':
+        case '$dteq':
+        case '$lte':
+        case '$gt':
+          ubound = this.calculateRangeEnd(prop, val);
+          uval = rcd[index[ubound]][prop];
+          break;
+        default: break;
+      }
+
 
       switch (op) {
-      case '$eq':
-        if (lval !== val) {
-          return [0, -1];
-        }
-        if (uval !== val) {
-          ubound--;
-        }
+        case '$eq':
+        case '$aeq':
+        case '$dteq':
+          // if hole (not found)
+          //if (ltHelper(lval, val, false) || gtHelper(lval, val, false)) {
+          //  return [0, -1];
+          //}
+          if (!aeqHelper(lval, val)) {
+            return [0, -1];
+          }
 
-        return [lbound, ubound];
-      case '$dteq':
-        if (lval > val || lval < val) {
-          return [0, -1];
-        }
-        if (uval > val || uval < val) {
-          ubound--;
-        }
+          return [lbound, ubound];
 
-        return [lbound, ubound];
+        //case '$dteq':
+        // if hole (not found)
+        //  if (lval > val || lval < val) {
+        //    return [0, -1];
+        //  }
 
+        //  return [lbound, ubound];
 
-      case '$gt':
-        if (ltHelper(uval, val, true)) {
-          return [0, -1];
-        }
+        case '$gt':
+          // (an eqHelper would probably be better test)
+          // if hole (not found) ub position is already greater
+          if (!aeqHelper(rcd[index[ubound]][prop], val)) {
+            //if (gtHelper(rcd[index[ubound]][prop], val, false)) {
+            return [ubound, max];
+          }
+          // otherwise (found) so ubound is still equal, get next
+          return [ubound+1, max];
 
-        return [ubound, rcd.length - 1];
+        case '$gte':
+          // if hole (not found) lb position marks left outside of range
+          if (!aeqHelper(rcd[index[lbound]][prop], val)) {
+            //if (ltHelper(rcd[index[lbound]][prop], val, false)) {
+            return [lbound+1, max];
+          }
+          // otherwise (found) so lb is first position where its equal
+          return [lbound, max];
 
-      case '$gte':
-        if (ltHelper(lval, val, false)) {
-          return [0, -1];
-        }
+        case '$lt':
+          // if hole (not found) position already is less than
+          if (!aeqHelper(rcd[index[lbound]][prop], val)) {
+            //if (ltHelper(rcd[index[lbound]][prop], val, false)) {
+            return [min, lbound];
+          }
+          // otherwise (found) so lb marks left inside of eq range, get previous
+          return [min, lbound-1];
 
-        return [lbound, rcd.length - 1];
+        case '$lte':
+          // if hole (not found) ub position marks right outside so get previous
+          if (!aeqHelper(rcd[index[ubound]][prop], val)) {
+            //if (gtHelper(rcd[index[ubound]][prop], val, false)) {
+            return [min, ubound-1];
+          }
+          // otherwise (found) so ub is last position where its still equal
+          return [min, ubound];
 
-      case '$lt':
-        if (lbound === 0 && ltHelper(lval, val, false)) {
-          return [0, 0];
-        }
-        return [0, lbound - 1];
-
-      case '$lte':
-        if (uval !== val) {
-          ubound--;
-        }
-
-        if (ubound === 0 && ltHelper(uval, val, false)) {
-          return [0, 0];
-        }
-        return [0, ubound];
-
-      default:
-        return [0, rcd.length - 1];
+        default:
+          return [0, rcd.length - 1];
       }
     };
 
@@ -5132,10 +6536,17 @@
     Loki.LokiOps = LokiOps;
     Loki.Collection = Collection;
     Loki.KeyValueStore = KeyValueStore;
+    Loki.LokiMemoryAdapter = LokiMemoryAdapter;
+    Loki.LokiPartitioningAdapter = LokiPartitioningAdapter;
+    Loki.LokiLocalStorageAdapter = LokiLocalStorageAdapter;
+    Loki.LokiFsAdapter = LokiFsAdapter;
     Loki.persistenceAdapters = {
       fs: LokiFsAdapter,
       localStorage: LokiLocalStorageAdapter
     };
+    Loki.aeq = aeqHelper;
+    Loki.lt = ltHelper;
+    Loki.gt = gtHelper;
     return Loki;
   }());
 

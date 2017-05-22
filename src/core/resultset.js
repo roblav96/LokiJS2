@@ -154,6 +154,10 @@ export var LokiOps = {
 		return (typeof b !== 'object') ? (type === b) : doQueryOp(type, b);
 	},
 
+	$finite: function(a, b) {
+		return (b === isFinite(a));
+	},
+
 	$size: function(a, b) {
 		if (Array.isArray(a)) {
 			return (typeof b !== 'object') ? (a.length === b) : doQueryOp(a.length, b);
@@ -199,8 +203,20 @@ export var LokiOps = {
 	}
 };
 
-// making indexing opt-in... our range function knows how to deal with these ops :
-var indexedOpsList = ['$eq', '$aeq', '$dteq', '$gt', '$gte', '$lt', '$lte', '$in', '$between'];
+// if an op is registered in this object, our 'calculateRange' can use it with our binary indices.
+// if the op is registered to a function, we will run that function/op as a 2nd pass filter on results.
+// those 2nd pass filter functions should be similar to LokiOps functions, accepting 2 vals to compare.
+var indexedOps = {
+	$eq: LokiOps.$eq,
+	$aeq: true,
+	$dteq: true,
+	$gt: true,
+	$gte: true,
+	$lt: true,
+	$lte: true,
+	$in: true,
+	$between: true
+};
 
 
 function sortHelper(prop1, prop2, desc) {
@@ -564,6 +580,10 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	simplesort(propname, isdesc) {
+		if (typeof (isdesc) === 'undefined') {
+			isdesc = false;
+		}
+
 		// if this is chained resultset with no filters applied, just we need to populate filteredrows first
 		if (this.searchIsChained && !this.filterInitialized && this.filteredrows.length === 0) {
 			// if we have a binary index and no other filters applied, we can use that instead of sorting (again)
@@ -572,6 +592,11 @@ export class Resultset {
 				this.collection.ensureIndex(propname);
 				// copy index values into filteredrows
 				this.filteredrows = this.collection.binaryIndices[propname].values.slice(0);
+
+				if (isdesc) {
+					this.filteredrows.reverse();
+				}
+
 				// we are done, return this (resultset) for further chain ops
 				return this;
 			}
@@ -579,10 +604,6 @@ export class Resultset {
 			else {
 				this.filteredrows = this.collection.prepareFullDocIndex();
 			}
-		}
-
-		if (typeof(isdesc) === 'undefined') {
-			isdesc = false;
 		}
 
 		var wrappedComparer =
@@ -850,8 +871,7 @@ export class Resultset {
 		var doIndexCheck = !usingDotNotation &&
 			(!this.searchIsChained || !this.filterInitialized);
 
-		if (doIndexCheck && this.collection.binaryIndices[property] &&
-			indexedOpsList.indexOf(operator) !== -1) {
+		if (doIndexCheck && this.collection.binaryIndices[property] && indexedOps[operator]) {
 			// this is where our lazy index rebuilding will take place
 			// basically we will leave all indexes dirty until we need them
 			// so here we will rebuild only the index tied to this property
@@ -935,7 +955,14 @@ export class Resultset {
 
 				if (operator !== '$in') {
 					for (i = seg[0]; i <= seg[1]; i++) {
-						result.push(t[index.values[i]]);
+						if (indexedOps[operator] !== true) {
+							if (indexedOps[operator](t[index.values[i]][property], value)) {
+								result.push(t[index.values[i]]);
+							}
+						}
+						else {
+							result.push(t[index.values[i]]);
+						}
 					}
 				} else {
 					for (i = 0, len = seg.length; i < len; i++) {
@@ -1003,7 +1030,15 @@ export class Resultset {
 
 				if (operator !== '$in') {
 					for (i = segm[0]; i <= segm[1]; i++) {
-						result.push(index.values[i]);
+						if (indexedOps[operator] !== true) {
+							// must be a function, implying 2nd phase filtering of results from calculateRange
+							if (indexedOps[operator](t[index.values[i]][property], value)) {
+								result.push(index.values[i]);
+							}
+						}
+						else {
+							result.push(index.values[i]);
+						}
 					}
 				} else {
 					for (i = 0, len = segm.length; i < len; i++) {
