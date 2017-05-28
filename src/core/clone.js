@@ -14,10 +14,16 @@ export function clone(data, method) {
 			cloned = jQuery.extend(true, {}, data);
 			break;
 		case "shallow":
-			cloned = Object.create(data.prototype || null);
-			Object.keys(data).map(function(i) {
+			// more compatible method for older browsers
+			cloned = data.prototype ? Object.create(data.prototype) : {};
+			Object.keys(data).map(function (i) {
 				cloned[i] = data[i];
 			});
+			break;
+		case "shallow-assign":
+			// should be supported by newer environments/browsers
+			cloned = data.prototype ? Object.create(data.prototype) : {};
+			Object.assign(cloned, data);
 			break;
 		default:
 			break;
