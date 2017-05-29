@@ -4,8 +4,8 @@ import {Loki as loki} from '../../../src/core/loki';
 describe('Constraints', function () {
 
 	it('should retrieve records with by()', function () {
-		var db = new loki();
-		var coll = db.addCollection('users', {
+		const db = new loki();
+		const coll = db.addCollection('users', {
 			unique: ['username']
 		});
 		coll.insert({
@@ -18,10 +18,10 @@ describe('Constraints', function () {
 		});
 		expect(coll.by('username', 'joe').name).toEqual('Joe');
 
-		var byUsername = coll.by('username');
+		const byUsername = coll.by('username');
 		expect(byUsername('jack').name).toEqual('Jack');
 
-		var joe = coll.by('username', 'joe');
+		const joe = coll.by('username', 'joe');
 		joe.username = 'jack';
 		expect(function () {
 			coll.update(joe);
@@ -32,8 +32,8 @@ describe('Constraints', function () {
 	});
 
 	it('should create a unique index', function () {
-		var db = new loki();
-		var coll2 = db.addCollection('moreusers');
+		const db = new loki();
+		const coll2 = db.addCollection('moreusers');
 		coll2.insert({
 			name: 'jack'
 		});
@@ -44,8 +44,8 @@ describe('Constraints', function () {
 	});
 
 	it('should not add record with null index', function () {
-		var db = new loki();
-		var coll3 = db.addCollection('nullusers', {
+		const db = new loki();
+		const coll3 = db.addCollection('nullusers', {
 			unique: ['username']
 		});
 		coll3.insert({
@@ -61,8 +61,8 @@ describe('Constraints', function () {
 	});
 
 	it('should not throw an error id multiple nulls are added', function () {
-		var db = new loki();
-		var coll4 = db.addCollection('morenullusers', {
+		const db = new loki();
+		const coll4 = db.addCollection('morenullusers', {
 			unique: ['username']
 		});
 		coll4.insert({
@@ -81,8 +81,8 @@ describe('Constraints', function () {
 	});
 
 	it('coll.clear should affect unique indices correctly', function () {
-		var db = new loki();
-		var coll = db.addCollection('users', {unique: ['username']});
+		let db = new loki();
+		let coll = db.addCollection('users', {unique: ['username']});
 
 		coll.insert({username: 'joe', name: 'Joe'});
 		coll.insert({username: 'jack', name: 'Jack'});
@@ -98,8 +98,8 @@ describe('Constraints', function () {
 		expect(Object.keys(coll.constraints.unique.username.keyMap).length).toEqual(3);
 		expect(coll.uniqueNames.length).toEqual(1);
 
-		var db = new loki();
-		var coll = db.addCollection('users', {unique: ['username']});
+		db = new loki();
+		coll = db.addCollection('users', {unique: ['username']});
 
 		coll.insert({username: 'joe', name: 'Joe'});
 		coll.insert({username: 'jack', name: 'Jack'});

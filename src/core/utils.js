@@ -1,19 +1,16 @@
 /**
  * Created by toni on 1/27/17.
  */
-
-
-export var Utils = {
-	copyProperties: function(src, dest) {
-		var prop;
+export const Utils = {
+	copyProperties: function (src, dest) {
+		let prop;
 		for (prop in src) {
 			dest[prop] = src[prop];
 		}
 	},
 	// used to recursively scan hierarchical transform step object for param substitution
-	resolveTransformObject: function(subObj, params, depth) {
-		var prop,
-			pname;
+	resolveTransformObject: function (subObj, params, depth) {
+		let prop, pname;
 
 		if (typeof depth !== 'number') {
 			depth = 0;
@@ -35,10 +32,10 @@ export var Utils = {
 		return subObj;
 	},
 	// top level utility to resolve an entire (single) transform (array of steps) for parameter substitution
-	resolveTransformParams: function(transform, params) {
-		var idx,
-			clonedStep,
-			resolvedTransform = [];
+	resolveTransformParams: function (transform, params) {
+		let idx;
+		let clonedStep;
+		const resolvedTransform = [];
 
 		if (typeof params === 'undefined') return transform;
 

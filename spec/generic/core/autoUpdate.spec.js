@@ -10,7 +10,7 @@ describe('autoupdate', function () {
 			return;
 		}
 
-		var coll = new loki.Collection('test', {
+		const coll = new loki.Collection('test', {
 			unique: ['name'],
 			autoupdate: true
 		});
@@ -19,7 +19,7 @@ describe('autoupdate', function () {
 			name: 'Jack'
 		});
 
-		var doc = coll.insert({
+		const doc = coll.insert({
 			name: 'Peter'
 		});
 
@@ -50,15 +50,14 @@ describe('autoupdate', function () {
 			return;
 		}
 
-		var db1 = new loki('autoupdate1.json'),
-			db2 = new loki('autoupdate2.json');
+		const db1 = new loki('autoupdate1.json'), db2 = new loki('autoupdate2.json');
 
-		var coll = db1.addCollection('test', {
+		let coll = db1.addCollection('test', {
 			unique: ['name'],
 			autoupdate: true
 		});
 
-		var originalDocs = coll.insert([{
+		const originalDocs = coll.insert([{
 			name: 'Jack'
 		}, {
 			name: 'Peter'
@@ -68,7 +67,7 @@ describe('autoupdate', function () {
 
 		coll = db2.getCollection('test');
 
-		var doc = coll.by('name', 'Peter');
+		const doc = coll.by('name', 'Peter');
 
 		expect(coll.autoupdate).toBe(true);
 		expect(doc).toEqual(originalDocs[1]);

@@ -3,8 +3,8 @@ export function clone(data, method) {
 		return null;
 	}
 
-	var cloneMethod = method || 'parse-stringify',
-		cloned;
+	const cloneMethod = method || 'parse-stringify';
+	let cloned;
 
 	switch (cloneMethod) {
 		case "parse-stringify":
@@ -33,8 +33,8 @@ export function clone(data, method) {
 }
 
 export function cloneObjectArray(objarray, method) {
-	var i,
-		result = [];
+	let i;
+	const result = [];
 
 	if (method == "parse-stringify") {
 		return clone(objarray, method);

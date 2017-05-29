@@ -18,17 +18,14 @@
  * require libs
  * @ignore
  */
-var fs = require('fs');
-var cryptoLib = require('crypto');
-var isError = require('util').isError;
+const fs = require('fs');
+const cryptoLib = require('crypto');
+const isError = require('util').isError;
 
 /*
  * sensible defaults
  */
-var CIPHER = 'aes-256-cbc',
-	KEY_DERIVATION = 'pbkdf2',
-	KEY_LENGTH = 256,
-	ITERATIONS = 64000;
+const CIPHER = 'aes-256-cbc', KEY_DERIVATION = 'pbkdf2', KEY_LENGTH = 256, ITERATIONS = 64000;
 
 /**
  * encrypt() - encrypt a string
@@ -42,18 +39,17 @@ function encrypt(input, secret) {
 	}
 
 
-	var salt = cryptoLib.randomBytes(KEY_LENGTH / 8),
-		iv = cryptoLib.randomBytes(16);
+	const salt = cryptoLib.randomBytes(KEY_LENGTH / 8), iv = cryptoLib.randomBytes(16);
 
 	try {
 
-		var key = cryptoLib.pbkdf2Sync(secret, salt, ITERATIONS, KEY_LENGTH / 8, 'sha1'),
+		const key = cryptoLib.pbkdf2Sync(secret, salt, ITERATIONS, KEY_LENGTH / 8, 'sha1'),
 			cipher = cryptoLib.createCipheriv(CIPHER, key, iv);
 
-		var encryptedValue = cipher.update(input, 'utf8', 'base64');
+		let encryptedValue = cipher.update(input, 'utf8', 'base64');
 		encryptedValue += cipher.final('base64');
 
-		var result = {
+		const result = {
 			cipher: CIPHER,
 			keyDerivation: KEY_DERIVATION,
 			keyLength: KEY_LENGTH,
@@ -97,17 +93,15 @@ function decrypt(input, secret) {
 		return new Error('Input must be a valid object with \'iv\', \'salt\', and \'value\' properties');
 	}
 
-	var salt = new Buffer(input.salt, 'base64'),
-		iv = new Buffer(input.iv, 'base64'),
-		keyLength = input.keyLength,
+	const salt = new Buffer(input.salt, 'base64'), iv = new Buffer(input.iv, 'base64'), keyLength = input.keyLength,
 		iterations = input.iterations;
 
 	try {
 
-		var key = cryptoLib.pbkdf2Sync(secret, salt, iterations, keyLength / 8, 'sha1'),
+		const key = cryptoLib.pbkdf2Sync(secret, salt, iterations, keyLength / 8, 'sha1'),
 			decipher = cryptoLib.createDecipheriv(CIPHER, key, iv);
 
-		var decryptedValue = decipher.update(input.value, 'base64', 'utf8');
+		let decryptedValue = decipher.update(input.value, 'base64', 'utf8');
 		decryptedValue += decipher.final('utf8');
 
 		return decryptedValue;
@@ -138,9 +132,9 @@ lokiCryptedFileAdapter.prototype.setSecret = function setSecret(secret) {
  *
  *  @example
  // LOAD
- var cryptedFileAdapter = require('./lokiCryptedFileAdapter');
+ let cryptedFileAdapter = require('./lokiCryptedFileAdapter');
  cryptedFileAdapter.setSecret('mySecret'); // you should change 'mySecret' to something supplied by the user
- var db = new loki('test.crypted', { adapter: cryptedFileAdapter }); //you can use any name, not just '*.crypted'
+ let db = new loki('test.crypted', { adapter: cryptedFileAdapter }); //you can use any name, not just '*.crypted'
  db.loadDatabase(function(result) {
 		console.log('done');
 	});
@@ -149,7 +143,7 @@ lokiCryptedFileAdapter.prototype.setSecret = function setSecret(secret) {
  * @returns {Promise} a Promise that resolves after the database was loaded
  */
 lokiCryptedFileAdapter.prototype.loadDatabase = function loadDatabase(dbname) {
-	var secret = this.secret;
+	const secret = this.secret;
 
 	return new Promise(function (resolve, reject) {
 		fs.readFile(dbname, 'utf8', function (err, data) {
@@ -166,11 +160,11 @@ lokiCryptedFileAdapter.prototype.loadDatabase = function loadDatabase(dbname) {
  *
  @example
  // SAVE : will save database in 'test.crypted'
- var cryptedFileAdapter = require('./lokiCryptedFileAdapter');
+ let cryptedFileAdapter = require('./lokiCryptedFileAdapter');
  cryptedFileAdapter.setSecret('mySecret'); // you should change 'mySecret' to something supplied by the user
- var loki=require('lokijs');
- var db = new loki('test.crypted',{ adapter: cryptedFileAdapter }); //you can use any name, not just '*.crypted'
- var coll = db.addCollection('testColl');
+ let loki=require('lokijs');
+ let db = new loki('test.crypted',{ adapter: cryptedFileAdapter }); //you can use any name, not just '*.crypted'
+ let coll = db.addCollection('testColl');
  coll.insert({test: 'val'});
  db.saveDatabase();  // could pass callback if needed for async complete
 
@@ -186,7 +180,7 @@ lokiCryptedFileAdapter.prototype.loadDatabase = function loadDatabase(dbname) {
  * @returns {Promise} a Promise that resolves after the database was persisted
  */
 lokiCryptedFileAdapter.prototype.saveDatabase = function saveDatabase(dbname, dbstring) {
-	var encrypted = encrypt(dbstring, this.secret);
+	const encrypted = encrypt(dbstring, this.secret);
 
 	if (!isError(encrypted)) {
 		return new Promise(function (resolve, reject) {

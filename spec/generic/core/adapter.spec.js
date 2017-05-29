@@ -4,13 +4,13 @@ import {Loki} from '../../../src/core/loki';
 describe('testing persistence adapter', function () {
 
 	it('standard env adapter', function (done) {
-		var db = new Loki();
+		const db = new Loki();
 
 		db.initializePersistence()
 			.then(() => {
 				db.addCollection("myColl").insert({name: "Hello World"});
 				db.saveDatabase().then(function () {
-					var db2 = new Loki();
+					const db2 = new Loki();
 					return db2.initializePersistence()
 						.then(() => {
 							return db2.loadDatabase()
@@ -21,7 +21,7 @@ describe('testing persistence adapter', function () {
 				})
 			})
 			.then(() => {
-				var db3 = new Loki("other");
+				const db3 = new Loki("other");
 				return db3.initializePersistence()
 					.then(() => {
 						return db3.loadDatabase()

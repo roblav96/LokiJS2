@@ -5,7 +5,7 @@ import {QueryBuilder} from '../../src/inverted_index/queries';
 
 describe('changesApi', function () {
 	it('does what it says on the tin', function () {
-		var db = new loki(),
+		const db = new loki(),
 			options = {
 				asyncListeners: false,
 				disableChangesApi: true,
@@ -16,7 +16,7 @@ describe('changesApi', function () {
 				]
 			};
 
-		var users = db.addCollection('users', options);
+		const users = db.addCollection('users', options);
 		users.insert({abc: "123"});
 		// users.insert({abc: "124"});
 		// console.log(users._fullTextSearch.search(new QueryBuilder().wildcard("abc", "12?").build()));

@@ -17,8 +17,8 @@ export class ExactIndex {
 
 	// remove the value from the index, if the value was the last one, remove the key
 	remove(key, val) {
-		var idxSet = this.index[key];
-		for (var i in idxSet) {
+		const idxSet = this.index[key];
+		for (const i in idxSet) {
 			if (idxSet[i] == val) {
 				idxSet.splice(i, 1);
 			}

@@ -1,6 +1,6 @@
 import {LokiEventEmitter} from './event_emitter';
 
-import {LokiMemoryAdapter} from './memory_adapter'
+import {LokiMemoryAdapter} from './memory_adapter';
 import {LokiFsAdapter} from './fs_adapter';
 import {LokiLocalStorageAdapter} from './local_storage_adapter';
 import {Collection} from './collection';
@@ -81,17 +81,17 @@ export class Loki extends LokiEventEmitter {
 			'warning': []
 		};
 
-		var getENV = function () {
+		const getENV = function () {
 			if (typeof global !== 'undefined' && (global.android || global.NSObject)) {
 				// If no adapter is set use the default nativescript adapter
 				if (!options.adapter) {
-					//var LokiNativescriptAdapter = require('./loki-nativescript-adapter');
+					//let LokiNativescriptAdapter = require('./loki-nativescript-adapter');
 					//options.adapter=new LokiNativescriptAdapter();
 				}
 				return 'NATIVESCRIPT'; //nativescript
 			}
 
-			var isNode = typeof global !== "undefined" && ({}).toString.call(global) === '[object global]';
+			const isNode = typeof global !== "undefined" && ({}).toString.call(global) === '[object global]';
 
 			if (isNode) {
 				if (global.window) {
@@ -101,7 +101,7 @@ export class Loki extends LokiEventEmitter {
 				}
 			}
 
-			var isBrowser = typeof window !== 'undefined' && ({}).toString.call(window) === '[object Window]';
+			const isBrowser = typeof window !== 'undefined' && ({}).toString.call(window) === '[object Window]';
 
 			if (typeof document !== 'undefined') {
 				if (document.URL.indexOf('http://') === -1 && document.URL.indexOf('https://') === -1) {
@@ -131,7 +131,7 @@ export class Loki extends LokiEventEmitter {
 	// experimental support for browserify's abstract syntax scan to pick up dependency of indexed adapter.
 	// Hopefully, once this hits npm a browserify require of lokijs should scan the main file and detect this indexed adapter reference.
 	getIndexedAdapter() {
-		var adapter;
+		let adapter;
 
 		if (typeof require === 'function') {
 			adapter = require("./loki-indexed-adapter.js");
@@ -158,8 +158,8 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	initializePersistence(options) {
-		var self = this;
-		var defaultPersistence = {
+		const self = this;
+		const defaultPersistence = {
 				'NODEJS': 'fs',
 				'BROWSER': 'localStorage',
 				'CORDOVA': 'localStorage',
@@ -222,7 +222,7 @@ export class Loki extends LokiEventEmitter {
 
 		this.autosaveDisable();
 
-		var loaded;
+		let loaded;
 
 		// if they want to load database on loki instantiation, now is a good time to load... after adapter set and before possible autosave initiation
 		if (this.options.autoload) {
@@ -247,8 +247,8 @@ export class Loki extends LokiEventEmitter {
 	 */
 	copy(options) {
 		// in case running in an environment without accurate environment detection, pass 'NA'
-		var databaseCopy = new Loki(this.filename, {env: "NA"});
-		var clen, idx;
+		const databaseCopy = new Loki(this.filename, {env: "NA"});
+		let clen, idx;
 
 		options = options || {};
 
@@ -277,7 +277,7 @@ export class Loki extends LokiEventEmitter {
 	 *    This collection is not referenced internally so upon losing scope it will be garbage collected.
 	 *
 	 * @example
-	 * var results = new loki().anonym(myDocArray).find({'age': {'$gt': 30} });
+	 * let results = new loki().anonym(myDocArray).find({'age': {'$gt': 30} });
 	 *
 	 * @param {Array} docs - document array to initialize the anonymous collection with
 	 * @param {object} options - configuration object, see {@link Loki#addCollection} options
@@ -285,7 +285,7 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	anonym(docs, options) {
-		var collection = new Collection('anonym', options);
+		const collection = new Collection('anonym', options);
 		collection.insert(docs);
 
 		if (this.verbose)
@@ -311,7 +311,7 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	addCollection(name, options) {
-		var collection = new Collection(name, options);
+		const collection = new Collection(name, options);
 		this.collections.push(collection);
 
 		if (this.verbose)
@@ -334,8 +334,8 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	getCollection(collectionName) {
-		var i,
-			len = this.collections.length;
+		let i;
+		const len = this.collections.length;
 
 		for (i = 0; i < len; i += 1) {
 			if (this.collections[i].name === collectionName) {
@@ -349,9 +349,8 @@ export class Loki extends LokiEventEmitter {
 	}
 
 	listCollections() {
-
-		var i = this.collections.length,
-			colls = [];
+		let i = this.collections.length;
+		const colls = [];
 
 		while (i--) {
 			colls.push({
@@ -369,14 +368,14 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	removeCollection(collectionName) {
-		var i,
-			len = this.collections.length;
+		let i;
+		const len = this.collections.length;
 
 		for (i = 0; i < len; i += 1) {
 			if (this.collections[i].name === collectionName) {
-				var tmpcol = new Collection(collectionName, {});
-				var curcol = this.collections[i];
-				for (var prop in curcol) {
+				const tmpcol = new Collection(collectionName, {});
+				const curcol = this.collections[i];
+				for (const prop in curcol) {
 					if (curcol.hasOwnProperty(prop) && tmpcol.hasOwnProperty(prop)) {
 						curcol[prop] = tmpcol[prop];
 					}
@@ -453,9 +452,9 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	serializeDestructured(options) {
-		var idx, sidx, result, resultlen;
-		var reconstruct = [];
-		var dbcopy;
+		let idx, sidx, result, resultlen;
+		const reconstruct = [];
+		let dbcopy;
 
 		options = options || {};
 
@@ -584,9 +583,7 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	serializeCollection(options) {
-		var doccount,
-			docidx,
-			resultlines = [];
+		let doccount, docidx, resultlines = [];
 
 		options = options || {};
 
@@ -635,12 +632,10 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	deserializeDestructured(destructuredSource, options) {
-		var workarray = [];
-		var len, cdb;
-		var idx, collIndex = 0,
-			collCount, lineIndex = 1,
-			done = false;
-		var currLine, currObject;
+		let workarray = [];
+		let len, cdb;
+		let idx, collIndex = 0, collCount, lineIndex = 1, done = false;
+		let currLine, currObject;
 
 		options = options || {};
 
@@ -742,8 +737,8 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	deserializeCollection(destructuredSource, options) {
-		var workarray = [];
-		var idx, len;
+		let workarray = [];
+		let idx, len;
 
 		options = options || {};
 
@@ -782,7 +777,7 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	loadJSON(serializedDb, options) {
-		var dbObject;
+		let dbObject;
 		if (serializedDb.length === 0) {
 			dbObject = {};
 		} else {
@@ -813,14 +808,14 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	loadJSONObject(dbObject, options) {
-		var i = 0,
-			len = dbObject.collections ? dbObject.collections.length : 0,
-			coll,
-			copyColl,
-			clen,
-			j,
-			loader,
-			collObj;
+		let i = 0;
+		const len = dbObject.collections ? dbObject.collections.length : 0;
+		let coll;
+		let copyColl;
+		let clen;
+		let j;
+		let loader;
+		let collObj;
 
 		this.name = dbObject.name;
 
@@ -833,14 +828,14 @@ export class Loki extends LokiEventEmitter {
 		this.collections = [];
 
 		function makeLoader(coll) {
-			var collOptions = options[coll.name];
-			var inflater;
+			const collOptions = options[coll.name];
+			let inflater;
 
 			if (collOptions.proto) {
 				inflater = collOptions.inflate || Utils.copyProperties;
 
 				return function (data) {
-					var collObj = new (collOptions.proto)();
+					const collObj = new (collOptions.proto)();
 					inflater(data, collObj);
 					return collObj;
 				};
@@ -911,10 +906,10 @@ export class Loki extends LokiEventEmitter {
 			if (typeof(coll.DynamicViews) === 'undefined') continue;
 
 			// reinflate DynamicViews and attached Resultsets
-			for (var idx = 0; idx < coll.DynamicViews.length; idx++) {
-				var colldv = coll.DynamicViews[idx];
+			for (let idx = 0; idx < coll.DynamicViews.length; idx++) {
+				const colldv = coll.DynamicViews[idx];
 
-				var dv = copyColl.addDynamicView(colldv.name, colldv.options);
+				const dv = copyColl.addDynamicView(colldv.name, colldv.options);
 				dv.resultdata = colldv.resultdata;
 				dv.resultsdirty = colldv.resultsdirty;
 				dv.filterPipeline = colldv.filterPipeline;
@@ -949,8 +944,8 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	close() {
-		var self = this;
-		var saved;
+		const self = this;
+		let saved;
 
 		// for autosave scenarios, we will let close perform final save (if dirty)
 		// For web use, you might call from window.onbeforeunload to shutdown database, saving pending changes
@@ -990,8 +985,8 @@ export class Loki extends LokiEventEmitter {
 			return coll.name;
 		}
 
-		var changes = [],
-			selectedCollections = arrayOfCollectionNames || this.collections.map(getCollName);
+		let changes = [];
+		const selectedCollections = arrayOfCollectionNames || this.collections.map(getCollName);
 
 		this.collections.forEach(function (coll) {
 			if (selectedCollections.indexOf(getCollName(coll)) !== -1) {
@@ -1033,8 +1028,8 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	throttledSaveDrain(options) {
-		var self = this;
-		var now = (new Date()).getTime();
+		const self = this;
+		const now = (new Date()).getTime();
 
 		if (!this.throttledSaves) {
 			return Promise.resolve();
@@ -1089,7 +1084,7 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	loadDatabaseInternal(options) {
-		var self = this;
+		const self = this;
 
 		// the persistenceAdapter should be present if all is ok, but check to be sure.
 		if (this.persistenceAdapter === null) {
@@ -1130,7 +1125,7 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	loadDatabase(options) {
-		var self = this;
+		const self = this;
 
 		// if throttling disabled, just call internal
 		if (!this.throttledSaves) {
@@ -1151,14 +1146,14 @@ export class Loki extends LokiEventEmitter {
 	}
 
 	saveDatabaseInternal() {
-		var self = this;
+		const self = this;
 
 		// the persistenceAdapter should be present if all is ok, but check to be sure.
 		if (this.persistenceAdapter === null) {
 			return Promise.reject(new Error('persistenceAdapter not configured'));
 		}
 
-		var saved;
+		let saved;
 
 		// check if the adapter is requesting (and supports) a 'reference' mode export
 		if (this.persistenceAdapter.mode === "reference" && typeof this.persistenceAdapter.exportDatabase === "function") {
@@ -1188,7 +1183,7 @@ export class Loki extends LokiEventEmitter {
 		if (!this.throttledSaves) {
 			return this.saveDatabaseInternal();
 		}
-		var self = this;
+		const self = this;
 
 		// if the db save is currently running, a new promise for a next db save is created
 		// all calls to save db will get this new promise which will be processed right after
@@ -1236,7 +1231,7 @@ export class Loki extends LokiEventEmitter {
 	 * @returns {boolean} - true if database has changed since last autosave, false if not.
 	 */
 	autosaveDirty() {
-		for (var idx = 0; idx < this.collections.length; idx++) {
+		for (let idx = 0; idx < this.collections.length; idx++) {
 			if (this.collections[idx].dirty) {
 				return true;
 			}
@@ -1251,7 +1246,7 @@ export class Loki extends LokiEventEmitter {
 	 *
 	 */
 	autosaveClearFlags() {
-		for (var idx = 0; idx < this.collections.length; idx++) {
+		for (let idx = 0; idx < this.collections.length; idx++) {
 			this.collections[idx].dirty = false;
 		}
 	}
@@ -1265,8 +1260,8 @@ export class Loki extends LokiEventEmitter {
 			return;
 		}
 
-		var self = this;
-		var running = true;
+		const self = this;
+		let running = true;
 
 		this.autosave = true;
 		this.autosaveHandle = function () {

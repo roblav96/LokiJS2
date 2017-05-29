@@ -34,7 +34,7 @@ export class Scorer {
 			} else {
 				docResults[docId] = [{
 					type: "constant", value: 1, boost: boost, fieldName: fieldName
-				}]
+				}];
 			}
 		}
 
@@ -117,7 +117,7 @@ export class Scorer {
 				return lockUp[i];
 			}
 		}
-		throw RangeError("Unsupported field length.")
+		throw RangeError("Unsupported field length.");
 	}
 
 	_getCache(fieldName) {

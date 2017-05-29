@@ -2,12 +2,12 @@ import {LokiEventEmitter} from './event_emitter';
 import {Resultset} from './resultset';
 
 /*
-'LokiEventEmitter' is not defined        no-undef
-'Resultset' is not defined               no-undef
+ 'LokiEventEmitter' is not defined        no-undef
+ 'Resultset' is not defined               no-undef
 
-applySortCriteria -> like Resultset::compoundsort
+ applySortCriteria -> like Resultset::compoundsort
 
-queueRebuildEvent -> Promise?
+ queueRebuildEvent -> Promise?
 
  */
 
@@ -17,10 +17,10 @@ queueRebuildEvent -> Promise?
  *    whenever documents are add/updated/removed so it can remain up-to-date. (chainable)
  *
  * @example
- * var mydv = mycollection.addDynamicView('test');  // default is non-persistent
+ * let mydv = mycollection.addDynamicView('test');  // default is non-persistent
  * mydv.applyFind({ 'doors' : 4 });
  * mydv.applyWhere(function(obj) { return obj.name === 'Toyota'; });
- * var results = mydv.data();
+ * let results = mydv.data();
  *
  * @constructor DynamicView
  * @implements LokiEventEmitter
@@ -91,9 +91,7 @@ export class DynamicView extends LokiEventEmitter {
 	 * @fires DynamicView.rebuild
 	 */
 	rematerialize(options) {
-		var fpl,
-			fpi,
-			idx;
+		let fpl, fpi, idx;
 
 		options = options || {};
 
@@ -122,7 +120,7 @@ export class DynamicView extends LokiEventEmitter {
 		}
 
 		// back up old filter pipeline, clear filter pipeline, and reapply pipeline ops
-		var ofp = this.filterPipeline;
+		const ofp = this.filterPipeline;
 		this.filterPipeline = [];
 
 		// now re-apply 'find' filterPipeline ops
@@ -151,7 +149,7 @@ export class DynamicView extends LokiEventEmitter {
 	 * @memberof DynamicView
 	 */
 	branchResultset(transform, parameters) {
-		var rs = this.resultset.branch();
+		const rs = this.resultset.branch();
 
 		if (typeof transform === 'undefined') {
 			return rs;
@@ -165,7 +163,7 @@ export class DynamicView extends LokiEventEmitter {
 	 *
 	 */
 	toJSON() {
-		var copy = new DynamicView(this.collection, this.name, this.options);
+		const copy = new DynamicView(this.collection, this.name, this.options);
 
 		copy.resultset = this.resultset;
 		copy.resultdata = []; // let's not save data (copy) to minimize size
@@ -329,7 +327,7 @@ export class DynamicView extends LokiEventEmitter {
 	 */
 	_indexOfFilterWithId(uid) {
 		if (typeof uid === 'string' || typeof uid === 'number') {
-			for (var idx = 0, len = this.filterPipeline.length; idx < len; idx += 1) {
+			for (let idx = 0, len = this.filterPipeline.length; idx < len; idx += 1) {
 				if (uid === this.filterPipeline[idx].uid) {
 					return idx;
 				}
@@ -363,10 +361,10 @@ export class DynamicView extends LokiEventEmitter {
 			this.resultsdirty = true;
 		}
 
-		var filters = this.filterPipeline;
+		const filters = this.filterPipeline;
 		this.filterPipeline = [];
 
-		for (var idx = 0, len = filters.length; idx < len; idx += 1) {
+		for (let idx = 0, len = filters.length; idx < len; idx += 1) {
 			this._addFilter(filters[idx]);
 		}
 
@@ -388,7 +386,7 @@ export class DynamicView extends LokiEventEmitter {
 	 * @memberof DynamicView
 	 */
 	applyFilter(filter) {
-		var idx = this._indexOfFilterWithId(filter.uid);
+		const idx = this._indexOfFilterWithId(filter.uid);
 		if (idx >= 0) {
 			this.filterPipeline[idx] = filter;
 			return this.reapplyFilters();
@@ -453,7 +451,7 @@ export class DynamicView extends LokiEventEmitter {
 	 * @memberof DynamicView
 	 */
 	removeFilter(uid) {
-		var idx = this._indexOfFilterWithId(uid);
+		const idx = this._indexOfFilterWithId(uid);
 		if (idx < 0) {
 			throw new Error("Dynamic view does not contain a filter with ID: " + uid);
 		}
@@ -506,8 +504,8 @@ export class DynamicView extends LokiEventEmitter {
 		}
 		this.rebuildPending = true;
 
-		var self = this;
-		setTimeout(function() {
+		const self = this;
+		setTimeout(function () {
 			if (self.rebuildPending) {
 				self.rebuildPending = false;
 				self.emit('rebuild', self);
@@ -527,10 +525,10 @@ export class DynamicView extends LokiEventEmitter {
 		}
 		this.sortDirty = true;
 
-		var self = this;
+		const self = this;
 		if (this.options.sortPriority === "active") {
 			// active sorting... once they are done and yield js thread, run async performSortPhase()
-			setTimeout(function() {
+			setTimeout(function () {
 				self.performSortPhase();
 			}, this.options.minRebuildInterval);
 		} else {
@@ -595,23 +593,23 @@ export class DynamicView extends LokiEventEmitter {
 			return;
 		}
 
-		var ofr = this.resultset.filteredrows;
-		var oldPos = (isNew) ? (-1) : (ofr.indexOf(+objIndex));
-		var oldlen = ofr.length;
+		const ofr = this.resultset.filteredrows;
+		const oldPos = (isNew) ? (-1) : (ofr.indexOf(+objIndex));
+		const oldlen = ofr.length;
 
 		// creating a 1-element resultset to run filter chain ops on to see if that doc passes filters;
 		// mostly efficient algorithm, slight stack overhead price (this function is called on inserts and updates)
-		var evalResultset = new Resultset(this.collection);
+		const evalResultset = new Resultset(this.collection);
 		evalResultset.filteredrows = [objIndex];
 		evalResultset.filterInitialized = true;
-		var filter;
-		for (var idx = 0, len = this.filterPipeline.length; idx < len; idx++) {
+		let filter;
+		for (let idx = 0, len = this.filterPipeline.length; idx < len; idx++) {
 			filter = this.filterPipeline[idx];
 			evalResultset[filter.type](filter.val);
 		}
 
 		// not a true position, but -1 if not pass our filter(s), 0 if passed filter(s)
-		var newPos = (evalResultset.filteredrows.length === 0) ? -1 : 0;
+		const newPos = (evalResultset.filteredrows.length === 0) ? -1 : 0;
 
 		// wasn't in old, shouldn't be now... do nothing
 		if (oldPos === -1 && newPos === -1) return;
@@ -696,10 +694,10 @@ export class DynamicView extends LokiEventEmitter {
 			return;
 		}
 
-		var ofr = this.resultset.filteredrows;
-		var oldPos = ofr.indexOf(+objIndex);
-		var oldlen = ofr.length;
-		var idx;
+		const ofr = this.resultset.filteredrows;
+		const oldPos = ofr.indexOf(+objIndex);
+		let oldlen = ofr.length;
+		let idx;
 
 		if (oldPos !== -1) {
 			// if not last row in resultdata, swap last to hole and truncate last row

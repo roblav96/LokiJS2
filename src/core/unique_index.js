@@ -7,7 +7,7 @@ export class UniqueIndex {
 	}
 
 	set(obj) {
-		var fieldValue = obj[this.field];
+		const fieldValue = obj[this.field];
 		if (fieldValue !== null && typeof(fieldValue) !== 'undefined') {
 			if (this.keyMap[fieldValue]) {
 				throw new Error('Duplicate key for property ' + this.field + ': ' + fieldValue);
@@ -33,7 +33,7 @@ export class UniqueIndex {
 	 */
 	update(obj, doc) {
 		if (this.lokiMap[obj.$loki] !== doc[this.field]) {
-			var old = this.lokiMap[obj.$loki];
+			const old = this.lokiMap[obj.$loki];
 			this.set(doc);
 			// make the old key fail bool test, while avoiding the use of delete (mem-leak prone)
 			this.keyMap[old] = undefined;
@@ -41,8 +41,9 @@ export class UniqueIndex {
 			this.keyMap[obj[this.field]] = doc;
 		}
 	}
+
 	remove(key) {
-		var obj = this.keyMap[key];
+		const obj = this.keyMap[key];
 		if (obj !== null && typeof obj !== 'undefined') {
 			this.keyMap[key] = undefined;
 			this.lokiMap[obj.$loki] = undefined;
@@ -50,6 +51,7 @@ export class UniqueIndex {
 			throw new Error('Key is not in unique index: ' + this.field);
 		}
 	}
+
 	clear() {
 		this.keyMap = {};
 		this.lokiMap = {};

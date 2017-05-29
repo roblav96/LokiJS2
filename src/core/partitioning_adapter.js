@@ -62,22 +62,22 @@ export class LokiPartitioningAdapter {
 	 * @memberof LokiMemoryAdapter
 	 */
 	loadDatabase(dbname) {
-		var self = this;
+		const self = this;
 		this.dbname = dbname;
 		this.dbref = new Loki(dbname);
 
 		// load the db container (without data)
-		return this.adapter.loadDatabase(dbname).then(function(result) {
+		return this.adapter.loadDatabase(dbname).then(function (result) {
 			if (typeof result !== "string") {
 				throw new Error("LokiPartitioningAdapter received an unexpected response from inner adapter loadDatabase()");
 			}
 
 			// I will want to use loki destructuring helper methods so i will inflate into typed instance
-			var db = JSON.parse(result);
+			let db = JSON.parse(result);
 			self.dbref.loadJSONObject(db);
 			db = null;
 
-			var clen = self.dbref.collections.length;
+			const clen = self.dbref.collections.length;
 
 			if (self.dbref.collections.length === 0) {
 				return self.dbref;
@@ -88,7 +88,7 @@ export class LokiPartitioningAdapter {
 				pageIndex: 0
 			};
 
-			return self.loadNextPartition(0).then(function() {
+			return self.loadNextPartition(0).then(function () {
 				return self.dbref;
 			});
 		});
@@ -101,16 +101,16 @@ export class LokiPartitioningAdapter {
 	 * @returns {Promise} a Promise that resolves after the next partition is loaded
 	 */
 	loadNextPartition(partition) {
-		var keyname = this.dbname + "." + partition;
-		var self = this;
+		const keyname = this.dbname + "." + partition;
+		const self = this;
 
 		if (this.options.paging === true) {
 			this.pageIterator.pageIndex = 0;
 			return this.loadNextPage();
 		}
 
-		return this.adapter.loadDatabase(keyname).then(function(result) {
-			var data = self.dbref.deserializeCollection(result, {
+		return this.adapter.loadDatabase(keyname).then(function (result) {
+			const data = self.dbref.deserializeCollection(result, {
 				delimited: true,
 				collectionIndex: partition
 			});
@@ -129,18 +129,18 @@ export class LokiPartitioningAdapter {
 	 */
 	loadNextPage() {
 		// calculate name for next saved page in sequence
-		var keyname = this.dbname + "." + this.pageIterator.collection + "." + this.pageIterator.pageIndex;
-		var self = this;
+		const keyname = this.dbname + "." + this.pageIterator.collection + "." + this.pageIterator.pageIndex;
+		const self = this;
 
 		// load whatever page is next in sequence
-		return this.adapter.loadDatabase(keyname).then(function(result) {
-			var data = result.split(self.options.delimiter);
+		return this.adapter.loadDatabase(keyname).then(function (result) {
+			let data = result.split(self.options.delimiter);
 			result = ""; // free up memory now that we have split it into array
-			var dlen = data.length;
-			var idx;
+			let dlen = data.length;
+			let idx;
 
 			// detect if last page by presence of final empty string element and remove it if so
-			var isLastPage = (data[dlen - 1] === "");
+			const isLastPage = (data[dlen - 1] === "");
 			if (isLastPage) {
 				data.pop();
 				dlen = data.length;
@@ -182,8 +182,9 @@ export class LokiPartitioningAdapter {
 	 * @memberof LokiPartitioningAdapter
 	 */
 	exportDatabase(dbname, dbref) {
-		var self = this;
-		var idx, clen = dbref.collections.length;
+		const self = this;
+		let idx;
+		const clen = dbref.collections.length;
 
 		this.dbref = dbref;
 		this.dbname = dbname;
@@ -205,9 +206,9 @@ export class LokiPartitioningAdapter {
 	 * @returns {Promise} a Promise that resolves after the next partition is saved
 	 */
 	saveNextPartition() {
-		var self = this;
-		var partition = this.dirtyPartitions.shift();
-		var keyname = this.dbname + ((partition === -1) ? "" : ("." + partition));
+		const self = this;
+		const partition = this.dirtyPartitions.shift();
+		const keyname = this.dbname + ((partition === -1) ? "" : ("." + partition));
 
 		// if we are doing paging and this is collection partition
 		if (this.options.paging && partition !== -1) {
@@ -218,7 +219,7 @@ export class LokiPartitioningAdapter {
 			};
 
 			// since saveNextPage recursively calls itself until done, our callback means this whole paged partition is finished
-			return this.saveNextPage().then(function() {
+			return this.saveNextPage().then(function () {
 				if (self.dirtyPartitions.length !== 0) {
 					return self.saveNextPartition();
 				}
@@ -226,13 +227,13 @@ export class LokiPartitioningAdapter {
 		}
 
 		// otherwise this is 'non-paged' partioning...
-		var result = this.dbref.serializeDestructured({
+		const result = this.dbref.serializeDestructured({
 			partitioned: true,
 			delimited: true,
 			partition: partition
 		});
 
-		return this.adapter.saveDatabase(keyname, result).then(function() {
+		return this.adapter.saveDatabase(keyname, result).then(function () {
 			if (self.dirtyPartitions.length !== 0) {
 				return self.saveNextPartition();
 			}
@@ -245,18 +246,16 @@ export class LokiPartitioningAdapter {
 	 * @returns {Promise} a Promise that resolves after the next partition is saved
 	 */
 	saveNextPage() {
-		var self = this;
-		var coll = this.dbref.collections[this.pageIterator.collection];
-		var keyname = this.dbname + "." + this.pageIterator.collection + "." + this.pageIterator.pageIndex;
-		var pageLen = 0,
-			cdlen = coll.data.length,
-			delimlen = this.options.delimiter.length;
-		var serializedObject = "",
-			pageBuilder = "";
-		var doneWithPartition = false,
-			doneWithPage = false;
+		const self = this;
+		const coll = this.dbref.collections[this.pageIterator.collection];
+		const keyname = this.dbname + "." + this.pageIterator.collection + "." + this.pageIterator.pageIndex;
+		let pageLen = 0;
+		const cdlen = coll.data.length;
+		const delimlen = this.options.delimiter.length;
+		let serializedObject = "", pageBuilder = "";
+		let doneWithPartition = false, doneWithPage = false;
 
-		var pageSaveCallback = function() {
+		const pageSaveCallback = function () {
 			pageBuilder = "";
 
 			// update meta properties then continue process by invoking callback

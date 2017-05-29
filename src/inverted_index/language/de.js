@@ -14,7 +14,7 @@ tkz.add('trimmer-de', trimmer);
 
 let stemmer = (function () {
 	/* create the wrapped stemmer object */
-	let st = new function GermanStemmer() {
+	let st = new (function GermanStemmer() {
 		let a_0 = [new Among("", -1, 6), new Among("U", 0, 2),
 				new Among("Y", 0, 1), new Among("\u00E4", 0, 3),
 				new Among("\u00F6", 0, 4), new Among("\u00FC", 0, 5)
@@ -290,7 +290,7 @@ let stemmer = (function () {
 			r_postlude();
 			return true;
 		}
-	};
+	});
 
 	/* and return a function that stems a word for the current locale */
 	return function (token) {

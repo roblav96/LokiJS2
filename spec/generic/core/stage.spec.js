@@ -28,15 +28,14 @@ describe('Staging and commits', function () {
 
 	it('work', function () {
 
-		var stageName = 'tentative directors',
-			newDirectorsName = 'Joel and Ethan Cohen',
+		const stageName = 'tentative directors', newDirectorsName = 'Joel and Ethan Cohen',
 			message = 'Edited Cohen brothers name';
 
-		var cohen = directors.insert({
+		const cohen = directors.insert({
 			name: 'Cohen Brothers',
 			directorId: 5
 		});
-		var new_cohen = directors.stage(stageName, cohen);
+		const new_cohen = directors.stage(stageName, cohen);
 		new_cohen.name = newDirectorsName;
 		expect(cohen.name).toEqual('Cohen Brothers');
 		directors.commitStage(stageName, message);

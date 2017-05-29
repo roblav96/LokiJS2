@@ -17,7 +17,7 @@ describe('transforms', function () {
 	describe('basic find transform', function () {
 		it('works', function () {
 
-			var tx = [
+			const tx = [
 				{
 					type: 'find',
 					value: {
@@ -26,7 +26,7 @@ describe('transforms', function () {
 				}
 			];
 
-			var results = items.chain(tx).data();
+			const results = items.chain(tx).data();
 
 			expect(results.length).toBe(2);
 		});
@@ -35,7 +35,7 @@ describe('transforms', function () {
 	describe('basic multi-step transform', function () {
 		it('works', function () {
 
-			var tx = [
+			const tx = [
 				{
 					type: 'find',
 					value: {
@@ -50,7 +50,7 @@ describe('transforms', function () {
 				}
 			];
 
-			var results = items.chain(tx).data();
+			const results = items.chain(tx).data();
 
 			expect(results.length).toBe(1);
 		});
@@ -59,7 +59,7 @@ describe('transforms', function () {
 	describe('parameterized find', function () {
 		it('works', function () {
 
-			var tx = [
+			const tx = [
 				{
 					type: 'find',
 					value: {
@@ -68,11 +68,11 @@ describe('transforms', function () {
 				}
 			];
 
-			var params = {
+			const params = {
 				OwnerName: 'odin'
 			};
 
-			var results = items.chain(tx, params).data();
+			const results = items.chain(tx, params).data();
 
 			expect(results.length).toBe(2);
 		});
@@ -81,20 +81,20 @@ describe('transforms', function () {
 	describe('parameterized where', function () {
 		it('works', function () {
 
-			var tx = [
+			const tx = [
 				{
 					type: 'where',
 					value: '[%lktxp]NameFilter'
 				}
 			];
 
-			var params = {
+			const params = {
 				NameFilter: function (obj) {
 					return (obj.name.indexOf("nir") !== -1);
 				}
 			};
 
-			var results = items.chain(tx, params).data();
+			const results = items.chain(tx, params).data();
 
 			expect(results.length).toBe(3);
 		});
@@ -103,7 +103,7 @@ describe('transforms', function () {
 	describe('named find transform', function () {
 		it('works', function () {
 
-			var tx = [
+			const tx = [
 				{
 					type: 'find',
 					value: {
@@ -114,11 +114,11 @@ describe('transforms', function () {
 
 			items.addTransform("OwnerLookup", tx);
 
-			var params = {
+			const params = {
 				OwnerName: 'odin'
 			};
 
-			var results = items.chain("OwnerLookup", params).data();
+			const results = items.chain("OwnerLookup", params).data();
 
 			expect(results.length).toBe(2);
 		});
@@ -126,7 +126,7 @@ describe('transforms', function () {
 
 	describe('dynamic view named transform', function () {
 		it('works', function () {
-			var testColl = db.addCollection('test');
+			const testColl = db.addCollection('test');
 
 			testColl.insert({
 				a: 'first',
@@ -169,12 +169,12 @@ describe('transforms', function () {
 			});
 
 			// our view should allow only first 4 test records
-			var dv = testColl.addDynamicView('lower');
+			const dv = testColl.addDynamicView('lower');
 			dv.applyFind({b: {'$lte': 4}});
 
 			// our transform will desc sort string column as 'third', 'second', 'fourth', 'first',
 			// and then limit to first two
-			var tx = [
+			const tx = [
 				{
 					type: 'simplesort',
 					property: 'a',
@@ -191,7 +191,7 @@ describe('transforms', function () {
 			// now store as named (collection) transform and run off dynamic view
 			testColl.addTransform("desc4limit2", tx);
 
-			var results = dv.branchResultset("desc4limit2").data();
+			const results = dv.branchResultset("desc4limit2").data();
 
 			expect(results.length).toBe(2);
 			expect(results[0].a).toBe("third");

@@ -18,8 +18,8 @@ function LokiNativescriptAdapter() {
 }
 
 LokiNativescriptAdapter.prototype.loadDatabase = function (dbname) {
-	var documents = this.fs.knownFolders.documents();
-	var myFile = documents.getFile(dbname);
+	const documents = this.fs.knownFolders.documents();
+	const myFile = documents.getFile(dbname);
 
 	//Read from filesystem
 	return myFile.readText().then(function (content) {
@@ -33,15 +33,15 @@ LokiNativescriptAdapter.prototype.loadDatabase = function (dbname) {
 };
 
 LokiNativescriptAdapter.prototype.saveDatabase = function (dbname, serialized) {
-	var documents = this.fs.knownFolders.documents();
-	var myFile = documents.getFile(dbname);
+	const documents = this.fs.knownFolders.documents();
+	const myFile = documents.getFile(dbname);
 
 	return myFile.writeText(serialized);
 };
 
 LokiNativescriptAdapter.prototype.deleteDatabase = function deleteDatabase(dbname) {
-	var documents = this.fs.knownFolders.documents();
-	var file = documents.getFile(dbname);
+	const documents = this.fs.knownFolders.documents();
+	const file = documents.getFile(dbname);
 
 	return file.remove();
 };

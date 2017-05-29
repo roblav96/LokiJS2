@@ -2,7 +2,7 @@
 import {Loki as loki} from '../../../src/core/loki';
 
 describe('joins', function () {
-	var db, directors, films;
+	let db, directors, films;
 
 	beforeEach(function () {
 		db = new loki('testJoins', {
@@ -53,7 +53,7 @@ describe('joins', function () {
 	});
 
 	it('works', function () {
-		var joined;
+		let joined;
 
 		//Basic non-mapped join
 		joined = films.eqJoin(directors.data, 'directorId', 'directorId').data();

@@ -68,7 +68,7 @@ export class IndexSearcher {
 						if (msm <= -1) {
 							msm = shouldLength + msm;
 						} else if (msm < 0) {
-							msm = shouldLength - Math.floor(shouldLength * -msm)
+							msm = shouldLength - Math.floor(shouldLength * -msm);
 						} else if (msm < 1) {
 							msm = Math.floor(shouldLength * msm);
 						}
@@ -279,7 +279,7 @@ class FuzzySearch {
 			b = tmp;
 		}
 
-		var row = Array(a.length + 1);
+		const row = Array(a.length + 1);
 		// init the row
 		for (i = 0; i <= a.length; i++) {
 			row[i] = i;

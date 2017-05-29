@@ -17,11 +17,11 @@ import {ltHelper, gtHelper} from './helper';
 
 function containsCheckFn(a) {
 	if (typeof a === 'string' || Array.isArray(a)) {
-		return function(b) {
+		return function (b) {
 			return a.indexOf(b) !== -1;
 		};
 	} else if (typeof a === 'object' && a !== null) {
-		return function(b) {
+		return function (b) {
 			return hasOwnProperty.call(a, b);
 		};
 	}
@@ -29,7 +29,7 @@ function containsCheckFn(a) {
 }
 
 function doQueryOp(val, op) {
-	for (var p in op) {
+	for (let p in op) {
 		if (hasOwnProperty.call(op, p)) {
 			return LokiOps[p](val, op[p]);
 		}
@@ -38,20 +38,20 @@ function doQueryOp(val, op) {
 }
 
 
-export var LokiOps = {
+export const LokiOps = {
 	// comparison operators
 	// a is the value in the collection
 	// b is the query value
-	$eq: function(a, b) {
+	$eq: function (a, b) {
 		return a === b;
 	},
 
 	// abstract/loose equality
-	$aeq: function(a, b) {
+	$aeq: function (a, b) {
 		return a == b;
 	},
 
-	$ne: function(a, b) {
+	$ne: function (a, b) {
 		// ecma 5 safe test for NaN
 		if (b !== b) {
 			// ecma 5 test value is not NaN
@@ -61,89 +61,89 @@ export var LokiOps = {
 		return a !== b;
 	},
 
-	$dteq: function(a, b) {
+	$dteq: function (a, b) {
 		if (ltHelper(a, b, false)) {
 			return false;
 		}
 		return !gtHelper(a, b, false);
 	},
 
-	$gt: function(a, b) {
+	$gt: function (a, b) {
 		return gtHelper(a, b, false);
 	},
 
-	$gte: function(a, b) {
+	$gte: function (a, b) {
 		return gtHelper(a, b, true);
 	},
 
-	$lt: function(a, b) {
+	$lt: function (a, b) {
 		return ltHelper(a, b, false);
 	},
 
-	$lte: function(a, b) {
+	$lte: function (a, b) {
 		return ltHelper(a, b, true);
 	},
 
 	// ex : coll.find({'orderCount': {$between: [10, 50]}});
-	$between: function(a, vals) {
+	$between: function (a, vals) {
 		if (a === undefined || a === null) return false;
 		return (gtHelper(a, vals[0], true) && ltHelper(a, vals[1], true));
 	},
 
-	$in: function(a, b) {
+	$in: function (a, b) {
 		return b.indexOf(a) !== -1;
 	},
 
-	$nin: function(a, b) {
+	$nin: function (a, b) {
 		return b.indexOf(a) === -1;
 	},
 
-	$keyin: function(a, b) {
+	$keyin: function (a, b) {
 		return a in b;
 	},
 
-	$nkeyin: function(a, b) {
+	$nkeyin: function (a, b) {
 		return !(a in b);
 	},
 
-	$definedin: function(a, b) {
+	$definedin: function (a, b) {
 		return b[a] !== undefined;
 	},
 
-	$undefinedin: function(a, b) {
+	$undefinedin: function (a, b) {
 		return b[a] === undefined;
 	},
 
-	$regex: function(a, b) {
+	$regex: function (a, b) {
 		return b.test(a);
 	},
 
-	$containsString: function(a, b) {
+	$containsString: function (a, b) {
 		return (typeof a === 'string') && (a.indexOf(b) !== -1);
 	},
 
-	$containsNone: function(a, b) {
+	$containsNone: function (a, b) {
 		return !LokiOps.$containsAny(a, b);
 	},
 
-	$containsAny: function(a, b) {
-		var checkFn = containsCheckFn(a);
+	$containsAny: function (a, b) {
+		const checkFn = containsCheckFn(a);
 		if (checkFn !== null) {
 			return (Array.isArray(b)) ? (b.some(checkFn)) : (checkFn(b));
 		}
 		return false;
 	},
 
-	$contains: function(a, b) {
-		var checkFn = containsCheckFn(a);
+	$contains: function (a, b) {
+		const checkFn = containsCheckFn(a);
 		if (checkFn !== null) {
 			return (Array.isArray(b)) ? (b.every(checkFn)) : (checkFn(b));
 		}
 		return false;
 	},
 
-	$type: function(a, b) {
-		var type = typeof a;
+	$type: function (a, b) {
+		let type = typeof a;
 		if (type === 'object') {
 			if (Array.isArray(a)) {
 				type = 'array';
@@ -154,25 +154,25 @@ export var LokiOps = {
 		return (typeof b !== 'object') ? (type === b) : doQueryOp(type, b);
 	},
 
-	$finite: function(a, b) {
+	$finite: function (a, b) {
 		return (b === isFinite(a));
 	},
 
-	$size: function(a, b) {
+	$size: function (a, b) {
 		if (Array.isArray(a)) {
 			return (typeof b !== 'object') ? (a.length === b) : doQueryOp(a.length, b);
 		}
 		return false;
 	},
 
-	$len: function(a, b) {
+	$len: function (a, b) {
 		if (typeof a === 'string') {
 			return (typeof b !== 'object') ? (a.length === b) : doQueryOp(a.length, b);
 		}
 		return false;
 	},
 
-	$where: function(a, b) {
+	$where: function (a, b) {
 		return b(a) === true;
 	},
 
@@ -180,12 +180,12 @@ export var LokiOps = {
 	// a is the value in the collection
 	// b is the nested query operation (for '$not')
 	//   or an array of nested query operations (for '$and' and '$or')
-	$not: function(a, b) {
+	$not: function (a, b) {
 		return !doQueryOp(a, b);
 	},
 
-	$and: function(a, b) {
-		for (var idx = 0, len = b.length; idx < len; idx += 1) {
+	$and: function (a, b) {
+		for (let idx = 0, len = b.length; idx < len; idx += 1) {
 			if (!doQueryOp(a, b[idx])) {
 				return false;
 			}
@@ -193,8 +193,8 @@ export var LokiOps = {
 		return true;
 	},
 
-	$or: function(a, b) {
-		for (var idx = 0, len = b.length; idx < len; idx += 1) {
+	$or: function (a, b) {
+		for (let idx = 0, len = b.length; idx < len; idx += 1) {
 			if (doQueryOp(a, b[idx])) {
 				return true;
 			}
@@ -206,7 +206,7 @@ export var LokiOps = {
 // if an op is registered in this object, our 'calculateRange' can use it with our binary indices.
 // if the op is registered to a function, we will run that function/op as a 2nd pass filter on results.
 // those 2nd pass filter functions should be similar to LokiOps functions, accepting 2 vals to compare.
-var indexedOps = {
+const indexedOps = {
 	$eq: LokiOps.$eq,
 	$aeq: true,
 	$dteq: true,
@@ -245,9 +245,9 @@ function sortHelper(prop1, prop2, desc) {
  * @returns {integer} 0, -1, or 1 to designate if identical (sortwise) or which should be first
  */
 function compoundeval(properties, obj1, obj2) {
-	var res = 0;
-	var prop, field;
-	for (var i = 0, len = properties.length; i < len; i++) {
+	let res = 0;
+	let prop, field;
+	for (let i = 0, len = properties.length; i < len; i++) {
 		prop = properties[i];
 		field = prop[0];
 		res = sortHelper(obj1[field], obj2[field], prop[1]);
@@ -269,20 +269,20 @@ function compoundeval(properties, obj1, obj2) {
  * @param {number} poffset - index of the item in 'paths' to start the sub-scan from
  */
 function dotSubScan(root, paths, fun, value, poffset) {
-	var pathOffset = poffset || 0;
-	var path = paths[pathOffset];
+	const pathOffset = poffset || 0;
+	const path = paths[pathOffset];
 	if (root === undefined || root === null || !hasOwnProperty.call(root, path)) {
 		return false;
 	}
 
-	var valueFound = false;
-	var element = root[path];
+	let valueFound = false;
+	const element = root[path];
 	if (pathOffset + 1 >= paths.length) {
 		// if we have already expanded out the dot notation,
 		// then just evaluate the test function and value on the element
 		valueFound = fun(element, value);
 	} else if (Array.isArray(element)) {
-		for (var index = 0, len = element.length; index < len; index += 1) {
+		for (let index = 0, len = element.length; index < len; index += 1) {
 			valueFound = dotSubScan(element[index], paths, fun, value, pathOffset + 1);
 			if (valueFound === true) {
 				break;
@@ -359,7 +359,7 @@ export class Resultset {
 	 *
 	 */
 	toJSON() {
-		var copy = this.copy();
+		const copy = this.copy();
 		copy.collection = null;
 		return copy;
 	}
@@ -378,7 +378,7 @@ export class Resultset {
 			this.filteredrows = this.collection.prepareFullDocIndex();
 		}
 
-		var rscopy = new Resultset(this.collection);
+		const rscopy = new Resultset(this.collection);
 		rscopy.filteredrows = this.filteredrows.slice(0, qty);
 		rscopy.filterInitialized = true;
 		return rscopy;
@@ -397,7 +397,7 @@ export class Resultset {
 			this.filteredrows = this.collection.prepareFullDocIndex();
 		}
 
-		var rscopy = new Resultset(this.collection);
+		const rscopy = new Resultset(this.collection);
 		rscopy.filteredrows = this.filteredrows.slice(pos);
 		rscopy.filterInitialized = true;
 		return rscopy;
@@ -410,7 +410,7 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	copy() {
-		var result = new Resultset(this.collection);
+		const result = new Resultset(this.collection);
 
 		if (this.filteredrows.length > 0) {
 			result.filteredrows = this.filteredrows.slice();
@@ -437,9 +437,7 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	transform(transform, parameters) {
-		var idx,
-			step,
-			rs = this;
+		let idx, step, rs = this;
 
 		// if transform is name, then do lookup first
 		if (typeof transform === 'string') {
@@ -515,13 +513,12 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	instance(collectionOptions) {
-		var docs = this.data();
-		var idx,
-			doc;
+		const docs = this.data();
+		let idx, doc;
 
 		collectionOptions = collectionOptions || {};
 
-		var instanceCollection = new Collection(collectionOptions);
+		const instanceCollection = new Collection(collectionOptions);
 
 		for (idx = 0; idx < docs.length; idx++) {
 			if (this.collection.cloneObjects) {
@@ -558,9 +555,9 @@ export class Resultset {
 			this.filteredrows = this.collection.prepareFullDocIndex();
 		}
 
-		var wrappedComparer =
-			(function(userComparer, data) {
-				return function(a, b) {
+		const wrappedComparer =
+			(function (userComparer, data) {
+				return function (a, b) {
 					return userComparer(data[a], data[b]);
 				};
 			})(comparefun, this.collection.data);
@@ -606,9 +603,9 @@ export class Resultset {
 			}
 		}
 
-		var wrappedComparer =
-			(function(prop, desc, data) {
-				return function(a, b) {
+		const wrappedComparer =
+			(function (prop, desc, data) {
+				return function (a, b) {
 					return sortHelper(data[a][prop], data[b][prop], desc);
 				};
 			})(propname, isdesc, this.collection.data);
@@ -635,7 +632,7 @@ export class Resultset {
 			throw new Error("Invalid call to compoundsort, need at least one property");
 		}
 
-		var prop;
+		let prop;
 		if (properties.length === 1) {
 			prop = properties[0];
 			if (Array.isArray(prop)) {
@@ -645,7 +642,7 @@ export class Resultset {
 		}
 
 		// unify the structure of 'properties' to avoid checking it repeatedly while sorting
-		for (var i = 0, len = properties.length; i < len; i += 1) {
+		for (let i = 0, len = properties.length; i < len; i += 1) {
 			prop = properties[i];
 			if (!Array.isArray(prop)) {
 				properties[i] = [prop, false];
@@ -657,9 +654,9 @@ export class Resultset {
 			this.filteredrows = this.collection.prepareFullDocIndex();
 		}
 
-		var wrappedComparer =
-			(function(props, data) {
-				return function(a, b) {
+		const wrappedComparer =
+			(function (props, data) {
+				return function (a, b) {
 					return compoundeval(props, data[a], data[b]);
 				};
 			})(properties, this.collection.data);
@@ -679,17 +676,17 @@ export class Resultset {
 	 * @returns {Resultset} this resultset for further chain ops.
 	 */
 	findOr(expressionArray) {
-		var fr = null,
-			fri = 0,
-			frlen = 0,
-			docset = [],
-			idxset = [],
-			idx = 0,
-			origCount = this.count();
+		let fr = null;
+		let fri = 0;
+		let frlen = 0;
+		const docset = [];
+		const idxset = [];
+		let idx = 0;
+		const origCount = this.count();
 
 		// If filter is already initialized, then we query against only those items already in filter.
 		// This means no index utilization for fields, so hopefully its filtered to a smallish filteredrows.
-		for (var ei = 0, elen = expressionArray.length; ei < elen; ei++) {
+		for (let ei = 0, elen = expressionArray.length; ei < elen; ei++) {
 			// we need to branch existing query to run each filter separately and combine results
 			fr = this.branch().find(expressionArray[ei]).filteredrows;
 			frlen = fr.length;
@@ -713,6 +710,7 @@ export class Resultset {
 
 		return this;
 	}
+
 	$or() {
 		return this.findOr(...arguments);
 	}
@@ -729,7 +727,7 @@ export class Resultset {
 	findAnd(expressionArray) {
 		// we have already implementing method chaining in this (our Resultset class)
 		// so lets just progressively apply user supplied and filters
-		for (var i = 0, len = expressionArray.length; i < len; i++) {
+		for (let i = 0, len = expressionArray.length; i < len; i++) {
 			if (this.count() === 0) {
 				return this;
 			}
@@ -760,18 +758,18 @@ export class Resultset {
 			return [];
 		}
 
-		var queryObject = query || 'getAll',
-			p,
-			property,
-			queryObjectOp,
-			obj,
-			operator,
-			value,
-			key,
-			searchByIndex = false,
-			result = [],
-			filters = [],
-			index = null;
+		const queryObject = query || 'getAll';
+		let p;
+		let property;
+		let queryObjectOp;
+		let obj;
+		let operator;
+		let value;
+		let key;
+		let searchByIndex = false;
+		let result = [];
+		let filters = [];
+		let index = null;
 
 		// flag if this was invoked via findOne()
 		firstOnly = firstOnly || false;
@@ -790,7 +788,7 @@ export class Resultset {
 			// if more than one expression in single query object,
 			// convert implicit $and to explicit $and
 			if (filters.length > 1) {
-				return this.find({ '$and': filters }, firstOnly);
+				return this.find({'$and': filters}, firstOnly);
 			}
 		}
 
@@ -871,12 +869,12 @@ export class Resultset {
 		}
 
 		// if user is deep querying the object such as find('name.first': 'odin')
-		var usingDotNotation = (property.indexOf('.') !== -1);
+		const usingDotNotation = (property.indexOf('.') !== -1);
 
 		// if an index exists for the property being queried against, use it
 		// for now only enabling for non-chained query (who's set of docs matches index)
 		// or chained queries where it is the first filter applied and prop is indexed
-		var doIndexCheck = !usingDotNotation &&
+		const doIndexCheck = !usingDotNotation &&
 			(!this.searchIsChained || !this.filterInitialized);
 
 		if (doIndexCheck && this.collection.binaryIndices[property] && indexedOps[operator]) {
@@ -893,13 +891,15 @@ export class Resultset {
 		}
 
 		// the comparison function
-		var fun = LokiOps[operator];
+		const fun = LokiOps[operator];
 
 		// "shortcut" for collection data
-		var t = this.collection.data;
+		const t = this.collection.data;
+
 		// filter data length
-		var i = 0,
-			len = 0;
+		let i = 0;
+
+		let len = 0;
 
 		// Query executed differently depending on :
 		//    - whether it is chained or not
@@ -950,7 +950,7 @@ export class Resultset {
 				}
 			} else {
 				// searching by binary index via calculateRange() utility method
-				var seg = this.collection.calculateRange(operator, property, value);
+				const seg = this.collection.calculateRange(operator, property, value);
 
 				// not chained so this 'find' was designated in Resultset constructor
 				// so return object itself
@@ -987,7 +987,7 @@ export class Resultset {
 		// Otherwise this is a chained query
 		// Chained queries now preserve results ordering at expense on slightly reduced unindexed performance
 
-		var filter, rowIdx = 0;
+		let filter, rowIdx = 0;
 
 		// If the filteredrows[] is already initialized, use it
 		if (this.filterInitialized) {
@@ -1034,7 +1034,7 @@ export class Resultset {
 				}
 			} else {
 				// search by index
-				var segm = this.collection.calculateRange(operator, property, value);
+				const segm = this.collection.calculateRange(operator, property, value);
 
 				if (operator !== '$in') {
 					for (i = segm[0]; i <= segm[1]; i++) {
@@ -1071,7 +1071,7 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	where(fun) {
-		var viewFunction,
+		let viewFunction,
 			result = [];
 
 		if ('function' === typeof fun) {
@@ -1082,7 +1082,7 @@ export class Resultset {
 		try {
 			// if not a chained query then run directly against data[] and return object []
 			if (!this.searchIsChained) {
-				var i = this.collection.data.length;
+				let i = this.collection.data.length;
 
 				while (i--) {
 					if (viewFunction(this.collection.data[i]) === true) {
@@ -1097,7 +1097,7 @@ export class Resultset {
 			else {
 				// If the filteredrows[] is already initialized, use it
 				if (this.filterInitialized) {
-					var j = this.filteredrows.length;
+					let j = this.filteredrows.length;
 
 					while (j--) {
 						if (viewFunction(this.collection.data[this.filteredrows[j]]) === true) {
@@ -1111,7 +1111,7 @@ export class Resultset {
 				}
 				// otherwise this is initial chained op, work against data, push into filteredrows[]
 				else {
-					var k = this.collection.data.length;
+					let k = this.collection.data.length;
 
 					while (k--) {
 						if (viewFunction(this.collection.data[k]) === true) {
@@ -1156,7 +1156,7 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	data(options) {
-		var result = [],
+		let result = [],
 			data = this.collection.data,
 			len,
 			i,
@@ -1187,7 +1187,7 @@ export class Resultset {
 			}
 		}
 
-		var fr = this.filteredrows;
+		const fr = this.filteredrows;
 		len = fr.length;
 
 		if (this.collection.cloneObjects || options.forceClones) {
@@ -1221,10 +1221,9 @@ export class Resultset {
 			this.filteredrows = this.collection.prepareFullDocIndex();
 		}
 
-		var len = this.filteredrows.length,
-			rcd = this.collection.data;
+		const len = this.filteredrows.length, rcd = this.collection.data;
 
-		for (var idx = 0; idx < len; idx++) {
+		for (let idx = 0; idx < len; idx++) {
 			// pass in each document object currently in resultset to user supplied updateFunction
 			updateFunction(rcd[this.filteredrows[idx]]);
 
@@ -1283,7 +1282,7 @@ export class Resultset {
 	 */
 	eqJoin(joinData, leftJoinKey, rightJoinKey, mapFun) {
 
-		var leftData = [],
+		let leftData = [],
 			leftDataLength,
 			rightData = [],
 			rightDataLength,
@@ -1309,13 +1308,13 @@ export class Resultset {
 
 		//construct a lookup table
 
-		for (var i = 0; i < rightDataLength; i++) {
+		for (let i = 0; i < rightDataLength; i++) {
 			key = rightKeyisFunction ? rightJoinKey(rightData[i]) : rightData[i][rightJoinKey];
 			joinMap[key] = rightData[i];
 		}
 
 		if (!mapFun) {
-			mapFun = function(left, right) {
+			mapFun = function (left, right) {
 				return {
 					left: left,
 					right: right
@@ -1324,7 +1323,7 @@ export class Resultset {
 		}
 
 		//Run map function over each object in the resultset
-		for (var j = 0; j < leftDataLength; j++) {
+		for (let j = 0; j < leftDataLength; j++) {
 			key = leftKeyisFunction ? leftJoinKey(leftData[j]) : leftData[j][leftJoinKey];
 			result.push(mapFun(leftData[j], joinMap[key] || {}));
 		}
@@ -1339,7 +1338,7 @@ export class Resultset {
 	}
 
 	map(mapFun) {
-		var data = this.data().map(mapFun);
+		let data = this.data().map(mapFun);
 		//return return a new resultset with no filters
 		this.collection = new Collection('mappedData');
 		this.collection.insert(data);

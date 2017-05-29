@@ -2,8 +2,8 @@
 import {Loki as loki} from '../../../src/core/loki';
 
 describe('eventEmitter', function () {
-	var db;
-	var users;
+	let db;
+	let users;
 
 	beforeEach(function () {
 		db = new loki('test', {
@@ -23,7 +23,7 @@ describe('eventEmitter', function () {
 	});
 
 	it('emit', function () {
-		var index = db.on('test', function test(obj) {
+		const index = db.on('test', function test(obj) {
 			expect(obj).toEqual(42);
 		});
 

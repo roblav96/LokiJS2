@@ -1,4 +1,3 @@
-
 function localStorageAvailable() {
 	try {
 		return (window && window.localStorage !== undefined && window.localStorage !== null);

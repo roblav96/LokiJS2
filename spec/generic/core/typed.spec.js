@@ -3,8 +3,8 @@ import {Loki as loki} from '../../../src/core/loki';
 
 describe('typed', function () {
 	it('works', function () {
-		var db = new loki('test.json');
-		var users;
+		const db = new loki('test.json');
+		let users;
 
 		function User(n) {
 			this.name = n || '';
@@ -13,7 +13,7 @@ describe('typed', function () {
 			};
 		}
 
-		var json = {
+		const json = {
 			"filename": "test.json",
 			"collections": [{
 				"name": "users",
@@ -95,7 +95,7 @@ describe('typed', function () {
 		db.loadJSON(JSON.stringify(json), {
 			users: {
 				inflate: function (src) {
-					var dest = {};
+					const dest = {};
 
 					dest.$loki = src.$loki;
 					dest.meta = src.meta;

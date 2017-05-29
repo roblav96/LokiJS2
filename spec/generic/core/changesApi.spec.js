@@ -3,7 +3,7 @@ import {Loki as loki} from '../../../src/core/loki';
 
 describe('changesApi', function () {
 	it('does what it says on the tin', function () {
-		var db = new loki(),
+		const db = new loki(),
 			// gordian = require('gordian'),
 			// suite = new gordian('testEvents'),
 			options = {
@@ -14,7 +14,7 @@ describe('changesApi', function () {
 			test = db.addCollection('test', options),
 			test2 = db.addCollection('test2', options);
 
-		var u = users.insert({
+		const u = users.insert({
 			name: 'joe'
 		});
 		u.name = 'jack';
@@ -26,15 +26,15 @@ describe('changesApi', function () {
 			name: 'test2'
 		});
 
-		var userChanges = db.generateChangesNotification(['users']);
+		const userChanges = db.generateChangesNotification(['users']);
 
 		expect(userChanges.length).toEqual(2);
 		expect(db.serializeChanges(['users'])).toEqual(JSON.stringify(userChanges));
 
-		var someChanges = db.generateChangesNotification(['users', 'test2']);
+		const someChanges = db.generateChangesNotification(['users', 'test2']);
 
 		expect(someChanges.length).toEqual(3);
-		var allChanges = db.generateChangesNotification();
+		const allChanges = db.generateChangesNotification();
 
 		expect(allChanges.length).toEqual(4);
 		users.setChangesApi(false);
@@ -42,7 +42,7 @@ describe('changesApi', function () {
 
 		u.name = 'john';
 		users.update(u);
-		var newChanges = db.generateChangesNotification(['users']);
+		const newChanges = db.generateChangesNotification(['users']);
 
 		expect(newChanges.length).toEqual(2);
 		db.clearChanges();

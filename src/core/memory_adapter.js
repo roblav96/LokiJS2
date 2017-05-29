@@ -32,10 +32,10 @@ export class LokiMemoryAdapter {
 	 * @memberof LokiMemoryAdapter
 	 */
 	loadDatabase(dbname) {
-		var self = this;
+		const self = this;
 
 		if (this.options.asyncResponses) {
-			return new Promise(function(resolve, reject) {
+			return new Promise(function (resolve, reject) {
 				setTimeout(function () {
 					if (self.hashStore.hasOwnProperty(dbname)) {
 						resolve(self.hashStore[dbname].value);
@@ -65,11 +65,11 @@ export class LokiMemoryAdapter {
 	 * @memberof LokiMemoryAdapter
 	 */
 	saveDatabase(dbname, dbstring) {
-		var self=this;
-		var saveCount;
+		const self = this;
+		let saveCount;
 
 		if (this.options.asyncResponses) {
-			return new Promise(function(resolve, reject) {
+			return new Promise(function (resolve, reject) {
 				setTimeout(function () {
 					saveCount = (self.hashStore.hasOwnProperty(dbname) ? self.hashStore[dbname].savecount : 0);
 

@@ -15,10 +15,10 @@ it('indexed adapter', function (done) {
 		.then(() => db2.loadDatabase())
 		.then(() => {
 			expect(db2.getCollection("myColl").find()[0].name).toEqual("Hello World");
-			return db2.deleteDatabase()
+			return db2.deleteDatabase();
 		})
 		.then(() => {
-			var ldx = new LokiIndexedAdapter("myTestApp");
+			const ldx = new LokiIndexedAdapter("myTestApp");
 			// Should be promised?
 			ldx.getDatabaseList(function (result) {
 				expect(result.length).toEqual(0);

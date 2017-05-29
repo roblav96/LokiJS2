@@ -3,7 +3,7 @@ import {Loki as loki} from '../../../src/core/loki';
 import {LokiMemoryAdapter} from '../../../src/core/memory_adapter';
 
 
-var suite = {
+const suite = {
 	assertEqual: function (message, actual, expected) {
 		expect(actual).toEqual(expected);
 	},
@@ -26,10 +26,7 @@ var suite = {
 };
 
 describe('loki', function () {
-	var db,
-		users,
-		jonas,
-		testObject;
+	let db, users, jonas, testObject;
 
 	function docCompare(a, b) {
 		if (a.$loki < b.$loki) return -1;
@@ -64,8 +61,8 @@ describe('loki', function () {
 
 	describe('core methods', function () {
 		it('works', function () {
-			var tdb = new loki('regextests');
-			var tcu = tdb.addCollection('user');
+			const tdb = new loki('regextests');
+			const tcu = tdb.addCollection('user');
 			tcu.insert({
 				name: 'abcd',
 				age: 25,
@@ -92,13 +89,13 @@ describe('loki', function () {
 
 
 			// findOne()
-			var j = users.findOne({
+			const j = users.findOne({
 				'name': 'jonas'
 			});
 			expect(j.name).toEqual('jonas');
 
 			// find()
-			var result = users.find({
+			const result = users.find({
 				'age': {
 					'$gt': 29
 				}
@@ -157,11 +154,11 @@ describe('loki', function () {
 
 
 			// insert() : try inserting existing document (should fail), try adding doc with legacy id column
-			var collectionLength = users.data.length;
-			var objDave = users.findOne({
+			const collectionLength = users.data.length;
+			const objDave = users.findOne({
 				'name': 'dave'
 			});
-			var wasAdded = true;
+			let wasAdded = true;
 			try {
 				users.insert(objDave);
 			} catch (err) {
@@ -170,7 +167,7 @@ describe('loki', function () {
 			expect(wasAdded).toEqual(false);
 
 			// our collections are not strongly typed so lets invent some object that has its 'own' id column
-			var legacyObject = {
+			let legacyObject = {
 				id: 999,
 				first: 'aaa',
 				last: 'bbb',
@@ -201,7 +198,7 @@ describe('loki', function () {
 				city: 'pasadena',
 				state: 'ca'
 			};
-			var wasUpdated = true;
+			let wasUpdated = true;
 
 			try {
 				users.update(legacyObject);
@@ -211,7 +208,7 @@ describe('loki', function () {
 			expect(wasUpdated).toEqual(false);
 
 			// remove() - add some bogus object to remove
-			var userCount1 = users.data.length;
+			const userCount1 = users.data.length;
 
 			testObject = {
 				first: 'aaa',
@@ -230,7 +227,7 @@ describe('loki', function () {
 
 	describe('dot notation', function () {
 		it('works', function () {
-			var dnc = db.addCollection('dncoll');
+			const dnc = db.addCollection('dncoll');
 
 			dnc.insert({
 				first: 'aaa',
@@ -278,7 +275,7 @@ describe('loki', function () {
 			});
 
 			// test dot notation using regular find (with multiple results)
-			var firstResult = dnc.find({
+			const firstResult = dnc.find({
 				"addr.zip": 12345
 			});
 			expect(firstResult.length).toEqual(2);
@@ -286,7 +283,7 @@ describe('loki', function () {
 			expect(firstResult[1].addr.zip).toEqual(12345);
 
 			// test not notation using findOne
-			var secObj = dnc.findOne({
+			const secObj = dnc.findOne({
 				"addr.state": 'FF'
 			});
 
@@ -301,7 +298,7 @@ describe('loki', function () {
 	// the leaf property is the array.  This verifies that functionality
 	describe('dot notation across leaf object array', function () {
 		it('works', function () {
-			var dna = db.addCollection('dnacoll');
+			const dna = db.addCollection('dnacoll');
 
 			dna.insert({
 				id: 1,
@@ -347,7 +344,7 @@ describe('loki', function () {
 				}]
 			});
 
-			var results = dna.find({'children.someProperty': 33});
+			let results = dna.find({'children.someProperty': 33});
 			expect(results.length).toEqual(1);
 
 			results = dna.find({'children.someProperty': 11});
@@ -361,7 +358,7 @@ describe('loki', function () {
 
 	describe('dot notation terminating at leaf array', function () {
 		it('works', function () {
-			var dna = db.addCollection('dnacoll');
+			const dna = db.addCollection('dnacoll');
 
 			dna.insert({
 				"relations": {
@@ -381,7 +378,7 @@ describe('loki', function () {
 				}
 			});
 
-			var results = dna.find({
+			const results = dna.find({
 				'relations.ids': {$contains: 379}
 			});
 
@@ -391,7 +388,7 @@ describe('loki', function () {
 
 	describe('dot notation across child array', function () {
 		it('works', function () {
-			var dna = db.addCollection('dnacoll');
+			const dna = db.addCollection('dnacoll');
 
 			dna.insert({
 				id: 1,
@@ -455,7 +452,7 @@ describe('loki', function () {
 				}]
 			});
 
-			var results = dna.find({'children.someArray.someProperty': 333});
+			let results = dna.find({'children.someArray.someProperty': 333});
 			expect(results.length).toEqual(1);
 
 			results = dna.find({'children.someArray.someProperty': 111});
@@ -477,7 +474,7 @@ describe('loki', function () {
 
 	describe('calculateRange', function () {
 		it('works', function () {
-			var eic = db.addCollection('eic');
+			const eic = db.addCollection('eic');
 			eic.ensureIndex('testid');
 
 			eic.insert({
@@ -521,14 +518,14 @@ describe('loki', function () {
 				'testFloat': 2.2
 			}); //7
 
-			var rset = eic.chain();
+			const rset = eic.chain();
 			rset.find({
 				'testid': 1
 			}); // force index to be built
 
 			// ranges are order of sequence in index not data array positions
 
-			var range = eic.calculateRange('$eq', 'testid', 22);
+			let range = eic.calculateRange('$eq', 'testid', 22);
 			expect(range).toEqual([6, 6]);
 
 			range = eic.calculateRange('$eq', 'testid', 1);
@@ -606,11 +603,11 @@ describe('loki', function () {
 
 	describe('lazy indexLifecycle', function () {
 		it('works', function () {
-			var ilc = db.addCollection('ilc', {
+			const ilc = db.addCollection('ilc', {
 				adaptiveBinaryIndices: false
 			});
 
-			var hasIdx = ilc.binaryIndices.hasOwnProperty('testid');
+			let hasIdx = ilc.binaryIndices.hasOwnProperty('testid');
 			expect(hasIdx).toEqual(false);
 
 			ilc.ensureIndex('testid');
@@ -639,7 +636,7 @@ describe('loki', function () {
 
 	describe('indexes', function () {
 		it('works', function () {
-			var itc = db.addCollection('test', {
+			const itc = db.addCollection('test', {
 				indices: ['testid']
 			});
 
@@ -669,7 +666,7 @@ describe('loki', function () {
 			});
 
 			// lte
-			var results = itc.find({
+			let results = itc.find({
 				'testid': {
 					'$lte': 1
 				}
@@ -759,7 +756,7 @@ describe('loki', function () {
 
 	describe('andOrOps', function () {
 		it('works', function () {
-			var eic = db.addCollection('eic');
+			const eic = db.addCollection('eic');
 
 			eic.insert({
 				'testid': 1,
@@ -905,7 +902,7 @@ describe('loki', function () {
 
 	describe('findOne', function () {
 		it('works', function () {
-			var eic = db.addCollection('eic');
+			const eic = db.addCollection('eic');
 
 			eic.insert({
 				'testid': 1,
@@ -967,10 +964,10 @@ describe('loki', function () {
 
 	describe('resultset unfiltered simplesort works', function () {
 		it('works', function () {
-			var ssdb = new loki('sandbox.db');
+			const ssdb = new loki('sandbox.db');
 
 			// Add a collection to the database
-			var items = ssdb.addCollection('items', {indices: ['name']});
+			const items = ssdb.addCollection('items', {indices: ['name']});
 
 			// Add some documents to the collection
 			items.insert({name: 'mjolnir', owner: 'thor', maker: 'dwarves'});
@@ -979,7 +976,7 @@ describe('loki', function () {
 			items.insert({name: 'draupnir', owner: 'odin', maker: 'elves'});
 
 			// simplesort without filters on prop with index should work
-			var results = items.chain().simplesort('name').data();
+			let results = items.chain().simplesort('name').data();
 			expect(results.length).toEqual(4);
 			expect(results[0].name).toEqual('draupnir');
 			expect(results[1].name).toEqual('gungnir');
@@ -998,10 +995,10 @@ describe('loki', function () {
 
 	describe('resultset instance works', function () {
 		it('works', function () {
-			var idb = new loki('sandbox.db');
+			const idb = new loki('sandbox.db');
 
 			// Add a collection to the database
-			var items = idb.addCollection('items', {indices: ['owner']});
+			const items = idb.addCollection('items', {indices: ['owner']});
 
 			// Add some documents to the collection
 			items.insert({name: 'mjolnir', owner: 'thor', maker: 'dwarves'});
@@ -1010,7 +1007,7 @@ describe('loki', function () {
 			items.insert({name: 'draupnir', owner: 'odin', maker: 'elves'});
 
 			// combine indexed enabled sort with instancing
-			var instanceCollection = items.chain().simplesort('owner').limit(2).instance();
+			let instanceCollection = items.chain().simplesort('owner').limit(2).instance();
 			expect(instanceCollection.data.length).toEqual(2);
 			expect(instanceCollection.data[0].owner).toEqual('odin');
 			expect(instanceCollection.data[1].owner).toEqual('odin');
@@ -1025,7 +1022,7 @@ describe('loki', function () {
 
 	describe('chained removes', function () {
 		it('works', function () {
-			var rsc = db.addCollection('rsc');
+			const rsc = db.addCollection('rsc');
 
 			rsc.insert({
 				'testid': 1,
@@ -1048,7 +1045,7 @@ describe('loki', function () {
 				'testFloat': 7.2
 			});
 
-			var docCount = rsc.find().length;
+			const docCount = rsc.find().length;
 
 			// verify initial doc count
 			expect(docCount).toEqual(4);
@@ -1062,7 +1059,7 @@ describe('loki', function () {
 			expect(rsc.chain().data().length).toEqual(2);
 
 			// now fetch and retain all remaining documents
-			var results = rsc.chain().simplesort('testString').data();
+			const results = rsc.chain().simplesort('testString').data();
 
 			// make sure its the documents we expect
 			expect(results[0].testString).toEqual('hhh');
@@ -1073,8 +1070,8 @@ describe('loki', function () {
 	/* Dynamic View Tests */
 	describe('stepEvaluateDocument', function () {
 		it('works', function () {
-			var view = users.addDynamicView('test');
-			var query = {
+			const view = users.addDynamicView('test');
+			const query = {
 				'age': {
 					'$gt': 24
 				}
@@ -1099,8 +1096,8 @@ describe('loki', function () {
 			});
 
 			// assert set equality of docArrays irrelevant of sort/sequence
-			var result1 = users.find(query).sort(docCompare);
-			var result2 = view.data().sort(docCompare);
+			const result1 = users.find(query).sort(docCompare);
+			const result2 = view.data().sort(docCompare);
 			result1.forEach(function (obj) {
 				delete obj.meta;
 			});
@@ -1131,14 +1128,14 @@ describe('loki', function () {
 
 	describe('stepDynamicViewPersistence', function () {
 		it('works', function stepDynamicViewPersistence() {
-			var query = {
+			const query = {
 				'age': {
 					'$gt': 24
 				}
 			};
 
 			// set up a persistent dynamic view with sort
-			var pview = users.addDynamicView('test2', {
+			const pview = users.addDynamicView('test2', {
 				persistent: true
 			});
 			pview.applyFind(query);
@@ -1156,7 +1153,7 @@ describe('loki', function () {
 
 
 			// compare how many documents are in results before adding new ones
-			var pviewResultsetLenBefore = pview.resultset.filteredrows.length;
+			const pviewResultsetLenBefore = pview.resultset.filteredrows.length;
 
 			users.insert({
 				name: 'abc',
@@ -1171,7 +1168,7 @@ describe('loki', function () {
 			});
 
 			// now see how many are in resultset (without rebuilding persistent view)
-			var pviewResultsetLenAfter = pview.resultset.filteredrows.length;
+			const pviewResultsetLenAfter = pview.resultset.filteredrows.length;
 
 			// only one document should have been added to resultset (1 was filtered out)
 			it('dv resultset is valid',
@@ -1183,13 +1180,13 @@ describe('loki', function () {
 			// Test sorting and lazy build of resultdata
 
 			// retain copy of internal resultset's filteredrows before lazy sort
-			var frcopy = pview.resultset.filteredrows.slice();
+			const frcopy = pview.resultset.filteredrows.slice();
 			pview.data();
 			// now make a copy of internal result's filteredrows after lazy sort
-			var frcopy2 = pview.resultset.filteredrows.slice();
+			const frcopy2 = pview.resultset.filteredrows.slice();
 
 			// verify filteredrows logically matches resultdata (irrelevant of sort)
-			for (var idxFR = 0; idxFR < frcopy2.length; idxFR++) {
+			for (let idxFR = 0; idxFR < frcopy2.length; idxFR++) {
 				it('dynamic view resultset/resultdata consistency', function () {
 					expect(pview.resultdata[idxFR]).toEqual(pview.collection.data[frcopy2[idxFR]]);
 				});
@@ -1203,14 +1200,14 @@ describe('loki', function () {
 
 	describe('stepDynamicViewPersistence', function () {
 		it('works', function duplicateItemFoundOnIndex() {
-			var test = db.addCollection('nodupes', ['index']);
+			const test = db.addCollection('nodupes', ['index']);
 
-			var item = test.insert({
+			const item = test.insert({
 				index: 'key',
 				a: 1
 			});
 
-			var results = test.find({
+			let results = test.find({
 				index: 'key'
 			});
 			it('one result exists', function () {
@@ -1239,14 +1236,14 @@ describe('loki', function () {
 
 	describe('stepDynamicViewPersistence', function () {
 		it('works', function testEmptyTableWithIndex() {
-			var itc = db.addCollection('test', ['testindex']);
+			const itc = db.addCollection('test', ['testindex']);
 
-			var resultsNoIndex = itc.find({
+			const resultsNoIndex = itc.find({
 				'testid': 2
 			});
 			expect(resultsNoIndex.length).toEqual(0);
 
-			var resultsWithIndex = itc.find({
+			const resultsWithIndex = itc.find({
 				'testindex': 4
 			});
 			it('no results found', function () {
@@ -1257,7 +1254,7 @@ describe('loki', function () {
 
 	describe('stepDynamicViewPersistence', function () {
 		it('works', function testAnonym() {
-			var coll = db.anonym([{
+			const coll = db.anonym([{
 				name: 'joe'
 			}, {
 				name: 'jack'
@@ -1283,13 +1280,13 @@ describe('loki', function () {
 	describe('stepDynamicViewPersistence', function () {
 		it('works', function testCollections(done) {
 			// mock persistence by using memory adapter
-			var mem = new LokiMemoryAdapter();
-			var db = new loki('testCollections', {adapter: mem});
+			const mem = new LokiMemoryAdapter();
+			const db = new loki('testCollections', {adapter: mem});
 			db.name = 'testCollections';
 			it('DB name', function () {
 				expect(db.getName()).toEqual('testCollections');
 			});
-			var t = db.addCollection('test1', {
+			const t = db.addCollection('test1', {
 				transactional: true
 			});
 			db.addCollection('test2');
@@ -1305,7 +1302,7 @@ describe('loki', function () {
 				expect(db.listCollections().length).toEqual(2);
 			});
 			t.clear();
-			var users = [{
+			const users = [{
 				name: 'joe'
 			}, {
 				name: 'dave'

@@ -1,4 +1,3 @@
-
 /**
  * A loki persistence adapter which persists using node fs module
  * @constructor LokiFsAdapter
@@ -19,10 +18,10 @@ export class LokiFsAdapter {
 	 * @memberof LokiFsAdapter
 	 */
 	loadDatabase(dbname) {
-		var self = this;
+		const self = this;
 
-		return new Promise(function(resolve, reject) {
-			self.fs.stat(dbname, function(err, stats) {
+		return new Promise(function (resolve, reject) {
+			self.fs.stat(dbname, function (err, stats) {
 				if (!err && stats.isFile()) {
 					self.fs.readFile(dbname, {
 						encoding: 'utf8'
@@ -48,15 +47,15 @@ export class LokiFsAdapter {
 	 * @memberof LokiFsAdapter
 	 */
 	saveDatabase(dbname, dbstring) {
-		var self = this;
-		var tmpdbname = dbname + '~';
+		const self = this;
+		const tmpdbname = dbname + '~';
 
-		return new Promise(function(resolve, reject) {
-			self.fs.writeFile(tmpdbname, dbstring, function(err) {
+		return new Promise(function (resolve, reject) {
+			self.fs.writeFile(tmpdbname, dbstring, function (err) {
 				if (err) {
 					reject(err);
 				} else {
-					self.fs.rename(tmpdbname, dbname, function(err) {
+					self.fs.rename(tmpdbname, dbname, function (err) {
 						if (err) {
 							reject(err);
 						} else {
@@ -76,9 +75,9 @@ export class LokiFsAdapter {
 	 * @memberof LokiFsAdapter
 	 */
 	deleteDatabase(dbname) {
-		var self = this;
+		const self = this;
 
-		return new Promise(function(resolve, reject) {
+		return new Promise(function (resolve, reject) {
 			self.fs.unlink(dbname, function deleteDatabaseCallback(err) {
 				if (err) {
 					reject(err);

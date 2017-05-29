@@ -2,8 +2,8 @@
 import {Loki as loki} from '../../../src/core/loki';
 
 describe('stats', function () {
-	var db = new loki();
-	var users = db.addCollection('users');
+	const db = new loki();
+	const users = db.addCollection('users');
 	users.insert({
 		name: 'joe',
 		age: 35,

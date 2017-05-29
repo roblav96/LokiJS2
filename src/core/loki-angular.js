@@ -1,45 +1,46 @@
 /*
-  Loki Angular Adapter (need to include this script to use it)
+ Loki Angular Adapter (need to include this script to use it)
  * @author Joe Minichino <joe.minichino@gmail.com>
  *
  * A lightweight document oriented javascript database
  */
 (function (root, factory) {
 	if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
+		// AMD. Register as an anonymous module.
 		define(['angular', 'lokijs'], factory);
 	} else if (typeof exports === 'object') {
-        // CommonJS
+		// CommonJS
 		module.exports = factory();
 	} else {
-        // Browser globals
+		// Browser globals
 		root.lokiAngular = factory(
-            root.angular,
-            // Use thirdParty.loki if available to cover all legacy cases
-            root.thirdParty && root.thirdParty.loki ?
-            root.thirdParty.loki : root.loki
-        );
+			root.angular,
+			// Use thirdParty.loki if available to cover all legacy cases
+			root.thirdParty && root.thirdParty.loki ?
+				root.thirdParty.loki : root.loki
+		);
 	}
 }(this, function (angular, lokijs) {
-	var module = angular.module('lokijs', [])
-        .factory('Loki', Loki)
-        .service('Lokiwork', Lokiwork);
+	const module = angular.module('lokijs', [])
+		.factory('Loki', Loki)
+		.service('Lokiwork', Lokiwork);
 
 	function Loki() {
 		return loki;
 	}
+
 	Lokiwork.$inject = ['Loki', '$q', '$injector', '$window'];
 
 	function Lokiwork(Loki, $q, $injector, $window) {
-		var vm = this;
+		const vm = this;
 		vm.checkStates = checkStates;
-		var statesChecked = false;
-		var db;
-		var userDbPreference = '';
-		var userPrefJsonFile = 0;
-		var numOfJsonDatabases = 0;
-		var dbitems = [];
-		var lokidbs = [];
+		let statesChecked = false;
+		let db;
+		let userDbPreference = '';
+		let userPrefJsonFile = 0;
+		let numOfJsonDatabases = 0;
+		const dbitems = [];
+		const lokidbs = [];
 		vm.dbExists = dbExists;
 		vm.closeDb = closeDb;
 		vm.closeAllDbs = closeAllDbs;
@@ -56,8 +57,8 @@
 		vm.deleteDatabase = deleteDatbase;
 		vm.addDocument = addDocument;
 		vm.insertItemInDoc = insertItemInDoc;
-		var currentDoc = {};
-		var currentColl = {};
+		let currentDoc = {};
+		let currentColl = {};
 		numOfJsonDatabases = getNumberOfJsonDatabases();
 
 		function getCurrentDoc() {
@@ -68,16 +69,16 @@
 			localStorage.removeItem(data);
 		}
 
-		function deleteDocument(dbName, collName, doc) { //doc should be in {name:value} format 
+		function deleteDocument(dbName, collName, doc) { //doc should be in {name:value} format
 			return $q(function (resolve, reject) {
 				userDbPreference = dbName;
 				_getem('delete_doc', dbName, collName, doc)
-                    .then(function (data) {
-	currentDoc = {};
-	resolve(data);
-}, function(data){
-	reject(data);
-});
+					.then(function (data) {
+						currentDoc = {};
+						resolve(data);
+					}, function (data) {
+						reject(data);
+					});
 			});
 		}
 
@@ -85,22 +86,22 @@
 		function insertItemInDoc(item) {
 			return $q(function (resolve, reject) {
 				_getem('insert_item_in_doc', currentDoc.dbName, currentDoc.collName, currentDoc.doc, "", item)
-                    .then(function (data) {
-	resolve(data);
-}, function (data) {
-	reject(data);
-});
+					.then(function (data) {
+						resolve(data);
+					}, function (data) {
+						reject(data);
+					});
 			});
 		}
 
 		function deleteCurrentDoc() {
 			return $q(function (resolve, reject) {
 				_getem('delete_current_doc')
-                    .then(function (data) {
-	resolve(data);
-}, function (data) {
-	reject(data);
-});
+					.then(function (data) {
+						resolve(data);
+					}, function (data) {
+						reject(data);
+					});
 			});
 		}
 
@@ -108,15 +109,15 @@
 			return $q(function (resolve, reject) {
 				userDbPreference = dbName;
 				_getem('create_doc', dbName, collName, "", "", newDoc)
-                    .then(function (data) {
-	currentDoc.dbName = dbName;
-	currentDoc.collName = collName;
-	currentDoc.doc = data;
-	currentDoc.lokiNum = data[0].$loki;
-	resolve(data[0]);
-}, function(data){
-	reject(data);
-});
+					.then(function (data) {
+						currentDoc.dbName = dbName;
+						currentDoc.collName = collName;
+						currentDoc.doc = data;
+						currentDoc.lokiNum = data[0].$loki;
+						resolve(data[0]);
+					}, function (data) {
+						reject(data);
+					});
 			});
 		}
 
@@ -124,15 +125,15 @@
 			return $q(function (resolve, reject) {
 				userDbPreference = dbName;
 				_getem('set_doc', dbName, collName, docName)
-                    .then(function (data) {
-	currentDoc.dbName = dbName;
-	currentDoc.collName = collName;
-	currentDoc.doc = data;
-	currentDoc.lokiNum = data[0].$loki;
-	resolve(data[0]);
-}, function(data){
-	reject(data);
-});
+					.then(function (data) {
+						currentDoc.dbName = dbName;
+						currentDoc.collName = collName;
+						currentDoc.doc = data;
+						currentDoc.lokiNum = data[0].$loki;
+						resolve(data[0]);
+					}, function (data) {
+						reject(data);
+					});
 			});
 		}
 
@@ -140,11 +141,11 @@
 			return $q(function (resolve, reject) {
 				if (currentDoc) {
 					_getem('update_current_doc', currentDoc.dbName, currentDoc.collName, currentDoc.doc, thekey, thevalue)
-                        .then(function (data) {
-	resolve(data[0]);
-}, function(data){
-	reject(data);
-});
+						.then(function (data) {
+							resolve(data[0]);
+						}, function (data) {
+							reject(data);
+						});
 				} else {
 					reject("you have to set a current doc first, use: setCurrentDoc(dbName, collName, docName)");
 				}
@@ -156,11 +157,11 @@
 				userDbPreference = dbName;
 				if (currentDoc) {
 					_getem('update_doc', dbName, collName, docName, thekey, thevalue)
-                        .then(function (data) {
-	resolve(data[0]);
-}, function(data){
-	reject(data);
-});
+						.then(function (data) {
+							resolve(data[0]);
+						}, function (data) {
+							reject(data);
+						});
 				} else {
 					reject("bad, check parameters)");
 				}
@@ -171,15 +172,15 @@
 			return $q(function (resolve, reject) {
 				userDbPreference = dbName;
 				_getem('get_doc', dbName, collName, docName)
-                    .then(function (data) {
-	currentDoc.dbName = dbName;
-	currentDoc.collName = collName;
-	currentDoc.doc = data;
-	currentDoc.lokiNum = data[0].$loki;
-	resolve(data[0]);
-}, function(data){
-	reject(data);
-});
+					.then(function (data) {
+						currentDoc.dbName = dbName;
+						currentDoc.collName = collName;
+						currentDoc.doc = data;
+						currentDoc.lokiNum = data[0].$loki;
+						resolve(data[0]);
+					}, function (data) {
+						reject(data);
+					});
 			});
 		}
 
@@ -187,13 +188,13 @@
 			return $q(function (resolve, reject) {
 				userDbPreference = dbName;
 				_getem('get_collection', dbName, collName)
-                    .then(function (data) {
-	currentColl.dbName = dbName;
-	currentColl.collName = collName;
-	resolve(data);
-}, function(data){
-	reject(data);
-});
+					.then(function (data) {
+						currentColl.dbName = dbName;
+						currentColl.collName = collName;
+						resolve(data);
+					}, function (data) {
+						reject(data);
+					});
 			});
 		}
 
@@ -201,26 +202,26 @@
 			return $q(function (resolve, reject) {
 				userDbPreference = dbName;
 				_getem('remove_collection', dbName, collName)
-                    .then(function (data) {
-	currentColl = {};
-	resolve(data);
-}, function(data){
-	reject(data);
-});
+					.then(function (data) {
+						currentColl = {};
+						resolve(data);
+					}, function (data) {
+						reject(data);
+					});
 			});
 		}
 
 		function addCollection(collData) {
 			return $q(function (resolve, reject) {
-				var dbobj = breakdown_components(collData);
+				const dbobj = breakdown_components(collData);
 				userDbPreference = collData[dbobj.db];
 				_getem('add_collection', userDbPreference, '', '', '', collData)
-                    .then(function (data) {
-	currentColl.dbName = userDbPreference;
-	resolve(data);
-}, function(data){
-	reject(data);
-});
+					.then(function (data) {
+						currentColl.dbName = userDbPreference;
+						resolve(data);
+					}, function (data) {
+						reject(data);
+					});
 			});
 		}
 
@@ -231,41 +232,40 @@
 						getdata();
 					} else {
 						loadDb(dbName)
-                            .then(function () {
-	getdata();
-});
+							.then(function () {
+								getdata();
+							});
 					}
 				} else {
 					if (statesChecked) {
 						loadDb(dbName)
-                            .then(function () {
-	getdata();
-});
+							.then(function () {
+								getdata();
+							});
 					} else {
 						checkStates().then(function () {
 							getdata();
-						}, function(data){
+						}, function (data) {
 							reject(data);
 						});
 					}
 				}
-                
-                
+
 
 				function getdata() {
-					var found;
+					let found;
 
 					if (operation === 'update_doc' || operation === 'insert_item_in_doc') {
 						db.loadDatabase(dbName);
-						var coll = db.getCollection(collName);
-                        
-                        //docName is not simply a docname, this is an object like: {name: 'user settings'}
-						for(var i in docName) {
+						const coll = db.getCollection(collName);
+
+						//docName is not simply a docname, this is an object like: {name: 'user settings'}
+						for (const i in docName) {
 							currentDoc.key = i;
 							currentDoc.value = docName[i];
 						}
-						for (var x = 0; x < coll.data.length; x++){
-							if (coll.data[x][currentDoc.key] === currentDoc.value){
+						for (let x = 0; x < coll.data.length; x++) {
+							if (coll.data[x][currentDoc.key] === currentDoc.value) {
 								currentDoc.lokiNum = coll.data[x].$loki;
 							}
 						}
@@ -280,78 +280,78 @@
 						db.save();
 						resolve(true);
 					}
-					else if(operation === 'update_current_doc'){
+					else if (operation === 'update_current_doc') {
 						db.loadDatabase(dbName);
-						var coll0 = db.getCollection(collName);
+						const coll0 = db.getCollection(collName);
 						found = coll0.get(parseInt(currentDoc.lokiNum, 10));
 						found[thekey] = thevalue;
 						coll0.update(found);
-                        
+
 						db.save();
 						resolve(true);
-					} 
+					}
 					else if (operation === 'delete_current_doc' || operation === 'delete_doc') {
 						db.loadDatabase(dbName);
-						var coll6 = db.getCollection(collName);
-						if(operation === 'delete_doc'){
-							for(var j in docName) {
+						const coll6 = db.getCollection(collName);
+						if (operation === 'delete_doc') {
+							for (const j in docName) {
 								currentDoc.key = j;
 								currentDoc.value = docName[j];
 							}
-							for (var y = 0; y < coll6.data.length; y++){
-								if (coll6.data[y][currentDoc.key] === currentDoc.value){
+							for (let y = 0; y < coll6.data.length; y++) {
+								if (coll6.data[y][currentDoc.key] === currentDoc.value) {
 									currentDoc.lokiNum = coll6.data[y].$loki;
 								}
 							}
 						}
-						coll6.remove(currentDoc.lokiNum);                        
+						coll6.remove(currentDoc.lokiNum);
 						db.save();
 						resolve(true);
-					}                    
+					}
 					else if (operation === 'get_doc' || operation === 'set_doc') {
 						db.loadDatabase(dbName);
-						var coll1 = db.getCollection(collName);
+						const coll1 = db.getCollection(collName);
 						found = coll1.find(docName);
 						resolve(angular.fromJson(found));
 					} else if (operation === 'get_collection') {
 						db.loadDatabase(dbName);
-						var coll2 = db.getCollection(collName);
+						const coll2 = db.getCollection(collName);
 						resolve(angular.fromJson(coll2));
 					} else if (operation === 'remove_collection') {
 						db.loadDatabase(dbName);
 						db.removeCollection(collName);
-                        //coll = db.getCollection(collName);
+						//coll = db.getCollection(collName);
 						db.save(function () {
 							resolve('collection deleted');
 						});
 					} else if (operation === 'add_collection') {
 						db.loadDatabase(dbName);
-						var dbobj = breakdown_components(thevalue);
-                        
-						for (var w=0; w< dbobj.coll_array.length; w++){
-							var items = db.addCollection(thevalue[dbobj.coll_array[w].coll]);
+						const dbobj = breakdown_components(thevalue);
+
+						for (let w = 0; w < dbobj.coll_array.length; w++) {
+							const items = db.addCollection(thevalue[dbobj.coll_array[w].coll]);
 							items.insert(thevalue[dbobj.coll_array[w].docs]);
 						}
-                        
+
 						db.save(function () {
 							resolve('collection(s) added');
 						});
 
 					} else if (operation === 'create_doc') {
 						db.loadDatabase(dbName);
-						var coll3 = db.getCollection(collName);
+						const coll3 = db.getCollection(collName);
 						coll3.insert(thevalue);
 						db.save(function () {
-							var found = coll3.find({
+							const found = coll3.find({
 								name: thevalue.name
 							});
 							resolve(angular.fromJson(found));
 						});
 
-					} 
-                    // _getem('delete_doc', dbName, collName, "", "", doc)
+					}
+					// _getem('delete_doc', dbName, collName, "", "", doc)
 					else if (operation === 'delete_current_doc') {
-						var coll5 = db.getCollection(currentDoc.collName);
+						const coll5 = db.getCollection(currentDoc.collName);
 						if (!coll5) {
 							reject('You forgot to specify a current doc first');
 						} else {
@@ -365,7 +365,7 @@
 		}
 
 		function dbExists(databaseName) {
-			var value = window.localStorage.getItem(databaseName);
+			const value = window.localStorage.getItem(databaseName);
 			if (value) {
 				return true;
 			} else {
@@ -375,8 +375,8 @@
 
 		function closeAllDbs() {
 			return $q(function (resolve, reject) {
-				var current = 0;
-				for (var x = 0; x < lokidbs.length; x++) {
+				let current = 0;
+				for (let x = 0; x < lokidbs.length; x++) {
 					current++;
 					lokidbs[x].close();
 					if (x === (lokidbs.length - 1)) {
@@ -389,7 +389,7 @@
 		function closeDb(databaseName) {
 			return $q(function (resolve, reject) {
 
-				for (var x = 0; x < lokidbs.length; x++) {
+				for (let x = 0; x < lokidbs.length; x++) {
 					if (lokidbs.filename === databaseName) {
 						lokidbs[x].close();
 						resolve();
@@ -420,11 +420,11 @@
 
 		function firstFewItemsOfDbList() {
 			return $q(function (resolve, reject) {
-				for (var x = 0; x >= 0; x++) {
+				for (let x = 0; x >= 0; x++) {
 					if ($injector.has('json' + (x + 1))) {
-						var item = {};
-						var setting = $injector.get('json' + (x + 1));
-						var dbobj = breakdown_components(setting);
+						const item = {};
+						const setting = $injector.get('json' + (x + 1));
+						const dbobj = breakdown_components(setting);
 						if (setting[dbobj.db] === userDbPreference) { //userDbPreference is the name
 							userPrefJsonFile = x + 1; //userPrefJsonFile is the index
 							if (x === (numOfJsonDatabases - 1)) {
@@ -448,20 +448,20 @@
 		}
 
 		function initialiseDbList() {
-			return $q(function (resolve, reject) {                
+			return $q(function (resolve, reject) {
 				firstFewItemsOfDbList()
-                    .then(function () {
-	if (userPrefJsonFile === 0){
-		reject('Oops!, you didn\'t specify any starting document');
-	}
-	var currentdb = $injector.get('json' + userPrefJsonFile);
-	var item = {};
-	var dbobj = breakdown_components(currentdb);
-	item.filename = dbobj.db;
-	item.json = userPrefJsonFile;
-	dbitems.push(item);
-	resolve();
-});
+					.then(function () {
+						if (userPrefJsonFile === 0) {
+							reject('Oops!, you didn\'t specify any starting document');
+						}
+						const currentdb = $injector.get('json' + userPrefJsonFile);
+						const item = {};
+						const dbobj = breakdown_components(currentdb);
+						item.filename = dbobj.db;
+						item.json = userPrefJsonFile;
+						dbitems.push(item);
+						resolve();
+					});
 			});
 		}
 
@@ -469,7 +469,7 @@
 			if (numOfJsonDatabases >= 1) {
 				return numOfJsonDatabases;
 			} else {
-				for (var x = 0; x >= 0; x++) {
+				for (let x = 0; x >= 0; x++) {
 					if ($injector.has('json' + (x + 1))) {
 						numOfJsonDatabases++;
 					}
@@ -482,48 +482,49 @@
 			}
 		}
 
-		var still_running = false;
-		var current_iteration = 1;
+		let still_running = false;
+		let current_iteration = 1;
 
 		function initialiseAll() {
 			return $q(function (resolve, reject) {
 				initialiseDbList()
-                    .then(function () {
+					.then(function () {
 
-	function iterate_me() {
-		if ($injector.has('json' + dbitems[current_iteration - 1].json)) {
-			var setting = $injector.get('json' + dbitems[current_iteration - 1].json);
+						function iterate_me() {
+							if ($injector.has('json' + dbitems[current_iteration - 1].json)) {
+								const setting = $injector.get('json' + dbitems[current_iteration - 1].json);
 
-			console.log('number = ' + current_iteration);
-			var set = angular.fromJson(setting);
-			still_running = true;
-			initiateDb(set)
-                                    .then(function () {
-                                        //lokidbs.push(angular.copy(db));
-	if (!doesDBAlreadyExistInArray(db.filename)) {
-		lokidbs.push(angular.copy(db));
-	}
-	still_running = false;
-	if (current_iteration === (dbitems.length)) {
-		resolve();
-	} else {
-		current_iteration++;
-		iterate_me();
-		return;
-	}
-});
-		}
-	}
-	iterate_me();
-}, function(data){
-	reject(data);
-});
+								console.log('number = ' + current_iteration);
+								const set = angular.fromJson(setting);
+								still_running = true;
+								initiateDb(set)
+									.then(function () {
+										//lokidbs.push(angular.copy(db));
+										if (!doesDBAlreadyExistInArray(db.filename)) {
+											lokidbs.push(angular.copy(db));
+										}
+										still_running = false;
+										if (current_iteration === (dbitems.length)) {
+											resolve();
+										} else {
+											current_iteration++;
+											iterate_me();
+											return;
+										}
+									});
+							}
+						}
+
+						iterate_me();
+					}, function (data) {
+						reject(data);
+					});
 			});
 		}
 
 		function doesDBAlreadyExistInArray(dbname) {
-			var answer = false;
-			for (var x = 0; x < lokidbs.length; x++) {
+			let answer = false;
+			for (let x = 0; x < lokidbs.length; x++) {
 				if (lokidbs[x].filename === dbname) {
 					answer = true;
 				}
@@ -532,8 +533,8 @@
 		}
 
 		function getIndexOfDbItem(dbname) {
-			var answer = -1;
-			for (var x = 0; x < numOfJsonDatabases; x++) {
+			let answer = -1;
+			for (let x = 0; x < numOfJsonDatabases; x++) {
 				if (dbitems[x].filename === dbname) {
 					answer = x;
 				}
@@ -543,7 +544,7 @@
 
 		function loadDb(databaseName) {
 			return $q(function (resolve, reject) {
-				for (var x = 0; x < lokidbs.length; x++) {
+				for (let x = 0; x < lokidbs.length; x++) {
 					if (lokidbs[x].filename === databaseName) {
 						db = lokidbs[x];
 						resolve();
@@ -553,11 +554,10 @@
 		}
 
 
-
 		function initiateDb(database) {
 			return $q(function (resolve, reject) {
-				var dbobj = breakdown_components(database);
-				var db_does_exist = false;
+				const dbobj = breakdown_components(database);
+				let db_does_exist = false;
 				if (dbExists(database[dbobj.db])) {
 					db_does_exist = true;
 				}
@@ -573,9 +573,9 @@
 
 						resolve();
 					} else {
-						var dbobj = breakdown_components(database);
-						for(var x = 0; x < dbobj.coll_array.length; x++){
-							var items = db.addCollection(database[dbobj.coll_array[x].coll]);
+						const dbobj = breakdown_components(database);
+						for (let x = 0; x < dbobj.coll_array.length; x++) {
+							const items = db.addCollection(database[dbobj.coll_array[x].coll]);
 							items.insert(database[dbobj.coll_array[x].docs]);
 						}
 						db.save();
@@ -584,38 +584,42 @@
 				}
 			});
 		}
-		function breakdown_components(db_obj){
-			var iterate = 1;
-			var db_id = '';
-			var coll_id = "";
-			var doc_id = "";
-			var collections = [];
-			for(var i in db_obj){
-				if (iterate > 1){
-					if(isEven(iterate)){
+
+		function breakdown_components(db_obj) {
+			let iterate = 1;
+			let db_id = '';
+			let coll_id = "";
+			let doc_id = "";
+			const collections = [];
+			for (const i in db_obj) {
+				if (iterate > 1) {
+					if (isEven(iterate)) {
 						coll_id = i;
 					}
-					else{
-						doc_id = i; 
-						var tempobj = {coll: coll_id, docs: doc_id};
+					else {
+						doc_id = i;
+						const tempobj = {coll: coll_id, docs: doc_id};
 						collections.push(tempobj);
-					}                   
+					}
 				}
 				else {
 					db_id = i;
 				}
-				iterate ++;
+				iterate++;
 			}
-              
-			var dataobj = {db: db_id, coll_array: collections};
+
+			const dataobj = {db: db_id, coll_array: collections};
 			return dataobj;
 		}
+
 		function isEven(n) {
 			return n % 2 === 0;
 		}
+
 		function isOdd(n) {
 			return Boolean(n % 2);
 		}
 	}
+
 	return module;
 }));

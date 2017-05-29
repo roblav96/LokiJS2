@@ -4,7 +4,7 @@ import {LokiOps} from '../../../src/core/resultset';
 
 describe('Testing operators', function () {
 
-	var db, tree, res;
+	let db, tree, res;
 	beforeEach(function () {
 		db = new loki('testOps'),
 			tree = db.addCollection('tree'),
@@ -93,7 +93,7 @@ describe('Testing operators', function () {
 
 describe("Individual operator tests", function () {
 
-	var ops;
+	let ops;
 	beforeEach(function () {
 		ops = LokiOps;
 	});
@@ -117,10 +117,10 @@ describe("Individual operator tests", function () {
 		expect(ops.$aeq(1, '1')).toEqual(true);
 		expect(ops.$aeq(undefined, null)).toEqual(true);
 
-		var dt1 = new Date();
-		var dt2 = new Date();
+		const dt1 = new Date();
+		const dt2 = new Date();
 		dt2.setTime(dt1.getTime());
-		var dt3 = new Date();
+		const dt3 = new Date();
 		dt3.setTime(dt1.getTime() - 10000);
 
 		expect(ops.$dteq(dt1, dt2)).toEqual(true);
@@ -157,17 +157,17 @@ describe("Individual operator tests", function () {
 		expect(ops.$between(null, [5, 100])).toEqual(false);
 	});
 
-	it('$between find works as expected', function() {
+	it('$between find works as expected', function () {
 		// test unindexed code path
-		var db = new loki('db');
-		var coll = db.addCollection('coll');
-		coll.insert({ name : 'mjolnir', count: 73 });
-		coll.insert({ name : 'gungnir', count: 5 });
-		coll.insert({ name : 'tyrfing', count: 15 });
-		coll.insert({ name : 'draupnir', count: 132 });
+		let db = new loki('db');
+		let coll = db.addCollection('coll');
+		coll.insert({name: 'mjolnir', count: 73});
+		coll.insert({name: 'gungnir', count: 5});
+		coll.insert({name: 'tyrfing', count: 15});
+		coll.insert({name: 'draupnir', count: 132});
 
 		// simple inner between
-		var results = coll.chain().find({count: {$between: [10, 80]}}).simplesort('count').data();
+		let results = coll.chain().find({count: {$between: [10, 80]}}).simplesort('count').data();
 		expect(results.length).toEqual(2);
 		expect(results[0].count).toEqual(15);
 		expect(results[1].count).toEqual(73);
@@ -182,14 +182,14 @@ describe("Individual operator tests", function () {
 		expect(coll.find({count: {$between: [1, 4]}}).length).toEqual(0);
 
 		// multiple low and high bounds
-		var db = new loki('db');
-		var coll = db.addCollection('coll');
-		coll.insert({ name : 'first', count: 5});
-		coll.insert({ name : 'mjolnir', count: 15 });
-		coll.insert({ name : 'gungnir', count: 15 });
-		coll.insert({ name : 'tyrfing', count: 75 });
-		coll.insert({ name : 'draupnir', count: 75 });
-		coll.insert({ name : 'last', count: 100});
+		db = new loki('db');
+		coll = db.addCollection('coll');
+		coll.insert({name: 'first', count: 5});
+		coll.insert({name: 'mjolnir', count: 15});
+		coll.insert({name: 'gungnir', count: 15});
+		coll.insert({name: 'tyrfing', count: 75});
+		coll.insert({name: 'draupnir', count: 75});
+		coll.insert({name: 'last', count: 100});
 
 		results = coll.chain().find({count: {$between: [15, 75]}}).simplesort('count').data();
 		expect(results.length).toEqual(4);
@@ -227,60 +227,60 @@ describe("Individual operator tests", function () {
 		expect(coll.find({count: {$between: [20, 60]}}).length).toEqual(0);
 	});
 
-	it('indexed $in find works as expected', function() {
+	it('indexed $in find works as expected', function () {
 		// test unindexed code path
-		var db = new loki('db');
-		var coll = db.addCollection('coll', { indices: ['count'] });
-		coll.insert({ name : 'mjolnir', count: 73 });
-		coll.insert({ name : 'gungnir', count: 5 });
-		coll.insert({ name : 'tyrfing', count: 15 });
-		coll.insert({ name : 'draupnir', count: 132 });
+		const db = new loki('db');
+		const coll = db.addCollection('coll', {indices: ['count']});
+		coll.insert({name: 'mjolnir', count: 73});
+		coll.insert({name: 'gungnir', count: 5});
+		coll.insert({name: 'tyrfing', count: 15});
+		coll.insert({name: 'draupnir', count: 132});
 
-		var results = coll.chain().find({count: {$in: [15, 73]}}).simplesort('count').data();
+		const results = coll.chain().find({count: {$in: [15, 73]}}).simplesort('count').data();
 		expect(results.length).toEqual(2);
 		expect(results[0].count).toEqual(15);
 		expect(results[1].count).toEqual(73);
 	});
 
-	it('ops work with mixed datatypes', function() {
-		var db = new loki('db');
-		var coll = db.addCollection('coll');
+	it('ops work with mixed datatypes', function () {
+		const db = new loki('db');
+		const coll = db.addCollection('coll');
 
-		coll.insert({ a: null, b: 5});
-		coll.insert({ a: "asdf", b: 5});
-		coll.insert({ a: "11", b: 5});
-		coll.insert({ a: 2, b: 5});
-		coll.insert({ a: "1", b: 5});
-		coll.insert({ a: "4", b: 5});
-		coll.insert({ a: 7.2, b: 5});
-		coll.insert({ a: "5", b: 5});
-		coll.insert({ a: 4, b: 5});
-		coll.insert({ a: "18.1", b: 5});
+		coll.insert({a: null, b: 5});
+		coll.insert({a: "asdf", b: 5});
+		coll.insert({a: "11", b: 5});
+		coll.insert({a: 2, b: 5});
+		coll.insert({a: "1", b: 5});
+		coll.insert({a: "4", b: 5});
+		coll.insert({a: 7.2, b: 5});
+		coll.insert({a: "5", b: 5});
+		coll.insert({a: 4, b: 5});
+		coll.insert({a: "18.1", b: 5});
 
-		expect(coll.findOne({ a: "asdf"}).a).toEqual("asdf");
+		expect(coll.findOne({a: "asdf"}).a).toEqual("asdf");
 		// default equality is strict, otherwise use $aeq
-		expect(coll.find({ a: 4}).length).toEqual(1);
-		expect(coll.find({ a: '4'}).length).toEqual(1);
+		expect(coll.find({a: 4}).length).toEqual(1);
+		expect(coll.find({a: '4'}).length).toEqual(1);
 		// default range ops (lt, lte, gt, gte, between) are loose
-		expect(coll.find({ a: { $between : [4, 12] }}).length).toEqual(5); // "4", 4, "5", 7.2, "11"
-		expect(coll.find({ a: { $gte: "7.2" }}).length).toEqual(4); // 7.2, "11", "18.1", "asdf" (strings after numbers)
-		expect(coll.chain().find({ a: { $gte: "7.2" }}).find({ a: { $finite: true }}).data().length).toEqual(3); // 7.2, "11", "18.1"
-		expect(coll.find({ a: { $gt: "7.2" }}).length).toEqual(3); // "11", "18.1", "asdf"
-		expect(coll.find({ a: { $lte: "7.2" }}).length).toEqual(7); // 7.2, "5", "4", 4, 2, 1, null
+		expect(coll.find({a: {$between: [4, 12]}}).length).toEqual(5); // "4", 4, "5", 7.2, "11"
+		expect(coll.find({a: {$gte: "7.2"}}).length).toEqual(4); // 7.2, "11", "18.1", "asdf" (strings after numbers)
+		expect(coll.chain().find({a: {$gte: "7.2"}}).find({a: {$finite: true}}).data().length).toEqual(3); // 7.2, "11", "18.1"
+		expect(coll.find({a: {$gt: "7.2"}}).length).toEqual(3); // "11", "18.1", "asdf"
+		expect(coll.find({a: {$lte: "7.2"}}).length).toEqual(7); // 7.2, "5", "4", 4, 2, 1, null
 
 		// expect same behavior when binary index is applied to property being queried
 		coll.ensureIndex('a');
 
-		expect(coll.findOne({ a: "asdf"}).a).toEqual("asdf");
+		expect(coll.findOne({a: "asdf"}).a).toEqual("asdf");
 		// default equality is strict, otherwise use $aeq
-		expect(coll.find({ a: 4}).length).toEqual(1);
-		expect(coll.find({ a: '4'}).length).toEqual(1);
+		expect(coll.find({a: 4}).length).toEqual(1);
+		expect(coll.find({a: '4'}).length).toEqual(1);
 		// default range ops (lt, lte, gt, gte, between) are loose
-		expect(coll.find({ a: { $between : [4, 12] }}).length).toEqual(5); // "4", 4, "5", 7.2, "11"
-		expect(coll.find({ a: { $gte: "7.2" }}).length).toEqual(4); // 7.2, "11", "18.1", "asdf" (strings after numbers)
-		expect(coll.chain().find({ a: { $gte: "7.2" }}).find({ a: { $finite: true }}).data().length).toEqual(3); // 7.2, "11", "18.1"
-		expect(coll.find({ a: { $gt: "7.2" }}).length).toEqual(3); // "11", "18.1", "asdf"
-		expect(coll.find({ a: { $lte: "7.2" }}).length).toEqual(7); // 7.2, "5", "4", 4, 2, 1, null
+		expect(coll.find({a: {$between: [4, 12]}}).length).toEqual(5); // "4", 4, "5", 7.2, "11"
+		expect(coll.find({a: {$gte: "7.2"}}).length).toEqual(4); // 7.2, "11", "18.1", "asdf" (strings after numbers)
+		expect(coll.chain().find({a: {$gte: "7.2"}}).find({a: {$finite: true}}).data().length).toEqual(3); // 7.2, "11", "18.1"
+		expect(coll.find({a: {$gt: "7.2"}}).length).toEqual(3); // "11", "18.1", "asdf"
+		expect(coll.find({a: {$lte: "7.2"}}).length).toEqual(7); // 7.2, "5", "4", 4, 2, 1, null
 
 	});
 });
