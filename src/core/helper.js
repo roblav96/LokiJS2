@@ -1,7 +1,11 @@
-/** Helper function for determining 'less-than' conditions for ops, sorting, and binary indices.
- *     In the future we might want $lt and $gt ops to use their own functionality/helper.
- *     Since binary indices on a property might need to index [12, NaN, new Date(), Infinity], we
- *     need this function (as well as gtHelper) to always ensure one value is LT, GT, or EQ to another.
+/** Helper function for determining 'loki' abstract equality which is a little more abstract than ==
+ *     aeqHelper(5, '5') === true
+ *     aeqHelper(5.0, '5') === true
+ *     aeqHelper(new Date("1/1/2011"), new Date("1/1/2011")) === true
+ *     aeqHelper({a:1}, {z:4}) === true (all objects sorted equally)
+ *     aeqHelper([1, 2, 3], [1, 3]) === false
+ *     aeqHelper([1, 2, 3], [1, 2, 3]) === true
+ *     aeqHelper(undefined, null) === true
  */
 export function aeqHelper(prop1, prop2) {
 	let cv1, cv2, t1, t2;

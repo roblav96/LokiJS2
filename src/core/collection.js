@@ -1673,18 +1673,15 @@ export class Collection extends LokiEventEmitter {
 		query = query || {};
 
 		// Instantiate Resultset and exec find op passing firstOnly = true param
-		const result = new Resultset(this, {
-			queryObj: query,
-			firstOnly: true
-		});
+		const result = this.chain().find(query,true).data();
 
 		if (Array.isArray(result) && result.length === 0) {
 			return null;
 		} else {
 			if (!this.cloneObjects) {
-				return result;
+				return result[0];
 			} else {
-				return clone(result, this.cloneMethod);
+				return clone(result[0], this.cloneMethod);
 			}
 		}
 	}
@@ -1717,18 +1714,7 @@ export class Collection extends LokiEventEmitter {
 	 * @memberof Collection
 	 */
 	find(query) {
-		if (typeof(query) === 'undefined') {
-			query = 'getAll';
-		}
-
-		const results = new Resultset(this, {
-			queryObj: query
-		});
-		if (!this.cloneObjects) {
-			return results;
-		} else {
-			return cloneObjectArray(results, this.cloneMethod);
-		}
+		return this.chain().find(query).data();
 	}
 
 	/**
@@ -1806,14 +1792,7 @@ export class Collection extends LokiEventEmitter {
 	 * @memberof Collection
 	 */
 	where(fun) {
-		const results = new Resultset(this, {
-			queryFunc: fun
-		});
-		if (!this.cloneObjects) {
-			return results;
-		} else {
-			return cloneObjectArray(results, this.cloneMethod);
-		}
+		return this.chain().where(fun).data();
 	}
 
 	/**

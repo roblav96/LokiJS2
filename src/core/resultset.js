@@ -1,7 +1,7 @@
 import {clone} from './clone';
 import {Collection} from './collection';
 import {Utils} from './utils';
-import {ltHelper, gtHelper} from './helper';
+import {ltHelper, gtHelper, aeqHelper} from './helper';
 
 /*
  'Utils' is not defined                 no-undef	(resolveTransformParams)
@@ -61,11 +61,9 @@ export const LokiOps = {
 		return a !== b;
 	},
 
+	// date equality / loki abstract equality test
 	$dteq: function (a, b) {
-		if (ltHelper(a, b, false)) {
-			return false;
-		}
-		return !gtHelper(a, b, false);
+		return aeqHelper(a, b);
 	},
 
 	$gt: function (a, b) {
@@ -317,27 +315,11 @@ export class Resultset {
 	constructor(collection, options) {
 		options = options || {};
 
-		options.queryObj = options.queryObj || null;
-		options.queryFunc = options.queryFunc || null;
-		options.firstOnly = options.firstOnly || false;
-
 		// retain reference to collection we are querying against
 		this.collection = collection;
-
-		// if chain() instantiates with null queryObj and queryFunc, so we will keep flag for later
-		this.searchIsChained = (!options.queryObj && !options.queryFunc);
 		this.filteredrows = [];
 		this.filterInitialized = false;
 
-		// if user supplied initial queryObj or queryFunc, apply it
-		if (typeof(options.queryObj) !== "undefined" && options.queryObj !== null) {
-			return this.find(options.queryObj, options.firstOnly);
-		}
-		if (typeof(options.queryFunc) !== "undefined" && options.queryFunc !== null) {
-			return this.where(options.queryFunc);
-		}
-
-		// otherwise return unfiltered Resultset for future filtering
 		return this;
 	}
 
@@ -373,8 +355,8 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	limit(qty) {
-		// if this is chained resultset with no filters applied, we need to populate filteredrows first
-		if (this.searchIsChained && !this.filterInitialized && this.filteredrows.length === 0) {
+		// if this has no filters applied, we need to populate filteredrows first
+		if (!this.filterInitialized && this.filteredrows.length === 0) {
 			this.filteredrows = this.collection.prepareFullDocIndex();
 		}
 
@@ -392,8 +374,8 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	offset(pos) {
-		// if this is chained resultset with no filters applied, we need to populate filteredrows first
-		if (this.searchIsChained && !this.filterInitialized && this.filteredrows.length === 0) {
+		// if this has no filters applied, we need to populate filteredrows first
+		if (!this.filterInitialized && this.filteredrows.length === 0) {
 			this.filteredrows = this.collection.prepareFullDocIndex();
 		}
 
@@ -506,37 +488,6 @@ export class Resultset {
 	}
 
 	/**
-	 * Instances a new anonymous collection with the documents contained in the current resultset.
-	 *
-	 * @param {object} collectionOptions - Options to pass to new anonymous collection construction.
-	 * @returns {Collection} A reference to an anonymous collection initialized with resultset data().
-	 * @memberof Resultset
-	 */
-	instance(collectionOptions) {
-		const docs = this.data();
-		let idx, doc;
-
-		collectionOptions = collectionOptions || {};
-
-		const instanceCollection = new Collection(collectionOptions);
-
-		for (idx = 0; idx < docs.length; idx++) {
-			if (this.collection.cloneObjects) {
-				doc = docs[idx];
-			} else {
-				doc = clone(docs[idx], this.collection.cloneMethod);
-			}
-
-			delete doc.$loki;
-			delete doc.meta;
-
-			instanceCollection.insert(doc);
-		}
-
-		return instanceCollection;
-	}
-
-	/**
 	 * User supplied compare function is provided two documents to compare. (chainable)
 	 * @example
 	 *    rslt.sort(function(obj1, obj2) {
@@ -550,8 +501,8 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	sort(comparefun) {
-		// if this is chained resultset with no filters applied, just we need to populate filteredrows first
-		if (this.searchIsChained && !this.filterInitialized && this.filteredrows.length === 0) {
+		// if this has no filters applied, just we need to populate filteredrows first
+		if (!this.filterInitialized && this.filteredrows.length === 0) {
 			this.filteredrows = this.collection.prepareFullDocIndex();
 		}
 
@@ -581,8 +532,8 @@ export class Resultset {
 			isdesc = false;
 		}
 
-		// if this is chained resultset with no filters applied, just we need to populate filteredrows first
-		if (this.searchIsChained && !this.filterInitialized && this.filteredrows.length === 0) {
+		// if this has no filters applied, just we need to populate filteredrows first
+		if (!this.filterInitialized && this.filteredrows.length === 0) {
 			// if we have a binary index and no other filters applied, we can use that instead of sorting (again)
 			if (this.collection.binaryIndices.hasOwnProperty(propname)) {
 				// make sure index is up-to-date
@@ -649,8 +600,8 @@ export class Resultset {
 			}
 		}
 
-		// if this is chained resultset with no filters applied, just we need to populate filteredrows first
-		if (this.searchIsChained && !this.filterInitialized && this.filteredrows.length === 0) {
+		// if this has no filters applied, just we need to populate filteredrows first
+		if (!this.filterInitialized && this.filteredrows.length === 0) {
 			this.filteredrows = this.collection.prepareFullDocIndex();
 		}
 
@@ -750,12 +701,9 @@ export class Resultset {
 	 */
 	find(query, firstOnly) {
 		if (this.collection.data.length === 0) {
-			if (this.searchIsChained) {
-				this.filteredrows = [];
-				this.filterInitialized = true;
-				return this;
-			}
-			return [];
+			this.filteredrows = [];
+			this.filterInitialized = true;
+			return this;
 		}
 
 		const queryObject = query || 'getAll';
@@ -795,37 +743,22 @@ export class Resultset {
 		// apply no filters if they want all
 		if (!property || queryObject === 'getAll') {
 			if (firstOnly) {
-				return (this.collection.data.length > 0) ? this.collection.data[0] : null;
+				this.filteredrows = (this.collection.data.length > 0) ? [0] : [];
+				this.filterInitialized = true;
 			}
-
-			return (this.searchIsChained) ? (this) : (this.collection.data.slice());
+			return this;
 		}
 
 		// injecting $and and $or expression tree evaluation here.
 		if (property === '$and' || property === '$or') {
-			if (this.searchIsChained) {
-				this[property](queryObjectOp);
+			this[property](queryObjectOp);
 
-				// for chained find with firstonly,
-				if (firstOnly && this.filteredrows.length > 1) {
-					this.filteredrows = this.filteredrows.slice(0, 1);
-				}
-
-				return this;
-			} else {
-				// our $and operation internally chains filters
-				result = this.collection.chain()[property](queryObjectOp).data();
-
-				// if this was coll.findOne() return first object or empty array if null
-				// since this is invoked from a constructor we can't return null, so we will
-				// make null in coll.findOne();
-				if (firstOnly) {
-					return (result.length === 0) ? ([]) : (result[0]);
-				}
-
-				// not first only return all results
-				return result;
+			// for chained find with firstonly,
+			if (firstOnly && this.filteredrows.length > 1) {
+				this.filteredrows = this.filteredrows.slice(0, 1);
 			}
+
+			return this;
 		}
 
 		// see if query object is in shorthand mode (assuming eq operator)
@@ -872,10 +805,8 @@ export class Resultset {
 		const usingDotNotation = (property.indexOf('.') !== -1);
 
 		// if an index exists for the property being queried against, use it
-		// for now only enabling for non-chained query (who's set of docs matches index)
-		// or chained queries where it is the first filter applied and prop is indexed
-		const doIndexCheck = !usingDotNotation &&
-			(!this.searchIsChained || !this.filterInitialized);
+		// for now only enabling where it is the first filter applied and prop is indexed
+		var doIndexCheck = !usingDotNotation && !this.filterInitialized;
 
 		if (doIndexCheck && this.collection.binaryIndices[property] && indexedOps[operator]) {
 			// this is where our lazy index rebuilding will take place
@@ -902,90 +833,10 @@ export class Resultset {
 		let len = 0;
 
 		// Query executed differently depending on :
-		//    - whether it is chained or not
 		//    - whether the property being queried has an index defined
 		//    - if chained, we handle first pass differently for initial filteredrows[] population
 		//
 		// For performance reasons, each case has its own if block to minimize in-loop calculations
-
-		// If not a chained query, bypass filteredrows and work directly against data
-		if (!this.searchIsChained) {
-			if (!searchByIndex) {
-				i = t.length;
-
-				if (firstOnly) {
-					if (usingDotNotation) {
-						property = property.split('.');
-						while (i--) {
-							if (dotSubScan(t[i], property, fun, value)) {
-								return (t[i]);
-							}
-						}
-					} else {
-						while (i--) {
-							if (fun(t[i][property], value)) {
-								return (t[i]);
-							}
-						}
-					}
-
-					return [];
-				}
-
-				// if using dot notation then treat property as keypath such as 'name.first'.
-				// currently supporting dot notation for non-indexed conditions only
-				if (usingDotNotation) {
-					property = property.split('.');
-					while (i--) {
-						if (dotSubScan(t[i], property, fun, value)) {
-							result.push(t[i]);
-						}
-					}
-				} else {
-					while (i--) {
-						if (fun(t[i][property], value)) {
-							result.push(t[i]);
-						}
-					}
-				}
-			} else {
-				// searching by binary index via calculateRange() utility method
-				const seg = this.collection.calculateRange(operator, property, value);
-
-				// not chained so this 'find' was designated in Resultset constructor
-				// so return object itself
-				if (firstOnly) {
-					if (seg[1] !== -1) {
-						return t[index.values[seg[0]]];
-					}
-					return [];
-				}
-
-				if (operator !== '$in') {
-					for (i = seg[0]; i <= seg[1]; i++) {
-						if (indexedOps[operator] !== true) {
-							if (indexedOps[operator](t[index.values[i]][property], value)) {
-								result.push(t[index.values[i]]);
-							}
-						}
-						else {
-							result.push(t[index.values[i]]);
-						}
-					}
-				} else {
-					for (i = 0, len = seg.length; i < len; i++) {
-						result.push(t[index.values[seg[i]]]);
-					}
-				}
-			}
-
-			// not a chained query so return result as data[]
-			return result;
-		}
-
-
-		// Otherwise this is a chained query
-		// Chained queries now preserve results ordering at expense on slightly reduced unindexed performance
 
 		let filter, rowIdx = 0;
 
@@ -1023,12 +874,22 @@ export class Resultset {
 					for (i = 0; i < len; i++) {
 						if (dotSubScan(t[i], property, fun, value)) {
 							result.push(i);
+							if (firstOnly) {
+								this.filteredrows = result;
+								this.filterInitialized = true;
+								return this;
+							}
 						}
 					}
 				} else {
 					for (i = 0; i < len; i++) {
 						if (fun(t[i][property], value)) {
 							result.push(i);
+							if (firstOnly) {
+								this.filteredrows = result;
+								this.filterInitialized = true;
+								return this;
+							}
 						}
 					}
 				}
@@ -1042,23 +903,37 @@ export class Resultset {
 							// must be a function, implying 2nd phase filtering of results from calculateRange
 							if (indexedOps[operator](t[index.values[i]][property], value)) {
 								result.push(index.values[i]);
+								if (firstOnly) {
+									this.filteredrows = result;
+									this.filterInitialized = true;
+									return this;
+								}
 							}
 						}
 						else {
 							result.push(index.values[i]);
+							if (firstOnly) {
+								this.filteredrows = result;
+								this.filterInitialized = true;
+								return this;
+							}
 						}
 					}
 				} else {
 					for (i = 0, len = segm.length; i < len; i++) {
 						result.push(index.values[segm[i]]);
+						if (firstOnly) {
+							this.filteredrows = result;
+							this.filterInitialized = true;
+							return this;
+						}
 					}
 				}
 			}
-
-			this.filterInitialized = true; // next time work against filteredrows[]
 		}
 
 		this.filteredrows = result;
+		this.filterInitialized = true; // next time work against filteredrows[]
 		return this;
 	}
 
@@ -1080,50 +955,34 @@ export class Resultset {
 			throw new TypeError('Argument is not a stored view or a function');
 		}
 		try {
-			// if not a chained query then run directly against data[] and return object []
-			if (!this.searchIsChained) {
-				let i = this.collection.data.length;
+			// If the filteredrows[] is already initialized, use it
+			if (this.filterInitialized) {
+				let j = this.filteredrows.length;
 
-				while (i--) {
-					if (viewFunction(this.collection.data[i]) === true) {
-						result.push(this.collection.data[i]);
+				while (j--) {
+					if (viewFunction(this.collection.data[this.filteredrows[j]]) === true) {
+						result.push(this.filteredrows[j]);
 					}
 				}
 
-				// not a chained query so returning result as data[]
-				return result;
+				this.filteredrows = result;
+
+				return this;
 			}
-			// else chained query, so run against filteredrows
+			// otherwise this is initial chained op, work against data, push into filteredrows[]
 			else {
-				// If the filteredrows[] is already initialized, use it
-				if (this.filterInitialized) {
-					let j = this.filteredrows.length;
+				let k = this.collection.data.length;
 
-					while (j--) {
-						if (viewFunction(this.collection.data[this.filteredrows[j]]) === true) {
-							result.push(this.filteredrows[j]);
-						}
+				while (k--) {
+					if (viewFunction(this.collection.data[k]) === true) {
+						result.push(k);
 					}
-
-					this.filteredrows = result;
-
-					return this;
 				}
-				// otherwise this is initial chained op, work against data, push into filteredrows[]
-				else {
-					let k = this.collection.data.length;
 
-					while (k--) {
-						if (viewFunction(this.collection.data[k]) === true) {
-							result.push(k);
-						}
-					}
+				this.filteredrows = result;
+				this.filterInitialized = true;
 
-					this.filteredrows = result;
-					this.filterInitialized = true;
-
-					return this;
-				}
+				return this;
 			}
 		} catch (err) {
 			throw err;
@@ -1137,7 +996,7 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	count() {
-		if (this.searchIsChained && this.filterInitialized) {
+		if (this.filterInitialized) {
 			return this.filteredrows.length;
 		}
 		return this.collection.count();
@@ -1151,6 +1010,7 @@ export class Resultset {
 	 *        the collection is not configured for clone object.
 	 * @param {string} options.forceCloneMethod - Allows overriding the default or collection specified cloning method.
 	 *        Possible values include 'parse-stringify', 'jquery-extend-deep', and 'shallow'
+	 * @param {bool} options.removeMeta - Will force clones and strip $loki and meta properties from documents
 	 *
 	 * @returns {array} Array of documents in the resultset
 	 * @memberof Resultset
@@ -1158,14 +1018,21 @@ export class Resultset {
 	data(options) {
 		let result = [],
 			data = this.collection.data,
+			obj,
 			len,
 			i,
 			method;
 
 		options = options || {};
 
-		// if this is chained resultset with no filters applied, just return collection.data
-		if (this.searchIsChained && !this.filterInitialized) {
+		// if user opts to strip meta, then force clones and use 'shallow' if 'force' options are not present
+		if (options.removeMeta && !options.forceClones) {
+			options.forceClones = true;
+			options.forceCloneMethod = options.forceCloneMethod || 'shallow';
+		}
+
+		// if this has no filters applied, just return collection.data
+		if (!this.filterInitialized) {
 			if (this.filteredrows.length === 0) {
 				// determine whether we need to clone objects or not
 				if (this.collection.cloneObjects || options.forceClones) {
@@ -1173,7 +1040,12 @@ export class Resultset {
 					method = options.forceCloneMethod || this.collection.cloneMethod;
 
 					for (i = 0; i < len; i++) {
-						result.push(clone(data[i], method));
+						obj = clone(data[i], method);
+						if (options.removeMeta) {
+							delete obj.$loki;
+							delete obj.meta;
+						}
+						result.push(obj);
 					}
 					return result;
 				}
@@ -1193,7 +1065,12 @@ export class Resultset {
 		if (this.collection.cloneObjects || options.forceClones) {
 			method = options.forceCloneMethod || this.collection.cloneMethod;
 			for (i = 0; i < len; i++) {
-				result.push(clone(data[fr[i]], method));
+				obj = clone(data[fr[i]], method);
+				if (options.removeMeta) {
+					delete obj.$loki;
+					delete obj.meta;
+				}
+				result.push(obj);
 			}
 		} else {
 			for (i = 0; i < len; i++) {
@@ -1216,8 +1093,8 @@ export class Resultset {
 			throw new TypeError('Argument is not a function');
 		}
 
-		// if this is chained resultset with no filters applied, we need to populate filteredrows first
-		if (this.searchIsChained && !this.filterInitialized && this.filteredrows.length === 0) {
+		// if this has no filters applied, we need to populate filteredrows first
+		if (!this.filterInitialized && this.filteredrows.length === 0) {
 			this.filteredrows = this.collection.prepareFullDocIndex();
 		}
 
@@ -1242,8 +1119,8 @@ export class Resultset {
 	 */
 	remove() {
 
-		// if this is chained resultset with no filters applied, we need to populate filteredrows first
-		if (this.searchIsChained && !this.filterInitialized && this.filteredrows.length === 0) {
+		// if this has no filters applied, we need to populate filteredrows first
+		if (!this.filterInitialized && this.filteredrows.length === 0) {
 			this.filteredrows = this.collection.prepareFullDocIndex();
 		}
 

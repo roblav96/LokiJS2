@@ -38,8 +38,8 @@ export class Loki extends LokiEventEmitter {
 
 		// persist version of code which created the database to the database.
 		// could use for upgrade scenarios
-		this.databaseVersion = 1.441;
-		this.engineVersion = 1.441;
+		this.databaseVersion = 1.5;
+		this.engineVersion = 1.5;
 
 		// autosave support (disabled by default)
 		// pass autosave: true, autosaveInterval: 6000 in options to set 6 second autosave
@@ -270,28 +270,6 @@ export class Loki extends LokiEventEmitter {
 		}
 
 		return databaseCopy;
-	}
-
-	/**
-	 * Shorthand method for quickly creating and populating an anonymous collection.
-	 *    This collection is not referenced internally so upon losing scope it will be garbage collected.
-	 *
-	 * @example
-	 * let results = new loki().anonym(myDocArray).find({'age': {'$gt': 30} });
-	 *
-	 * @param {Array} docs - document array to initialize the anonymous collection with
-	 * @param {object} options - configuration object, see {@link Loki#addCollection} options
-	 * @returns {Collection} New collection which you can query or chain
-	 * @memberof Loki
-	 */
-	anonym(docs, options) {
-		const collection = new Collection('anonym', options);
-		collection.insert(docs);
-
-		if (this.verbose)
-			collection.console = console;
-
-		return collection;
 	}
 
 	/**
@@ -919,7 +897,6 @@ export class Loki extends LokiEventEmitter {
 
 				dv.sortDirty = colldv.sortDirty;
 				dv.resultset.filteredrows = colldv.resultset.filteredrows;
-				dv.resultset.searchIsChained = colldv.resultset.searchIsChained;
 				dv.resultset.filterInitialized = colldv.resultset.filterInitialized;
 
 				dv.rematerialize({
@@ -927,8 +904,8 @@ export class Loki extends LokiEventEmitter {
 				});
 			}
 
-			// Upgrade Logic for binary index refactoring at version 1.4.4
-			if (dbObject.databaseVersion < 1.441) {
+			// Upgrade Logic for binary index refactoring at version 1.5
+			if (dbObject.databaseVersion < 1.5) {
 				// rebuild all indices
 				copyColl.ensureAllIndexes(true);
 				copyColl.dirty = true;

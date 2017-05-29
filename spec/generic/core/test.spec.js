@@ -993,7 +993,7 @@ describe('loki', function () {
 		});
 	});
 
-	describe('resultset instance works', function () {
+	describe('resultset data removeMeta works', function () {
 		it('works', function () {
 			const idb = new loki('sandbox.db');
 
@@ -1006,17 +1006,69 @@ describe('loki', function () {
 			items.insert({name: 'tyrfing', owner: 'svafrlami', maker: 'dwarves'});
 			items.insert({name: 'draupnir', owner: 'odin', maker: 'elves'});
 
-			// combine indexed enabled sort with instancing
-			let instanceCollection = items.chain().simplesort('owner').limit(2).instance();
-			expect(instanceCollection.data.length).toEqual(2);
-			expect(instanceCollection.data[0].owner).toEqual('odin');
-			expect(instanceCollection.data[1].owner).toEqual('odin');
+			// unfiltered with strip meta
+			let result = items.chain().data({removeMeta: true});
+			expect(result.length).toEqual(4);
+			expect(result[0].hasOwnProperty('$loki')).toEqual(false);
+			expect(result[0].hasOwnProperty('meta')).toEqual(false);
+			expect(result[1].hasOwnProperty('$loki')).toEqual(false);
+			expect(result[1].hasOwnProperty('meta')).toEqual(false);
+			expect(result[2].hasOwnProperty('$loki')).toEqual(false);
+			expect(result[2].hasOwnProperty('meta')).toEqual(false);
+			expect(result[3].hasOwnProperty('$loki')).toEqual(false);
+			expect(result[3].hasOwnProperty('meta')).toEqual(false);
 
-			// combine unindexed find with instancing
-			instanceCollection = items.chain().find({maker: 'elves'}).instance();
-			expect(instanceCollection.data.length).toEqual(2);
-			expect(instanceCollection.data[0].maker).toEqual('elves');
-			expect(instanceCollection.data[1].maker).toEqual('elves');
+			// indexed sort with strip meta
+			result = items.chain().simplesort('owner').limit(2).data({removeMeta: true});
+			expect(result.length).toEqual(2);
+			expect(result[0].owner).toEqual('odin');
+			expect(result[0].hasOwnProperty('$loki')).toEqual(false);
+			expect(result[0].hasOwnProperty('meta')).toEqual(false);
+			expect(result[1].owner).toEqual('odin');
+			expect(result[1].hasOwnProperty('$loki')).toEqual(false);
+			expect(result[1].hasOwnProperty('meta')).toEqual(false);
+
+			// unindexed find strip meta
+			result = items.chain().find({maker: 'elves'}).data({removeMeta: true});
+			expect(result.length).toEqual(2);
+			expect(result[0].maker).toEqual('elves');
+			expect(result[0].hasOwnProperty('$loki')).toEqual(false);
+			expect(result[0].hasOwnProperty('meta')).toEqual(false);
+			expect(result[1].maker).toEqual('elves');
+			expect(result[1].hasOwnProperty('$loki')).toEqual(false);
+			expect(result[1].hasOwnProperty('meta')).toEqual(false);
+
+			// now try unfiltered without strip meta and ensure loki and meta are present
+			result = items.chain().data();
+			expect(result.length).toEqual(4);
+			expect(result[0].hasOwnProperty('$loki')).toEqual(true);
+			expect(result[0].hasOwnProperty('meta')).toEqual(true);
+			expect(result[1].hasOwnProperty('$loki')).toEqual(true);
+			expect(result[1].hasOwnProperty('meta')).toEqual(true);
+			expect(result[2].hasOwnProperty('$loki')).toEqual(true);
+			expect(result[2].hasOwnProperty('meta')).toEqual(true);
+			expect(result[3].hasOwnProperty('$loki')).toEqual(true);
+			expect(result[3].hasOwnProperty('meta')).toEqual(true);
+
+			// now try without strip meta and ensure loki and meta are present
+			result = items.chain().simplesort('owner').limit(2).data();
+			expect(result.length).toEqual(2);
+			expect(result[0].owner).toEqual('odin');
+			expect(result[0].hasOwnProperty('$loki')).toEqual(true);
+			expect(result[0].hasOwnProperty('meta')).toEqual(true);
+			expect(result[1].owner).toEqual('odin');
+			expect(result[1].hasOwnProperty('$loki')).toEqual(true);
+			expect(result[1].hasOwnProperty('meta')).toEqual(true);
+
+			// unindexed find strip meta
+			result = items.chain().find({maker: 'elves'}).data();
+			expect(result.length).toEqual(2);
+			expect(result[0].maker).toEqual('elves');
+			expect(result[0].hasOwnProperty('$loki')).toEqual(true);
+			expect(result[0].hasOwnProperty('meta')).toEqual(true);
+			expect(result[1].maker).toEqual('elves');
+			expect(result[1].hasOwnProperty('$loki')).toEqual(true);
+			expect(result[1].hasOwnProperty('meta')).toEqual(true);
 		});
 	});
 
@@ -1099,10 +1151,10 @@ describe('loki', function () {
 			const result1 = users.find(query).sort(docCompare);
 			const result2 = view.data().sort(docCompare);
 			result1.forEach(function (obj) {
-				delete obj.meta;
+				delete obj.meta
 			});
 			result2.forEach(function (obj) {
-				delete obj.meta;
+				delete obj.meta
 			});
 
 			it('Result data Equality', function () {
@@ -1146,7 +1198,7 @@ describe('loki', function () {
 			// filteredrows should be applied immediately to resultset will be lazily built into resultdata later when data() is called
 			it('dynamic view initialization 1', function () {
 				expect(pview.resultset.filteredrows.length).toEqual(3);
-			});
+			})
 			it('dynamic view initialization 2', function () {
 				expect(pview.resultdata.length).toEqual(0);
 			});
@@ -1193,7 +1245,7 @@ describe('loki', function () {
 			}
 			// now verify they are not exactly equal (verify sort moved stuff)
 			it('dynamic view sort', function () {
-				expect(frcopy).toEqual(frcopy2);
+				expect(frcopy).toEqual(frcopy2)
 			});
 		});
 	});
@@ -1253,31 +1305,6 @@ describe('loki', function () {
 	});
 
 	describe('stepDynamicViewPersistence', function () {
-		it('works', function testAnonym() {
-			const coll = db.anonym([{
-				name: 'joe'
-			}, {
-				name: 'jack'
-			}], ['name']);
-			it('Anonym collection', function () {
-				expect(coll.data.length).toEqual(2);
-			});
-			it('Collection not found', function () {
-				expect(db.getCollection('anonym')).toEqual(null);
-			});
-			coll.name = 'anonym';
-			db.loadCollection(coll);
-			it('Anonym collection loaded', function () {
-				expect(!!db.getCollection('anonym') === true).toBeTruthy();
-			});
-			coll.clear();
-			it('No data after coll.clear()', function () {
-				expect(0).toEqual(coll.data.length);
-			});
-		});
-	});
-
-	describe('stepDynamicViewPersistence', function () {
 		it('works', function testCollections(done) {
 			// mock persistence by using memory adapter
 			const mem = new LokiMemoryAdapter();
@@ -1310,11 +1337,11 @@ describe('loki', function () {
 			t.insert(users);
 
 			it('2 docs after array insert', function () {
-				expect(2).toEqual(t.data.length);
+				expect(2).toEqual(t.data.length)
 			});
 			t.remove(users);
 			it('0 docs after array remove', function () {
-				expect(0).toEqual(t.data.length);
+				expect(0).toEqual(t.data.length)
 			});
 
 			function TestError() {
