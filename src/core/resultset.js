@@ -1,6 +1,6 @@
 import {clone} from './clone';
 import {Collection} from './collection';
-import {Utils} from './utils';
+import {resolveTransformParams} from './utils';
 import {ltHelper, gtHelper, aeqHelper} from './helper';
 
 /*
@@ -38,16 +38,16 @@ export const LokiOps = {
 	// comparison operators
 	// a is the value in the collection
 	// b is the query value
-	$eq: function (a, b) {
+	$eq(a, b) {
 		return a === b;
 	},
 
 	// abstract/loose equality
-	$aeq: function (a, b) {
+	$aeq(a, b) {
 		return a == b;
 	},
 
-	$ne: function (a, b) {
+	$ne(a, b) {
 		// ecma 5 safe test for NaN
 		if (b !== b) {
 			// ecma 5 test value is not NaN
@@ -58,69 +58,69 @@ export const LokiOps = {
 	},
 
 	// date equality / loki abstract equality test
-	$dteq: function (a, b) {
+	$dteq(a, b) {
 		return aeqHelper(a, b);
 	},
 
-	$gt: function (a, b) {
+	$gt(a, b) {
 		return gtHelper(a, b, false);
 	},
 
-	$gte: function (a, b) {
+	$gte(a, b) {
 		return gtHelper(a, b, true);
 	},
 
-	$lt: function (a, b) {
+	$lt(a, b) {
 		return ltHelper(a, b, false);
 	},
 
-	$lte: function (a, b) {
+	$lte(a, b) {
 		return ltHelper(a, b, true);
 	},
 
 	// ex : coll.find({'orderCount': {$between: [10, 50]}});
-	$between: function (a, vals) {
+	$between(a, vals) {
 		if (a === undefined || a === null) return false;
 		return (gtHelper(a, vals[0], true) && ltHelper(a, vals[1], true));
 	},
 
-	$in: function (a, b) {
+	$in(a, b) {
 		return b.indexOf(a) !== -1;
 	},
 
-	$nin: function (a, b) {
+	$nin(a, b) {
 		return b.indexOf(a) === -1;
 	},
 
-	$keyin: function (a, b) {
+	$keyin(a, b) {
 		return a in b;
 	},
 
-	$nkeyin: function (a, b) {
+	$nkeyin(a, b) {
 		return !(a in b);
 	},
 
-	$definedin: function (a, b) {
+	$definedin(a, b) {
 		return b[a] !== undefined;
 	},
 
-	$undefinedin: function (a, b) {
+	$undefinedin(a, b) {
 		return b[a] === undefined;
 	},
 
-	$regex: function (a, b) {
+	$regex(a, b) {
 		return b.test(a);
 	},
 
-	$containsString: function (a, b) {
+	$containsString(a, b) {
 		return (typeof a === 'string') && (a.indexOf(b) !== -1);
 	},
 
-	$containsNone: function (a, b) {
+	$containsNone(a, b) {
 		return !LokiOps.$containsAny(a, b);
 	},
 
-	$containsAny: function (a, b) {
+	$containsAny(a, b) {
 		const checkFn = containsCheckFn(a);
 		if (checkFn !== null) {
 			return (Array.isArray(b)) ? (b.some(checkFn)) : (checkFn(b));
@@ -128,7 +128,7 @@ export const LokiOps = {
 		return false;
 	},
 
-	$contains: function (a, b) {
+	$contains(a, b) {
 		const checkFn = containsCheckFn(a);
 		if (checkFn !== null) {
 			return (Array.isArray(b)) ? (b.every(checkFn)) : (checkFn(b));
@@ -136,7 +136,7 @@ export const LokiOps = {
 		return false;
 	},
 
-	$type: function (a, b) {
+	$type(a, b) {
 		let type = typeof a;
 		if (type === 'object') {
 			if (Array.isArray(a)) {
@@ -148,25 +148,25 @@ export const LokiOps = {
 		return (typeof b !== 'object') ? (type === b) : doQueryOp(type, b);
 	},
 
-	$finite: function (a, b) {
+	$finite(a, b) {
 		return (b === isFinite(a));
 	},
 
-	$size: function (a, b) {
+	$size(a, b) {
 		if (Array.isArray(a)) {
 			return (typeof b !== 'object') ? (a.length === b) : doQueryOp(a.length, b);
 		}
 		return false;
 	},
 
-	$len: function (a, b) {
+	$len(a, b) {
 		if (typeof a === 'string') {
 			return (typeof b !== 'object') ? (a.length === b) : doQueryOp(a.length, b);
 		}
 		return false;
 	},
 
-	$where: function (a, b) {
+	$where(a, b) {
 		return b(a) === true;
 	},
 
@@ -174,11 +174,11 @@ export const LokiOps = {
 	// a is the value in the collection
 	// b is the nested query operation (for '$not')
 	//   or an array of nested query operations (for '$and' and '$or')
-	$not: function (a, b) {
+	$not(a, b) {
 		return !doQueryOp(a, b);
 	},
 
-	$and: function (a, b) {
+	$and(a, b) {
 		for (let idx = 0, len = b.length; idx < len; idx += 1) {
 			if (!doQueryOp(a, b[idx])) {
 				return false;
@@ -187,7 +187,7 @@ export const LokiOps = {
 		return true;
 	},
 
-	$or: function (a, b) {
+	$or(a, b) {
 		for (let idx = 0, len = b.length; idx < len; idx += 1) {
 			if (doQueryOp(a, b[idx])) {
 				return true;
@@ -240,7 +240,8 @@ function sortHelper(prop1, prop2, desc) {
  */
 function compoundeval(properties, obj1, obj2) {
 	let res = 0;
-	let prop, field;
+	let prop;
+	let field;
 	for (let i = 0, len = properties.length; i < len; i++) {
 		prop = properties[i];
 		field = prop[0];
@@ -415,7 +416,9 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	transform(transform, parameters) {
-		let idx, step, rs = this;
+		let idx;
+		let step;
+		let rs = this;
 
 		// if transform is name, then do lookup first
 		if (typeof transform === 'string') {
@@ -430,7 +433,7 @@ export class Resultset {
 		}
 
 		if (typeof parameters !== 'undefined') {
-			transform = Utils.resolveTransformParams(transform, parameters);
+			transform = resolveTransformParams(transform, parameters);
 		}
 
 		for (idx = 0; idx < transform.length; idx++) {
@@ -646,8 +649,8 @@ export class Resultset {
 		return this;
 	}
 
-	$or() {
-		return this.findOr(...arguments);
+	$or(...args) {
+		return this.findOr(...args);
 	}
 
 	/**
@@ -671,8 +674,8 @@ export class Resultset {
 		return this;
 	}
 
-	$and() {
-		return this.findAnd(...arguments);
+	$and(...args) {
+		return this.findAnd(...args);
 	}
 
 	/**
@@ -822,7 +825,9 @@ export class Resultset {
 		//
 		// For performance reasons, each case has its own if block to minimize in-loop calculations
 
-		let filter, rowIdx = 0;
+		let filter;
+
+		let rowIdx = 0;
 
 		// If the filteredrows[] is already initialized, use it
 		if (this.filterInitialized) {
@@ -930,8 +935,8 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	where(fun) {
-		let viewFunction,
-			result = [];
+		let viewFunction;
+		let result = [];
 
 		if ('function' === typeof fun) {
 			viewFunction = fun;
@@ -1000,12 +1005,12 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	data(options) {
-		let result = [],
-			data = this.collection.data,
-			obj,
-			len,
-			i,
-			method;
+		let result = [];
+		let data = this.collection.data;
+		let obj;
+		let len;
+		let i;
+		let method;
 
 		options = options || {};
 
@@ -1072,7 +1077,6 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	update(updateFunction) {
-
 		if (typeof(updateFunction) !== "function") {
 			throw new TypeError('Argument is not a function');
 		}
@@ -1082,7 +1086,8 @@ export class Resultset {
 			this.filteredrows = this.collection.prepareFullDocIndex();
 		}
 
-		const len = this.filteredrows.length, rcd = this.collection.data;
+		const len = this.filteredrows.length;
+		const rcd = this.collection.data;
 
 		for (let idx = 0; idx < len; idx++) {
 			// pass in each document object currently in resultset to user supplied updateFunction
@@ -1142,16 +1147,15 @@ export class Resultset {
 	 * @memberof Resultset
 	 */
 	eqJoin(joinData, leftJoinKey, rightJoinKey, mapFun) {
-
-		let leftData = [],
-			leftDataLength,
-			rightData = [],
-			rightDataLength,
-			key,
-			result = [],
-			leftKeyisFunction = typeof leftJoinKey === 'function',
-			rightKeyisFunction = typeof rightJoinKey === 'function',
-			joinMap = {};
+		let leftData = [];
+		let leftDataLength;
+		let rightData = [];
+		let rightDataLength;
+		let key;
+		let result = [];
+		let leftKeyisFunction = typeof leftJoinKey === 'function';
+		let rightKeyisFunction = typeof rightJoinKey === 'function';
+		let joinMap = {};
 
 		//get the left data
 		leftData = this.data();
@@ -1176,8 +1180,8 @@ export class Resultset {
 
 		if (!mapFun) {
 			mapFun = (left, right) => ({
-				left: left,
-				right: right
+				left,
+				right
 			});
 		}
 

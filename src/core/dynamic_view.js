@@ -91,7 +91,9 @@ export class DynamicView extends LokiEventEmitter {
 	 * @fires DynamicView.rebuild
 	 */
 	rematerialize(options) {
-		let fpl, fpi, idx;
+		let fpl;
+		let fpi;
+		let idx;
 
 		options = options || {};
 
@@ -421,7 +423,7 @@ export class DynamicView extends LokiEventEmitter {
 		this.applyFilter({
 			type: 'find',
 			val: query,
-			uid: uid
+			uid
 		});
 		return this;
 	}
@@ -438,7 +440,7 @@ export class DynamicView extends LokiEventEmitter {
 		this.applyFilter({
 			type: 'where',
 			val: fun,
-			uid: uid
+			uid
 		});
 		return this;
 	}

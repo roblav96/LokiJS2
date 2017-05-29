@@ -260,7 +260,7 @@ export class Collection extends LokiEventEmitter {
 		 */
 		function createChange(name, op, obj) {
 			self.changes.push({
-				name: name,
+				name,
 				operation: op,
 				obj: JSON.parse(JSON.stringify(obj))
 			});
@@ -279,7 +279,8 @@ export class Collection extends LokiEventEmitter {
 		 * If the changes API is disabled make sure only metadata is added without re-evaluating everytime if the changesApi is enabled
 		 */
 		function insertMeta(obj) {
-			let len, idx;
+			let len;
+			let idx;
 
 			if (!obj) {
 				return;
@@ -338,7 +339,9 @@ export class Collection extends LokiEventEmitter {
 
 
 		/* assign correct handler based on ChangesAPI flag */
-		let insertHandler, updateHandler;
+		let insertHandler;
+
+		let updateHandler;
 
 		function setHandlers() {
 			insertHandler = self.disableChangesApi ? insertMeta : insertMetaWithChange;
@@ -375,11 +378,11 @@ export class Collection extends LokiEventEmitter {
 		flushChanges();
 
 		this.console = {
-			log: function () {
+			log() {
 			},
-			warn: function () {
+			warn() {
 			},
-			error: function () {
+			error() {
 			},
 		};
 
@@ -440,7 +443,9 @@ export class Collection extends LokiEventEmitter {
 	}
 
 	byExample(template) {
-		let k, obj, query;
+		let k;
+		let obj;
+		let query;
 		query = [];
 		for (k in template) {
 			if (!template.hasOwnProperty(k)) continue;
@@ -558,7 +563,8 @@ export class Collection extends LokiEventEmitter {
 
 		const wrappedComparer =
 			(((p, data) => (a, b) => {
-				const objAp = data[a][p], objBp = data[b][p];
+				const objAp = data[a][p];
+				const objBp = data[b][p];
 				if (objAp !== objBp) {
 					if (ltHelper(objAp, objBp, false)) return -1;
 					if (gtHelper(objAp, objBp, false)) return 1;
@@ -1104,9 +1110,11 @@ export class Collection extends LokiEventEmitter {
 
 		try {
 			this.startTransaction();
-			const arr = this.get(doc.$loki, true),
-				// obj = arr[0],
+			const arr = this.get(doc.$loki, true);
+
+			const // obj = arr[0],
 				position = arr[1];
+
 			Object.keys(this.constraints.unique).forEach((key) => {
 				if (doc[key] !== null && typeof doc[key] !== 'undefined') {
 					this.constraints.unique[key].remove(doc[key]);
@@ -1147,7 +1155,6 @@ export class Collection extends LokiEventEmitter {
 			delete doc.$loki;
 			delete doc.meta;
 			return doc;
-
 		} catch (err) {
 			this.rollback();
 			this.console.error(err.message);
@@ -1289,7 +1296,8 @@ export class Collection extends LokiEventEmitter {
 	adaptiveBinaryIndexRemove(dataPosition, binaryIndexName, removedFromIndexOnly) {
 		const idxPos = this.getBinaryIndexPosition(dataPosition, binaryIndexName);
 		const index = this.binaryIndices[binaryIndexName].values;
-		let len, idx;
+		let len;
+		let idx;
 
 		if (idxPos === null) {
 			// throw new Error('unable to determine binary index position');
@@ -1436,8 +1444,10 @@ export class Collection extends LokiEventEmitter {
 		const min = 0;
 		const max = index.length - 1;
 		const mid = 0;
-		let lbound, lval;
-		let ubound, uval;
+		let lbound;
+		let lval;
+		let ubound;
+		let uval;
 
 		// when no documents are in collection, return empty range condition
 		if (rcd.length === 0) {
@@ -1523,7 +1533,8 @@ export class Collection extends LokiEventEmitter {
 
 				return ([lbound, ubound]);
 			case '$in':
-				const idxset = [], segResult = [];
+				const idxset = [];
+				const segResult = [];
 				// query each value '$eq' operator and merge the seqment results.
 				for (let j = 0, len = val.length; j < len; j++) {
 					const seg = this.calculateRange('$eq', prop, val[j]);
@@ -1661,7 +1672,7 @@ export class Collection extends LokiEventEmitter {
 		query = query || {};
 
 		// Instantiate Resultset and exec find op passing firstOnly = true param
-		const result = this.chain().find(query,true).data();
+		const result = this.chain().find(query, true).data();
 
 		if (Array.isArray(result) && result.length === 0) {
 			return null;
@@ -1710,7 +1721,8 @@ export class Collection extends LokiEventEmitter {
 	 * simply iterates and returns the first element matching the query
 	 */
 	findOneUnindexed(prop, value) {
-		let i = this.data.length, doc;
+		let i = this.data.length;
+		let doc;
 		while (i--) {
 			if (this.data[i][prop] === value) {
 				doc = this.data[i];
@@ -1862,8 +1874,8 @@ export class Collection extends LokiEventEmitter {
 
 			this.update(stage[prop]);
 			this.commitLog.push({
-				timestamp: timestamp,
-				message: message,
+				timestamp,
+				message,
 				data: JSON.parse(JSON.stringify(stage[prop]))
 			});
 		}
@@ -1994,7 +2006,8 @@ export class Collection extends LokiEventEmitter {
 	 * @param {string} field
 	 */
 	mode(field) {
-		const dict = {}, data = this.extract(field);
+		const dict = {};
+		const data = this.extract(field);
 		data.forEach((obj) => {
 			if (dict[obj]) {
 				dict[obj] += 1;
@@ -2002,7 +2015,9 @@ export class Collection extends LokiEventEmitter {
 				dict[obj] = 1;
 			}
 		});
-		let max, prop, mode;
+		let max;
+		let prop;
+		let mode;
 		for (prop in dict) {
 			if (max) {
 				if (max < dict[prop]) {

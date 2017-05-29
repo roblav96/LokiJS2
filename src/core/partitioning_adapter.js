@@ -223,7 +223,7 @@ export class LokiPartitioningAdapter {
 		const result = this.dbref.serializeDestructured({
 			partitioned: true,
 			delimited: true,
-			partition: partition
+			partition
 		});
 
 		return this.adapter.saveDatabase(keyname, result).then(() => {
@@ -244,8 +244,10 @@ export class LokiPartitioningAdapter {
 		let pageLen = 0;
 		const cdlen = coll.data.length;
 		const delimlen = this.options.delimiter.length;
-		let serializedObject = "", pageBuilder = "";
-		let doneWithPartition = false, doneWithPage = false;
+		let serializedObject = "";
+		let pageBuilder = "";
+		let doneWithPartition = false;
+		let doneWithPage = false;
 
 		const pageSaveCallback = () => {
 			pageBuilder = "";

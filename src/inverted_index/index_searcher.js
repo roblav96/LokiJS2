@@ -271,8 +271,12 @@ class FuzzySearch {
 	levenshtein_distance(a, b) {
 		if (a.length === 0) return b.length;
 		if (b.length === 0) return a.length;
-		let tmp, i, j, prev, val;
-		// swap to save some memory O(min(a,b)) instead of O(a)
+		let tmp;
+		let i;
+		let j;
+		let prev;
+		let val;
+        // swap to save some memory O(min(a,b)) instead of O(a)
 		if (a.length > b.length) {
 			tmp = a;
 			a = b;
@@ -280,12 +284,12 @@ class FuzzySearch {
 		}
 
 		const row = Array(a.length + 1);
-		// init the row
+        // init the row
 		for (i = 0; i <= a.length; i++) {
 			row[i] = i;
 		}
 
-		// fill in the rest
+        // fill in the rest
 		for (i = 1; i <= b.length; i++) {
 			prev = i;
 			for (j = 1; j <= a.length; j++) {
@@ -351,7 +355,7 @@ class FuzzySearch {
 					let term = pre + treeTerms;
 					// Calculate boost.
 					let boost = 1 - distance / Math.min(term.length, this._fuzzy.length);
-					similarTokens.push({term: term, index: root, boost: boost});
+					similarTokens.push({term, index: root, boost});
 				}
 			}
 
@@ -407,7 +411,7 @@ class WildcardSearch {
 
 		if (idx === this._wildcard.length) {
 			if (root.hasOwnProperty('df')) {
-				this._result.push({index: root, term: term});
+				this._result.push({index: root, term});
 			}
 			return;
 		}

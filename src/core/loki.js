@@ -4,7 +4,7 @@ import {LokiMemoryAdapter} from './memory_adapter';
 import {LokiFsAdapter} from './fs_adapter';
 import {LokiLocalStorageAdapter} from './local_storage_adapter';
 import {Collection} from './collection';
-import {Utils} from './utils';
+import {copyProperties} from './utils';
 
 /*
  'LokiFsAdapter' is not defined                 no-undef	x
@@ -159,16 +159,17 @@ export class Loki extends LokiEventEmitter {
 	 */
 	initializePersistence(options) {
 		const defaultPersistence = {
-				'NODEJS': 'fs',
-				'BROWSER': 'localStorage',
-				'CORDOVA': 'localStorage',
-				'MEMORY': 'memory'
-			},
-			persistenceMethods = {
-				'fs': LokiFsAdapter,
-				'localStorage': LokiLocalStorageAdapter,
-				'memory': LokiMemoryAdapter
-			};
+			'NODEJS': 'fs',
+			'BROWSER': 'localStorage',
+			'CORDOVA': 'localStorage',
+			'MEMORY': 'memory'
+		};
+
+		const persistenceMethods = {
+			'fs': LokiFsAdapter,
+			'localStorage': LokiLocalStorageAdapter,
+			'memory': LokiMemoryAdapter
+		};
 
 		this.options = options || {};
 
@@ -247,7 +248,8 @@ export class Loki extends LokiEventEmitter {
 	copy(options) {
 		// in case running in an environment without accurate environment detection, pass 'NA'
 		const databaseCopy = new Loki(this.filename, {env: "NA"});
-		let clen, idx;
+		let clen;
+		let idx;
 
 		options = options || {};
 
@@ -429,7 +431,10 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	serializeDestructured(options) {
-		let idx, sidx, result, resultlen;
+		let idx;
+		let sidx;
+		let result;
+		let resultlen;
 		const reconstruct = [];
 		let dbcopy;
 
@@ -560,7 +565,9 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	serializeCollection(options) {
-		let doccount, docidx, resultlines = [];
+		let doccount;
+		let docidx;
+		let resultlines = [];
 
 		options = options || {};
 
@@ -610,9 +617,15 @@ export class Loki extends LokiEventEmitter {
 	 */
 	deserializeDestructured(destructuredSource, options) {
 		let workarray = [];
-		let len, cdb;
-		let idx, collIndex = 0, collCount, lineIndex = 1, done = false;
-		let currLine, currObject;
+		let len;
+		let cdb;
+		let idx;
+		let collIndex = 0;
+		let collCount;
+		let lineIndex = 1;
+		let done = false;
+		let currLine;
+		let currObject;
 
 		options = options || {};
 
@@ -715,7 +728,8 @@ export class Loki extends LokiEventEmitter {
 	 */
 	deserializeCollection(destructuredSource, options) {
 		let workarray = [];
-		let idx, len;
+		let idx;
+		let len;
 
 		options = options || {};
 
@@ -809,7 +823,7 @@ export class Loki extends LokiEventEmitter {
 			let inflater;
 
 			if (collOptions.proto) {
-				inflater = collOptions.inflate || Utils.copyProperties;
+				inflater = collOptions.inflate || copyProperties;
 
 				return (data) => {
 					const collObj = new (collOptions.proto)();

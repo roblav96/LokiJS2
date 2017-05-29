@@ -12,38 +12,37 @@
  * let db = new loki('loki.json',{autosave:true});
  *
  */
+export class LokiNativescriptAdapter {
+	constructor() {
+		this.fs = require("file-system");
+	}
 
-function LokiNativescriptAdapter() {
-	this.fs = require("file-system");
+	loadDatabase(dbname) {
+		const documents = this.fs.knownFolders.documents();
+		const myFile = documents.getFile(dbname);
+
+		//Read from filesystem
+		return myFile.readText().then((content) => {
+			//The file is empty or missing
+			if (content === "") {
+				throw new Error("DB file does not exist");
+			} else {
+				return content;
+			}
+		});
+	}
+
+	saveDatabase(dbname, serialized) {
+		const documents = this.fs.knownFolders.documents();
+		const myFile = documents.getFile(dbname);
+
+		return myFile.writeText(serialized);
+	}
+
+	deleteDatabase(dbname) {
+		const documents = this.fs.knownFolders.documents();
+		const file = documents.getFile(dbname);
+
+		return file.remove();
+	}
 }
-
-LokiNativescriptAdapter.prototype.loadDatabase = function (dbname) {
-	const documents = this.fs.knownFolders.documents();
-	const myFile = documents.getFile(dbname);
-
-	//Read from filesystem
-	return myFile.readText().then((content) => {
-		//The file is empty or missing
-		if (content === "") {
-			throw new Error("DB file does not exist");
-		} else {
-			return content;
-		}
-	});
-};
-
-LokiNativescriptAdapter.prototype.saveDatabase = function (dbname, serialized) {
-	const documents = this.fs.knownFolders.documents();
-	const myFile = documents.getFile(dbname);
-
-	return myFile.writeText(serialized);
-};
-
-LokiNativescriptAdapter.prototype.deleteDatabase = function deleteDatabase(dbname) {
-	const documents = this.fs.knownFolders.documents();
-	const file = documents.getFile(dbname);
-
-	return file.remove();
-};
-
-module.exports = LokiNativescriptAdapter;

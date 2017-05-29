@@ -675,8 +675,8 @@ export class QueryBuilder {
 
 		this._data.scoring = {
 			type: "BM25",
-			k1: k1,
-			b: b
+			k1,
+			b
 		};
 		return this;
 	}

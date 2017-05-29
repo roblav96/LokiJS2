@@ -25,15 +25,15 @@ export class Scorer {
 				let tf = termIdx.docs[docId];
 				docResults[docId].push({
 					type: 'BM25',
-					tf: tf,
-					idf: idf,
-					boost: boost,
-					fieldName: fieldName,
-					term: term
+					tf,
+					idf,
+					boost,
+					fieldName,
+					term
 				});
 			} else {
 				docResults[docId] = [{
-					type: "constant", value: 1, boost: boost, fieldName: fieldName
+					type: "constant", value: 1, boost, fieldName
 				}];
 			}
 		}
@@ -45,7 +45,7 @@ export class Scorer {
 		if (!docResults.hasOwnProperty(docId)) {
 			docResults[docId] = [];
 		}
-		docResults[docId].push({type: "constant", value: 1, boost: boost});
+		docResults[docId].push({type: "constant", value: 1, boost});
 		return docResults;
 	}
 
@@ -123,7 +123,7 @@ export class Scorer {
 	_getCache(fieldName) {
 		if (!this._cache.hasOwnProperty(fieldName)) {
 			let avgFieldLength = this._invIdxs[fieldName].totalFieldLength / this._invIdxs[fieldName].documentCount;
-			this._cache[fieldName] = {idfs: {}, avgFieldLength: avgFieldLength};
+			this._cache[fieldName] = {idfs: {}, avgFieldLength};
 		}
 		return this._cache[fieldName];
 	}

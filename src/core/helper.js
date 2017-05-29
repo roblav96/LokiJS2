@@ -8,7 +8,10 @@
  *     aeqHelper(undefined, null) === true
  */
 export function aeqHelper(prop1, prop2) {
-	let cv1, cv2, t1, t2;
+	let cv1;
+	let cv2;
+	let t1;
+	let t2;
 
 	if (prop1 === prop2) return true;
 
@@ -85,7 +88,10 @@ export function aeqHelper(prop1, prop2) {
  *     need this function (as well as gtHelper) to always ensure one value is LT, GT, or EQ to another.
  */
 export function ltHelper(prop1, prop2, equal) {
-	let cv1, cv2, t1, t2;
+	let cv1;
+	let cv2;
+	let t1;
+	let t2;
 
 	// if one of the params is falsy or strictly true or not equal to itself
 	// 0, 0.0, "", NaN, null, undefined, not defined, false, true
@@ -177,7 +183,10 @@ export function ltHelper(prop1, prop2, equal) {
 }
 
 export function gtHelper(prop1, prop2, equal) {
-	let cv1, cv2, t1, t2;
+	let cv1;
+	let cv2;
+	let t1;
+	let t2;
 
 	// 'falsy' and Boolean handling
 	if (!prop1 || !prop2 || prop1 === true || prop2 === true || prop1 !== prop1 || prop2 !== prop2) {

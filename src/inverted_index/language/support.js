@@ -15,11 +15,12 @@ export function generateStopWordFilter(stopWords) {
 export class Among {
 	constructor(s, substring_i, result, method) {
 		this.toCharArray = s => {
-			let sLength = s.length, charArr = new Array(sLength);
-			for (let i = 0; i < sLength; i++)
+            let sLength = s.length;
+            let charArr = new Array(sLength);
+            for (let i = 0; i < sLength; i++)
 				charArr[i] = s.charCodeAt(i);
-			return charArr;
-		};
+            return charArr;
+        };
 
 		if ((!s && s !== "") || (!substring_i && (substring_i !== 0)) || !result)
 			throw ("Bad Among initialisation: s:" + s + ", substring_i: "
@@ -139,12 +140,23 @@ export class SnowballProgram {
 	}
 
 	find_among(v, v_size) {
-		let i = 0, j = v_size, c = this.cursor, l = this.limit, common_i = 0, common_j = 0, first_key_inspected = false;
-		while (true) {
-			let k = i + ((j - i) >> 1), diff = 0, common = common_i < common_j
+        let i = 0;
+        let j = v_size;
+        let c = this.cursor;
+        let l = this.limit;
+        let common_i = 0;
+        let common_j = 0;
+        let first_key_inspected = false;
+        while (true) {
+            let k = i + ((j - i) >> 1);
+            let diff = 0;
+
+            let common = common_i < common_j
 				? common_i
-				: common_j, w = v[k];
-			for (let i2 = common; i2 < w.s_size; i2++) {
+				: common_j;
+
+            let w = v[k];
+            for (let i2 = common; i2 < w.s_size; i2++) {
 				if (c + common === l) {
 					diff = -1;
 					break;
@@ -154,20 +166,20 @@ export class SnowballProgram {
 					break;
 				common++;
 			}
-			if (diff < 0) {
+            if (diff < 0) {
 				j = k;
 				common_j = common;
 			} else {
 				i = k;
 				common_i = common;
 			}
-			if (j - i <= 1) {
+            if (j - i <= 1) {
 				if (i > 0 || j === i || first_key_inspected)
 					break;
 				first_key_inspected = true;
 			}
-		}
-		while (true) {
+        }
+        while (true) {
 			let w = v[i];
 			if (common_i >= w.s_size) {
 				this.cursor = c + w.s_size;
@@ -182,16 +194,26 @@ export class SnowballProgram {
 			if (i < 0)
 				return 0;
 		}
-	}
+    }
 
 	find_among_b(v, v_size) {
-		let i = 0, j = v_size, c = this.cursor, lb = this.limit_backward, common_i = 0, common_j = 0,
-			first_key_inspected = false;
-		while (true) {
-			let k = i + ((j - i) >> 1), diff = 0, common = common_i < common_j
+        let i = 0;
+        let j = v_size;
+        let c = this.cursor;
+        let lb = this.limit_backward;
+        let common_i = 0;
+        let common_j = 0;
+        let first_key_inspected = false;
+        while (true) {
+            let k = i + ((j - i) >> 1);
+            let diff = 0;
+
+            let common = common_i < common_j
 				? common_i
-				: common_j, w = v[k];
-			for (let i2 = w.s_size - 1 - common; i2 >= 0; i2--) {
+				: common_j;
+
+            let w = v[k];
+            for (let i2 = w.s_size - 1 - common; i2 >= 0; i2--) {
 				if (c - common === lb) {
 					diff = -1;
 					break;
@@ -201,20 +223,20 @@ export class SnowballProgram {
 					break;
 				common++;
 			}
-			if (diff < 0) {
+            if (diff < 0) {
 				j = k;
 				common_j = common;
 			} else {
 				i = k;
 				common_i = common;
 			}
-			if (j - i <= 1) {
+            if (j - i <= 1) {
 				if (i > 0 || j === i || first_key_inspected)
 					break;
 				first_key_inspected = true;
 			}
-		}
-		while (true) {
+        }
+        while (true) {
 			let w = v[i];
 			if (common_i >= w.s_size) {
 				this.cursor = c - w.s_size;
@@ -229,19 +251,23 @@ export class SnowballProgram {
 			if (i < 0)
 				return 0;
 		}
-	}
+    }
 
 	replace_s(c_bra, c_ket, s) {
-		let adjustment = s.length - (c_ket - c_bra), left = this.current
-			.substring(0, c_bra), right = this.current.substring(c_ket);
-		this.current = left + s + right;
-		this.limit += adjustment;
-		if (this.cursor >= c_ket)
+        let adjustment = s.length - (c_ket - c_bra);
+
+        let left = this.current
+			.substring(0, c_bra);
+
+        let right = this.current.substring(c_ket);
+        this.current = left + s + right;
+        this.limit += adjustment;
+        if (this.cursor >= c_ket)
 			this.cursor += adjustment;
 		else if (this.cursor > c_bra)
 			this.cursor = c_bra;
-		return adjustment;
-	}
+        return adjustment;
+    }
 
 	slice_check() {
 		if (this.bra < 0 || this.bra > this.ket || this.ket > this.limit

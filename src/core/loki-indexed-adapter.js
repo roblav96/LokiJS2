@@ -116,7 +116,8 @@ export class LokiIndexedAdapter {
 		const appName = this.app;
 		const adapter = this;
 
-		let resolve, reject;
+		let resolve;
+		let reject;
 		const result = new Promise((res, rej) => {
 			resolve = res;
 			reject = rej;
@@ -130,7 +131,7 @@ export class LokiIndexedAdapter {
 			}
 		}
 
-		// lazy open/create db reference so dont -need- callback in constructor
+        // lazy open/create db reference so dont -need- callback in constructor
 		if (this.catalog === null || this.catalog.db === null) {
 			this.catalog = new LokiCatalog((cat) => {
 				adapter.catalog = cat;
@@ -142,7 +143,7 @@ export class LokiIndexedAdapter {
 			return result;
 		}
 
-		// set (add/update) entry to AKV database
+        // set (add/update) entry to AKV database
 		this.catalog.setAppKey(appName, dbname, dbstring, saveCallback);
 
 		return result;
@@ -296,7 +297,11 @@ export class LokiIndexedAdapter {
 		// get all keys for current appName, and transpose results so just string array
 		this.catalog.getAllKeys((results) => {
 			const entries = [];
-			let obj, size, oapp, okey, oval;
+			let obj;
+			let size;
+			let oapp;
+			let okey;
+			let oval;
 
 			for (let idx = 0; idx < results.length; idx++) {
 				obj = results[idx];
@@ -443,10 +448,10 @@ class LokiCatalog {
 
 			if (res === null || res === undefined) {
 				res = {
-					app: app,
-					key: key,
+					app,
+					key,
 					appkey: app + "," + key,
-					val: val
+					val
 				};
 			} else {
 				res.val = val;
