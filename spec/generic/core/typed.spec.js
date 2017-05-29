@@ -1,8 +1,8 @@
 /* global describe, it, expect */
 import {Loki as loki} from '../../../src/core/loki';
 
-describe('typed', function () {
-	it('works', function () {
+describe('typed', () => {
+	it('works', () => {
 		const db = new loki('test.json');
 		let users;
 

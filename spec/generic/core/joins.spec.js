@@ -1,10 +1,10 @@
 /* global describe, it, expect */
 import {Loki as loki} from '../../../src/core/loki';
 
-describe('joins', function () {
+describe('joins', () => {
 	let db, directors, films;
 
-	beforeEach(function () {
+	beforeEach(() => {
 		db = new loki('testJoins', {
 			persistenceMethod: null
 		}),
@@ -52,7 +52,7 @@ describe('joins', function () {
 		}]);
 	});
 
-	it('works', function () {
+	it('works', () => {
 		let joined;
 
 		//Basic non-mapped join
@@ -60,24 +60,20 @@ describe('joins', function () {
 		expect(joined[0].left.title).toEqual('Taxi');
 
 		//Basic join with map
-		joined = films.eqJoin(directors.data, 'directorId', 'directorId', function (left, right) {
-			return {
-				filmTitle: left.title,
-				directorName: right.name
-			};
-		}).data();
+		joined = films.eqJoin(directors.data, 'directorId', 'directorId', (left, right) => ({
+            filmTitle: left.title,
+            directorName: right.name
+        })).data();
 		expect(joined.length).toEqual(films.data.length);
 		expect(joined[0].filmTitle).toEqual('Taxi');
 		expect(joined[0].directorName).toEqual('Martin Scorsese');
 
 		//Basic non-mapped join with chained map
 		joined = films.eqJoin(directors.data, 'directorId', 'directorId')
-			.map(function (obj) {
-				return {
-					filmTitle: obj.left.title,
-					directorName: obj.right.name
-				};
-			}).data();
+			.map(obj => ({
+            filmTitle: obj.left.title,
+            directorName: obj.right.name
+        })).data();
 		expect(joined[0].filmTitle).toEqual('Taxi');
 		expect(joined[0].directorName).toEqual('Martin Scorsese');
 
@@ -89,12 +85,10 @@ describe('joins', function () {
 				directorId: 3
 			})
 			.simplesort('title')
-			.eqJoin(directors.data, 'directorId', 'directorId', function (left, right) {
-				return {
-					filmTitle: left.title,
-					directorName: right.name
-				};
-			});
+			.eqJoin(directors.data, 'directorId', 'directorId', (left, right) => ({
+            filmTitle: left.title,
+            directorName: right.name
+        }));
 		expect(joined.data().length).toEqual(3);
 
 		//Test chaining after join
@@ -105,12 +99,8 @@ describe('joins', function () {
 
 		//Test calculated keys
 		joined = films.chain().eqJoin(directors.data,
-			function (director) {
-				return director.directorId + 1;
-			},
-			function (film) {
-				return film.directorId - 1;
-			})
+			director => director.directorId + 1,
+			film => film.directorId - 1)
 			.data();
 
 		expect(joined[0].right.name).toEqual('Steven Spielberg');

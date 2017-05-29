@@ -18,12 +18,10 @@ export class LokiFsAdapter {
 	 * @memberof LokiFsAdapter
 	 */
 	loadDatabase(dbname) {
-		const self = this;
-
-		return new Promise(function (resolve, reject) {
-			self.fs.stat(dbname, function (err, stats) {
+		return new Promise((resolve, reject) => {
+			this.fs.stat(dbname, (err, stats) => {
 				if (!err && stats.isFile()) {
-					self.fs.readFile(dbname, {
+					this.fs.readFile(dbname, {
 						encoding: 'utf8'
 					}, function readFileCallback(err, data) {
 						if (err) {
@@ -47,15 +45,14 @@ export class LokiFsAdapter {
 	 * @memberof LokiFsAdapter
 	 */
 	saveDatabase(dbname, dbstring) {
-		const self = this;
 		const tmpdbname = dbname + '~';
 
-		return new Promise(function (resolve, reject) {
-			self.fs.writeFile(tmpdbname, dbstring, function (err) {
+		return new Promise((resolve, reject) => {
+			this.fs.writeFile(tmpdbname, dbstring, (err) => {
 				if (err) {
 					reject(err);
 				} else {
-					self.fs.rename(tmpdbname, dbname, function (err) {
+					this.fs.rename(tmpdbname, dbname, (err) => {
 						if (err) {
 							reject(err);
 						} else {
@@ -75,10 +72,8 @@ export class LokiFsAdapter {
 	 * @memberof LokiFsAdapter
 	 */
 	deleteDatabase(dbname) {
-		const self = this;
-
-		return new Promise(function (resolve, reject) {
-			self.fs.unlink(dbname, function deleteDatabaseCallback(err) {
+		return new Promise((resolve, reject) => {
+			this.fs.unlink(dbname, function deleteDatabaseCallback(err) {
 				if (err) {
 					reject(err);
 				} else {

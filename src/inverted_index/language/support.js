@@ -14,7 +14,7 @@ export function generateStopWordFilter(stopWords) {
 
 export class Among {
 	constructor(s, substring_i, result, method) {
-		this.toCharArray = function (s) {
+		this.toCharArray = s => {
 			let sLength = s.length, charArr = new Array(sLength);
 			for (let i = 0; i < sLength; i++)
 				charArr[i] = s.charCodeAt(i);

@@ -2,7 +2,7 @@
 import {FullTextSearch} from '../../../../src/inverted_index/full_text_search';
 import {QueryBuilder as QB} from '../../../../src/inverted_index/queries';
 
-describe('fuzzy query', function () {
+describe('fuzzy query', () => {
 	// from lucene 6.4.0 core: TestFuzzyQuery
 	let assertMatches = (searcher, query, docIds = []) => {
 		let res = searcher.search(query);
@@ -14,7 +14,7 @@ describe('fuzzy query', function () {
 		expect(res).toEqual({});
 	};
 
-	it('Fuzzy query: QB', function () {
+	it('Fuzzy query: QB', () => {
 		let q = new QB().fuzzy("user", "albrt").boost(5.5).fuzziness(3).prefixLength(3).build();
 
 		q = new QB().fuzzy(1, 1);
@@ -27,7 +27,7 @@ describe('fuzzy query', function () {
 		expect(() => new QB().fuzzy(null, "albrt")).toThrowErrorOfType("TypeError");
 	});
 
-	it('Fuzzy query (1).', function () {
+	it('Fuzzy query (1).', () => {
 		let docs = ["aaaaa", "aaaab", "aaabb", "aabbb", "abbbb", "bbbbb", "ddddd"];
 		let fts = new FullTextSearch([{name: "body"}]);
 		for (let i = 0; i < docs.length; i++) {
@@ -108,7 +108,7 @@ describe('fuzzy query', function () {
 		assertMatches(fts, query);
 	});
 
-	it('Fuzzy query (2).', function () {
+	it('Fuzzy query (2).', () => {
 		let docs = ["lange", "lueth", "pirsing", "riegel", "trzecziak", "walker", "wbr", "we", "web", "webe", "weber",
 			"webere", "webree", "weberei", "wbre", "wittkopf", "wojnarowski", "wricke"];
 		let fts = new FullTextSearch([{name: "body"}]);

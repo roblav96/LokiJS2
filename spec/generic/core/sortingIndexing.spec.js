@@ -1,11 +1,11 @@
 /* global describe, it, expect */
 import {Loki as loki} from '../../../src/core/loki';
 
-describe('sorting and indexing', function () {
+describe('sorting and indexing', () => {
 	let db;
 	let items;
 
-	beforeEach(function () {
+	beforeEach(() => {
 		db = new loki('sortingIndexingTest'),
 			items = db.addCollection('items');
 
@@ -15,8 +15,8 @@ describe('sorting and indexing', function () {
 		items.insert({name: 'draupnir', owner: 'odin', maker: 'elves'});
 	});
 
-	describe('resultset simplesort', function () {
-		it('works', function () {
+	describe('resultset simplesort', () => {
+		it('works', () => {
 			const rss = db.addCollection('rssort');
 
 			rss.insert({a: 4, b: 2});
@@ -32,8 +32,8 @@ describe('sorting and indexing', function () {
 		});
 	});
 
-	describe('resultset simplesort descending', function () {
-		it('works', function () {
+	describe('resultset simplesort descending', () => {
+		it('works', () => {
 			const rss = db.addCollection('rssort');
 
 			rss.insert({a: 4, b: 2});
@@ -63,8 +63,8 @@ describe('sorting and indexing', function () {
 		});
 	});
 
-	describe('resultset simplesort with dates', function () {
-		it('works', function () {
+	describe('resultset simplesort with dates', () => {
+		it('works', () => {
 			const now = new Date().getTime();
 			const dt1 = new Date(now - 1000);
 			const dt2 = new Date(now + 5000);
@@ -89,14 +89,14 @@ describe('sorting and indexing', function () {
 		});
 	});
 
-	describe('resultset sort works correctly', function () {
-		it('works', function () {
+	describe('resultset sort works correctly', () => {
+		it('works', () => {
 			const db = new loki('test.db');
 			const coll = db.addCollection('coll');
 
 			coll.insert([{a: 1, b: 9, c: 'first'}, {a: 5, b: 7, c: 'second'}, {a: 2, b: 9, c: 'third'}]);
 
-			const sortfun = function (obj1, obj2) {
+			const sortfun = (obj1, obj2) => {
 				if (obj1.a === obj2.a) return 0;
 				if (obj1.a > obj2.a) return 1;
 				if (obj1.a < obj2.a) return -1;
@@ -110,8 +110,8 @@ describe('sorting and indexing', function () {
 		});
 	});
 
-	describe('resultset compoundsort works correctly', function () {
-		it('works', function () {
+	describe('resultset compoundsort works correctly', () => {
+		it('works', () => {
 			const db = new loki('test.db');
 			const coll = db.addCollection('coll');
 
@@ -131,8 +131,8 @@ describe('sorting and indexing', function () {
 		});
 	});
 
-	describe('collection indexing', function () {
-		it('mixed types sort as expected', function () {
+	describe('collection indexing', () => {
+		it('mixed types sort as expected', () => {
 			const mtdb = new loki('mtdb');
 			const coll = db.addCollection('coll');
 			coll.insert({a: undefined, b: 5});
@@ -155,7 +155,7 @@ describe('sorting and indexing', function () {
 			// make sure unindexed sort is as expected
 
 			const result = coll.chain().simplesort("a").data();
-			result.forEach(function (obj) {
+			result.forEach(obj => {
 				indexVals.push(obj.a);
 			});
 
@@ -182,7 +182,7 @@ describe('sorting and indexing', function () {
 			indexVals = [];
 			coll.ensureIndex('a');
 
-			coll.binaryIndices.a.values.forEach(function (vi) {
+			coll.binaryIndices.a.values.forEach(vi => {
 				indexVals.push(coll.data[vi].a);
 			});
 
@@ -206,7 +206,7 @@ describe('sorting and indexing', function () {
 			expect(indexVals[13] === "asdf").toEqual(true);
 		});
 
-		it('works', function () {
+		it('works', () => {
 			const now = new Date().getTime();
 			const dt1 = new Date(now - 1000);
 			const dt2 = new Date(now + 5000);

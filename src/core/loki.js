@@ -81,7 +81,7 @@ export class Loki extends LokiEventEmitter {
 			'warning': []
 		};
 
-		const getENV = function () {
+		const getENV = () => {
 			if (typeof global !== 'undefined' && (global.android || global.NSObject)) {
 				// If no adapter is set use the default nativescript adapter
 				if (!options.adapter) {
@@ -158,7 +158,6 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	initializePersistence(options) {
-		const self = this;
 		const defaultPersistence = {
 				'NODEJS': 'fs',
 				'BROWSER': 'localStorage',
@@ -231,9 +230,9 @@ export class Loki extends LokiEventEmitter {
 			loaded = Promise.resolve();
 		}
 
-		return loaded.then(function () {
-			if (self.options.autosave) {
-				self.autosaveEnable();
+		return loaded.then(() => {
+			if (this.options.autosave) {
+				this.autosaveEnable();
 			}
 		});
 	}
@@ -812,7 +811,7 @@ export class Loki extends LokiEventEmitter {
 			if (collOptions.proto) {
 				inflater = collOptions.inflate || Utils.copyProperties;
 
-				return function (data) {
+				return (data) => {
 					const collObj = new (collOptions.proto)();
 					inflater(data, collObj);
 					return collObj;
@@ -921,7 +920,6 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	close() {
-		const self = this;
 		let saved;
 
 		// for autosave scenarios, we will let close perform final save (if dirty)
@@ -933,8 +931,8 @@ export class Loki extends LokiEventEmitter {
 			}
 		}
 
-		return Promise.resolve(saved).then(function () {
-			self.emit('close');
+		return Promise.resolve(saved).then(() => {
+			this.emit('close');
 		});
 	}
 
@@ -965,7 +963,7 @@ export class Loki extends LokiEventEmitter {
 		let changes = [];
 		const selectedCollections = arrayOfCollectionNames || this.collections.map(getCollName);
 
-		this.collections.forEach(function (coll) {
+		this.collections.forEach((coll) => {
 			if (selectedCollections.indexOf(getCollName(coll)) !== -1) {
 				changes = changes.concat(coll.getChanges());
 			}
@@ -987,7 +985,7 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	clearChanges() {
-		this.collections.forEach(function (coll) {
+		this.collections.forEach((coll) => {
 			if (coll.flushChanges) {
 				coll.flushChanges();
 			}
@@ -1005,7 +1003,6 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	throttledSaveDrain(options) {
-		const self = this;
 		const now = (new Date()).getTime();
 
 		if (!this.throttledSaves) {
@@ -1031,12 +1028,12 @@ export class Loki extends LokiEventEmitter {
 			// if we want to wait until we are in a state where there are no pending saves at all
 			if (options.recursiveWait) {
 				// queue the following meta callback for when it completes
-				return Promise.resolve(Promise.all([this.throttledSaveRunning, this.throttledSavePending])).then(function () {
-					if (self.throttledSaveRunning !== null || self.throttledSavePending !== null) {
+				return Promise.resolve(Promise.all([this.throttledSaveRunning, this.throttledSavePending])).then(() => {
+					if (this.throttledSaveRunning !== null || this.throttledSavePending !== null) {
 						if (options.recursiveWaitLimit && (now - options.started > options.recursiveWaitLimitDuration)) {
 							return Promise.reject();
 						}
-						return self.throttledSaveDrain(options);
+						return this.throttledSaveDrain(options);
 					} else {
 						return Promise.resolve();
 					}
@@ -1061,23 +1058,21 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	loadDatabaseInternal(options) {
-		const self = this;
-
 		// the persistenceAdapter should be present if all is ok, but check to be sure.
 		if (this.persistenceAdapter === null) {
 			return Promise.reject(new Error('persistenceAdapter not configured'));
 		}
 
 		return Promise.resolve(this.persistenceAdapter.loadDatabase(this.filename))
-			.then(function loadDatabaseCallback(dbString) {
+			.then((dbString) => {
 				if (typeof (dbString) === 'string') {
-					self.loadJSON(dbString, options || {});
-					self.emit('load', self);
+					this.loadJSON(dbString, options || {});
+					this.emit('load', this);
 				} else {
 					// if adapter has returned an js object (other than null or error) attempt to load from JSON object
 					if (typeof (dbString) === "object" && dbString !== null && !(dbString instanceof Error)) {
-						self.loadJSONObject(dbString, options || {});
-						self.emit('load', self);
+						this.loadJSONObject(dbString, options || {});
+						this.emit('load', this);
 					} else {
 						if (dbString instanceof Error)
 							throw dbString;
@@ -1102,29 +1097,25 @@ export class Loki extends LokiEventEmitter {
 	 * @memberof Loki
 	 */
 	loadDatabase(options) {
-		const self = this;
-
 		// if throttling disabled, just call internal
 		if (!this.throttledSaves) {
 			return this.loadDatabaseInternal(options);
 		}
 
 		// try to drain any pending saves in the queue to lock it for loading
-		return this.throttledSaveDrain(options).then(function () {
+		return this.throttledSaveDrain(options).then(() => {
 			// pause/throttle saving until loading is done
-			self.throttledSaveRunning = self.loadDatabaseInternal(options).then(function () {
+			this.throttledSaveRunning = this.loadDatabaseInternal(options).then(() => {
 				// now that we are finished loading, if no saves were throttled, disable flag
-				self.throttledSaveRunning = null;
+				this.throttledSaveRunning = null;
 			});
-			return self.throttledSaveRunning;
-		}, function () {
+			return this.throttledSaveRunning;
+		}, () => {
 			throw new Error("Unable to pause save throttling long enough to read database");
 		});
 	}
 
 	saveDatabaseInternal() {
-		const self = this;
-
 		// the persistenceAdapter should be present if all is ok, but check to be sure.
 		if (this.persistenceAdapter === null) {
 			return Promise.reject(new Error('persistenceAdapter not configured'));
@@ -1139,12 +1130,12 @@ export class Loki extends LokiEventEmitter {
 		}
 		// otherwise just pass the serialized database to adapter
 		else {
-			saved = this.persistenceAdapter.saveDatabase(this.filename, self.serialize());
+			saved = this.persistenceAdapter.saveDatabase(this.filename, this.serialize());
 		}
 
-		return Promise.resolve(saved).then(function () {
-			self.autosaveClearFlags();
-			self.emit("save");
+		return Promise.resolve(saved).then(() => {
+			this.autosaveClearFlags();
+			this.emit("save");
 		});
 	}
 
@@ -1160,23 +1151,22 @@ export class Loki extends LokiEventEmitter {
 		if (!this.throttledSaves) {
 			return this.saveDatabaseInternal();
 		}
-		const self = this;
 
 		// if the db save is currently running, a new promise for a next db save is created
 		// all calls to save db will get this new promise which will be processed right after
 		// the current db save is finished
 		if (this.throttledSaveRunning !== null && this.throttledSavePending === null) {
-			this.throttledSavePending = Promise.resolve(this.throttledSaveRunning).then(function () {
-				self.throttledSaveRunning = null;
-				self.throttledSavePending = null;
-				return self.saveDatabase();
+			this.throttledSavePending = Promise.resolve(this.throttledSaveRunning).then(() => {
+				this.throttledSaveRunning = null;
+				this.throttledSavePending = null;
+				return this.saveDatabase();
 			});
 		}
 		if (this.throttledSavePending !== null) {
 			return this.throttledSavePending;
 		}
-		this.throttledSaveRunning = this.saveDatabaseInternal().then(function () {
-			self.throttledSaveRunning = null;
+		this.throttledSaveRunning = this.saveDatabaseInternal().then(() => {
+			this.throttledSaveRunning = null;
 		});
 
 		return this.throttledSaveRunning;
@@ -1237,21 +1227,20 @@ export class Loki extends LokiEventEmitter {
 			return;
 		}
 
-		const self = this;
 		let running = true;
 
 		this.autosave = true;
-		this.autosaveHandle = function () {
+		this.autosaveHandle = () => {
 			running = false;
-			self.autosaveHandle = undefined;
+			this.autosaveHandle = undefined;
 		};
 
-		(function saveDatabase() {
-			setTimeout(function () {
+		(() => {
+			setTimeout(() => {
 				if (running) {
-					self.saveDatabase().then(saveDatabase, saveDatabase);
+					this.saveDatabase().then(saveDatabase, saveDatabase);
 				}
-			}, self.autosaveInterval);
+			}, this.autosaveInterval);
 		})();
 	}
 

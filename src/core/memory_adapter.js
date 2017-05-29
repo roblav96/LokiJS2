@@ -32,18 +32,16 @@ export class LokiMemoryAdapter {
 	 * @memberof LokiMemoryAdapter
 	 */
 	loadDatabase(dbname) {
-		const self = this;
-
 		if (this.options.asyncResponses) {
-			return new Promise(function (resolve, reject) {
-				setTimeout(function () {
-					if (self.hashStore.hasOwnProperty(dbname)) {
-						resolve(self.hashStore[dbname].value);
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					if (this.hashStore.hasOwnProperty(dbname)) {
+						resolve(this.hashStore[dbname].value);
 					}
 					else {
 						reject(new Error("unable to load database, " + dbname + " was not found in memory adapter"));
 					}
-				}, self.options.asyncTimeout);
+				}, this.options.asyncTimeout);
 			});
 		}
 		else {
@@ -65,22 +63,21 @@ export class LokiMemoryAdapter {
 	 * @memberof LokiMemoryAdapter
 	 */
 	saveDatabase(dbname, dbstring) {
-		const self = this;
 		let saveCount;
 
 		if (this.options.asyncResponses) {
-			return new Promise(function (resolve, reject) {
-				setTimeout(function () {
-					saveCount = (self.hashStore.hasOwnProperty(dbname) ? self.hashStore[dbname].savecount : 0);
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					saveCount = (this.hashStore.hasOwnProperty(dbname) ? this.hashStore[dbname].savecount : 0);
 
-					self.hashStore[dbname] = {
+					this.hashStore[dbname] = {
 						savecount: saveCount + 1,
 						lastsave: new Date(),
 						value: dbstring
 					};
 
 					resolve();
-				}, self.options.asyncTimeout);
+				}, this.options.asyncTimeout);
 			});
 		} else {
 			saveCount = (this.hashStore.hasOwnProperty(dbname) ? this.hashStore[dbname].savecount : 0);

@@ -16,7 +16,7 @@ export function clone(data, method) {
 		case "shallow":
 			// more compatible method for older browsers
 			cloned = data.prototype ? Object.create(data.prototype) : {};
-			Object.keys(data).map(function (i) {
+			Object.keys(data).map((i) => {
 				cloned[i] = data[i];
 			});
 			break;

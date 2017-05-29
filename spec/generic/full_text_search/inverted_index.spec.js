@@ -1,7 +1,7 @@
 /* global describe, it, expect */
 import {InvertedIndex} from '../../../src/inverted_index/inverted_index';
 
-describe('inverted index', function () {
+describe('inverted index', () => {
 
 	let ii = new InvertedIndex();
 
@@ -11,7 +11,7 @@ describe('inverted index', function () {
 	let field4 = "Now again inside today! You...";
 	let field5 = "Good bye NO! for all worlds...";
 
-	it ('get', function (done) {
+	it ('get', done => {
 		expect(ii.documentCount).toBeNumber();
 		expect(ii.documentStore).toBeObject();
 		expect(ii.totalFieldLength).toBeNumber();
@@ -21,14 +21,12 @@ describe('inverted index', function () {
 		done();
 	});
 
-	it('insert', function (done) {
+	it('insert', done => {
 		ii.insert(field1, 1);
 		expect(() =>ii.insert(field2, 1)).toThrowErrorOfType("Error");
 		ii.insert(field3, 2);
 
-		ii.tokenizer.add("bad_tokenizer", function (tokens) {
-			return [""];
-		});
+		ii.tokenizer.add("bad_tokenizer", tokens => [""]);
 		ii.insert(field4, 3);
 		ii.tokenizer.remove("bad_tokenizer");
 		ii.insert(field4, 4);
@@ -37,7 +35,7 @@ describe('inverted index', function () {
 		done();
 	});
 
-	it('remove', function (done) {
+	it('remove', done => {
 		ii.remove(1);
 		ii.remove(4);
 		ii.remove(15);
@@ -45,7 +43,7 @@ describe('inverted index', function () {
 		done();
 	});
 
-	it('getTermIndex', function (done) {
+	it('getTermIndex', done => {
 		expect(InvertedIndex.getTermIndex("you", ii.root)).not.toBe(null);
 		expect(InvertedIndex.getTermIndex("ayou", ii.root, 1)).not.toBe(null);
 		expect(InvertedIndex.getTermIndex("you", ii.root, 10)).toBe(null);
@@ -54,7 +52,7 @@ describe('inverted index', function () {
 		done();
 	});
 
-	it('getNextTermIndex', function (done) {
+	it('getNextTermIndex', done => {
 		InvertedIndex.getNextTermIndex(ii.root);
 		let idx = InvertedIndex.getTermIndex("you", ii.root);
 		expect(InvertedIndex.getNextTermIndex(idx)).not.toBe(null);
@@ -62,13 +60,13 @@ describe('inverted index', function () {
 		done();
 	});
 
-	it('extendTermIndex', function (done) {
+	it('extendTermIndex', done => {
 		expect(InvertedIndex.extendTermIndex(ii.root)).toBeArray();
 
 		done();
 	});
 
-	it('serialize', function (done) {
+	it('serialize', done => {
 		let ii1 = new InvertedIndex();
 		ii1.insert(field1, 1);
 		ii1.insert(field2, 2);

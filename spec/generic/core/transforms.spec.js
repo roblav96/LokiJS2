@@ -1,10 +1,10 @@
 /* global describe, it, expect */
 import {Loki as loki} from '../../../src/core/loki';
 
-describe('transforms', function () {
+describe('transforms', () => {
 	let db, items;
 
-	beforeEach(function () {
+	beforeEach(() => {
 		db = new loki('transformTest'),
 			items = db.addCollection('items');
 
@@ -14,8 +14,8 @@ describe('transforms', function () {
 		items.insert({name: 'draupnir', owner: 'odin', maker: 'elves'});
 	});
 
-	describe('basic find transform', function () {
-		it('works', function () {
+	describe('basic find transform', () => {
+		it('works', () => {
 
 			const tx = [
 				{
@@ -32,8 +32,8 @@ describe('transforms', function () {
 		});
 	});
 
-	describe('basic multi-step transform', function () {
-		it('works', function () {
+	describe('basic multi-step transform', () => {
+		it('works', () => {
 
 			const tx = [
 				{
@@ -56,8 +56,8 @@ describe('transforms', function () {
 		});
 	});
 
-	describe('parameterized find', function () {
-		it('works', function () {
+	describe('parameterized find', () => {
+		it('works', () => {
 
 			const tx = [
 				{
@@ -78,8 +78,8 @@ describe('transforms', function () {
 		});
 	});
 
-	describe('parameterized where', function () {
-		it('works', function () {
+	describe('parameterized where', () => {
+		it('works', () => {
 
 			const tx = [
 				{
@@ -100,8 +100,8 @@ describe('transforms', function () {
 		});
 	});
 
-	describe('named find transform', function () {
-		it('works', function () {
+	describe('named find transform', () => {
+		it('works', () => {
 
 			const tx = [
 				{
@@ -124,8 +124,8 @@ describe('transforms', function () {
 		});
 	});
 
-	describe('dynamic view named transform', function () {
-		it('works', function () {
+	describe('dynamic view named transform', () => {
+		it('works', () => {
 			const testColl = db.addCollection('test');
 
 			testColl.insert({

@@ -36,11 +36,10 @@ export class LokiEventEmitter {
 	 */
 	on(eventName, listener) {
 		let event;
-		const self = this;
 
 		if (Array.isArray(eventName)) {
-			eventName.forEach(function (currentEventName) {
-				self.on(currentEventName, listener);
+			eventName.forEach((currentEventName) => {
+				this.on(currentEventName, listener);
 			});
 			return listener;
 		}
@@ -62,11 +61,10 @@ export class LokiEventEmitter {
 	 * @memberof LokiEventEmitter
 	 */
 	emit(eventName, data) {
-		const self = this;
 		if (eventName && this.events[eventName]) {
-			this.events[eventName].forEach(function (listener) {
-				if (self.asyncListeners) {
-					setTimeout(function () {
+			this.events[eventName].forEach((listener) => {
+				if (this.asyncListeners) {
+					setTimeout(() => {
 						listener(data);
 					}, 1);
 				} else {
@@ -96,10 +94,9 @@ export class LokiEventEmitter {
 	 * @memberof LokiEventEmitter
 	 */
 	removeListener(eventName, listener) {
-		const self = this;
 		if (Array.isArray(eventName)) {
-			eventName.forEach(function (currentEventName) {
-				self.removeListener(currentEventName, listen);
+			eventName.forEach((currentEventName) => {
+				this.removeListener(currentEventName, listen);
 			});
 		}
 

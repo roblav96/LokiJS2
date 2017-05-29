@@ -1,23 +1,23 @@
 /* global describe, it, expect */
 import {Loki} from '../../../src/core/loki';
 
-describe('testing persistence adapter', function () {
+describe('testing persistence adapter', () => {
 
-	it('standard env adapter', function (done) {
+	it('standard env adapter', done => {
 		const db = new Loki();
 
 		db.initializePersistence()
 			.then(() => {
 				db.addCollection("myColl").insert({name: "Hello World"});
-				db.saveDatabase().then(function () {
+				db.saveDatabase().then(() => {
 					const db2 = new Loki();
 					return db2.initializePersistence()
 						.then(() => {
 							return db2.loadDatabase()
-								.then(function () {
+								.then(() => {
 									expect(db2.getCollection("myColl").find()[0].name).toEqual("Hello World");
 								});
-						})
+						});
 				})
 			})
 			.then(() => {
@@ -25,10 +25,10 @@ describe('testing persistence adapter', function () {
 				return db3.initializePersistence()
 					.then(() => {
 						return db3.loadDatabase()
-							.then(function () {
+							.then(() => {
 								expect(false).toEqual(true);
 								done();
-							}, function () {
+							}, () => {
 								expect(true).toEqual(true);
 								done();
 							});

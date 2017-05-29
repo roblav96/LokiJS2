@@ -69,20 +69,19 @@ export class LokiIndexedAdapter {
 	loadDatabase(dbname) {
 		const appName = this.app;
 		const adapter = this;
-		const self = this;
 
 		// lazy open/create db reference so dont -need- callback in constructor
 		if (this.catalog === null || this.catalog.db === null) {
-			return new Promise(function (resolve) {
-				adapter.catalog = new LokiCatalog(function (cat) {
+			return new Promise((resolve) => {
+				adapter.catalog = new LokiCatalog((cat) => {
 					adapter.catalog = cat;
 					resolve(adapter.loadDatabase(dbname));
 				});
 			});
 		}
 		// lookup up db string in AKV db
-		return new Promise(function (resolve) {
-			self.catalog.getAppKey(appName, dbname, function (result) {
+		return new Promise((resolve) => {
+			this.catalog.getAppKey(appName, dbname, (result) => {
 				if (result.id === 0) {
 					resolve();
 					return;
@@ -118,7 +117,7 @@ export class LokiIndexedAdapter {
 		const adapter = this;
 
 		let resolve, reject;
-		const result = new Promise(function (res, rej) {
+		const result = new Promise((res, rej) => {
 			resolve = res;
 			reject = rej;
 		});
@@ -133,7 +132,7 @@ export class LokiIndexedAdapter {
 
 		// lazy open/create db reference so dont -need- callback in constructor
 		if (this.catalog === null || this.catalog.db === null) {
-			this.catalog = new LokiCatalog(function (cat) {
+			this.catalog = new LokiCatalog((cat) => {
 				adapter.catalog = cat;
 
 				// now that catalog has been initialized, set (add/update) the AKV entry
@@ -171,12 +170,11 @@ export class LokiIndexedAdapter {
 	deleteDatabase(dbname) {
 		const appName = this.app;
 		const adapter = this;
-		const self = this;
 
 		// lazy open/create db reference and pass callback ahead
 		if (this.catalog === null || this.catalog.db === null) {
-			return new Promise(function (resolve) {
-				adapter.catalog = new LokiCatalog(function (cat) {
+			return new Promise((resolve) => {
+				adapter.catalog = new LokiCatalog((cat) => {
 					adapter.catalog = cat;
 
 					resolve(adapter.deleteDatabase(dbname));
@@ -185,8 +183,8 @@ export class LokiIndexedAdapter {
 		}
 
 		// catalog was already initialized, so just lookup object and delete by id
-		return new Promise(function (resolve) {
-			self.catalog.getAppKey(appName, dbname, function (result) {
+		return new Promise((resolve) => {
+			this.catalog.getAppKey(appName, dbname, (result) => {
 				const id = result.id;
 
 				if (id !== 0) {
@@ -211,11 +209,10 @@ export class LokiIndexedAdapter {
 	 * @memberof LokiIndexedAdapter
 	 */
 	deleteDatabasePartitions(dbname) {
-		const self = this;
-		this.getDatabaseList(function (result) {
-			result.forEach(function (str) {
+		this.getDatabaseList((result) => {
+			result.forEach((str) => {
 				if (str.startsWith(dbname)) {
-					self.deleteDatabase(str);
+					this.deleteDatabase(str);
 				}
 			});
 		});
@@ -241,7 +238,7 @@ export class LokiIndexedAdapter {
 
 		// lazy open/create db reference so dont -need- callback in constructor
 		if (this.catalog === null || this.catalog.db === null) {
-			this.catalog = new LokiCatalog(function (cat) {
+			this.catalog = new LokiCatalog((cat) => {
 				adapter.catalog = cat;
 
 				adapter.getDatabaseList(callback);
@@ -252,7 +249,7 @@ export class LokiIndexedAdapter {
 
 		// catalog already initialized
 		// get all keys for current appName, and transpose results so just string array
-		this.catalog.getAppKeys(appName, function (results) {
+		this.catalog.getAppKeys(appName, (results) => {
 			const names = [];
 
 			for (let idx = 0; idx < results.length; idx++) {
@@ -262,7 +259,7 @@ export class LokiIndexedAdapter {
 			if (typeof(callback) === "function") {
 				callback(names);
 			} else {
-				names.forEach(function (obj) {
+				names.forEach((obj) => {
 					console.log(obj);
 				});
 			}
@@ -286,7 +283,7 @@ export class LokiIndexedAdapter {
 
 		// lazy open/create db reference
 		if (this.catalog === null || this.catalog.db === null) {
-			this.catalog = new LokiCatalog(function (cat) {
+			this.catalog = new LokiCatalog((cat) => {
 				adapter.catalog = cat;
 
 				adapter.getCatalogSummary(callback);
@@ -297,7 +294,7 @@ export class LokiIndexedAdapter {
 
 		// catalog already initialized
 		// get all keys for current appName, and transpose results so just string array
-		this.catalog.getAllKeys(function (results) {
+		this.catalog.getAllKeys((results) => {
 			const entries = [];
 			let obj, size, oapp, okey, oval;
 
@@ -320,7 +317,7 @@ export class LokiIndexedAdapter {
 			if (typeof(callback) === "function") {
 				callback(entries);
 			} else {
-				entries.forEach(function (obj) {
+				entries.forEach((obj) => {
 					console.log(obj);
 				});
 			}
@@ -344,7 +341,7 @@ class LokiCatalog {
 		const cat = this;
 
 		// If database doesn't exist yet or its version is lower than our version specified above (2nd param in line above)
-		openRequest.onupgradeneeded = function (e) {
+		openRequest.onupgradeneeded = (e) => {
 			const thisDB = e.target.result;
 			if (thisDB.objectStoreNames.contains("LokiAKV")) {
 				thisDB.deleteObjectStore("LokiAKV");
@@ -371,13 +368,13 @@ class LokiCatalog {
 			}
 		};
 
-		openRequest.onsuccess = function (e) {
+		openRequest.onsuccess = (e) => {
 			cat.db = e.target.result;
 
 			if (typeof(callback) === "function") callback(cat);
 		};
 
-		openRequest.onerror = function (e) {
+		openRequest.onerror = (e) => {
 			throw e;
 		};
 	}
@@ -389,37 +386,33 @@ class LokiCatalog {
 		const appkey = app + "," + key;
 		const request = index.get(appkey);
 
-		request.onsuccess = (function (usercallback) {
-			return function (e) {
-				let lres = e.target.result;
+		request.onsuccess = (((usercallback) => (e) => {
+			let lres = e.target.result;
 
-				if (lres === null || typeof(lres) === "undefined") {
-					lres = {
-						id: 0,
-						success: false
-					};
-				}
+			if (lres === null || typeof(lres) === "undefined") {
+				lres = {
+					id: 0,
+					success: false
+				};
+			}
 
-				if (typeof(usercallback) === "function") {
-					usercallback(lres);
-				} else {
-					console.log(lres);
-				}
-			};
-		})(callback);
+			if (typeof(usercallback) === "function") {
+				usercallback(lres);
+			} else {
+				console.log(lres);
+			}
+		}))(callback);
 
-		request.onerror = (function (usercallback) {
-			return function (e) {
-				if (typeof(usercallback) === "function") {
-					usercallback({
-						id: 0,
-						success: false
-					});
-				} else {
-					throw e;
-				}
-			};
-		})(callback);
+		request.onerror = (((usercallback) => (e) => {
+			if (typeof(usercallback) === "function") {
+				usercallback({
+					id: 0,
+					success: false
+				});
+			} else {
+				throw e;
+			}
+		}))(callback);
 	}
 
 	getAppKeyById(id, callback, data) {
@@ -427,15 +420,13 @@ class LokiCatalog {
 		const store = transaction.objectStore("LokiAKV");
 		const request = store.get(id);
 
-		request.onsuccess = (function (data, usercallback) {
-			return function (e) {
-				if (typeof(usercallback) === "function") {
-					usercallback(e.target.result, data);
-				} else {
-					console.log(e.target.result);
-				}
-			};
-		})(data, callback);
+		request.onsuccess = (((data, usercallback) => (e) => {
+			if (typeof(usercallback) === "function") {
+				usercallback(e.target.result, data);
+			} else {
+				console.log(e.target.result);
+			}
+		}))(data, callback);
 	}
 
 	setAppKey(app, key, val, callback) {
@@ -447,7 +438,7 @@ class LokiCatalog {
 
 		// first try to retrieve an existing object by that key
 		// need to do this because to update an object you need to have id in object, otherwise it will append id with new autocounter and clash the unique index appkey
-		request.onsuccess = function (e) {
+		request.onsuccess = (e) => {
 			let res = e.target.result;
 
 			if (res === null || res === undefined) {
@@ -463,43 +454,36 @@ class LokiCatalog {
 
 			const requestPut = store.put(res);
 
-			requestPut.onerror = (function (usercallback) {
-				return function (e) {
-					if (typeof(usercallback) === "function") {
-						usercallback({
-							success: false
-						});
-					} else {
-						console.error("LokiCatalog.setAppKey (set) onerror");
-						console.error(request.error);
-					}
-				};
-
-			})(callback);
-
-			requestPut.onsuccess = (function (usercallback) {
-				return function (e) {
-					if (typeof(usercallback) === "function") {
-						usercallback({
-							success: true
-						});
-					}
-				};
-			})(callback);
-		};
-
-		request.onerror = (function (usercallback) {
-			return function (e) {
+			requestPut.onerror = (((usercallback) => (e) => {
 				if (typeof(usercallback) === "function") {
 					usercallback({
 						success: false
 					});
 				} else {
-					console.error("LokiCatalog.setAppKey (get) onerror");
+					console.error("LokiCatalog.setAppKey (set) onerror");
 					console.error(request.error);
 				}
-			};
-		})(callback);
+			}))(callback);
+
+			requestPut.onsuccess = (((usercallback) => (e) => {
+				if (typeof(usercallback) === "function") {
+					usercallback({
+						success: true
+					});
+				}
+			}))(callback);
+		};
+
+		request.onerror = (((usercallback) => (e) => {
+			if (typeof(usercallback) === "function") {
+				usercallback({
+					success: false
+				});
+			} else {
+				console.error("LokiCatalog.setAppKey (get) onerror");
+				console.error(request.error);
+			}
+		}))(callback);
 	}
 
 	deleteAppKey(id, callback) {
@@ -507,24 +491,20 @@ class LokiCatalog {
 		const store = transaction.objectStore("LokiAKV");
 		const request = store.delete(id);
 
-		request.onsuccess = (function (usercallback) {
-			return function (evt) {
-				if (typeof(usercallback) === "function") usercallback({
-					success: true
-				});
-			};
-		})(callback);
+		request.onsuccess = (((usercallback) => (evt) => {
+			if (typeof(usercallback) === "function") usercallback({
+				success: true
+			});
+		}))(callback);
 
-		request.onerror = (function (usercallback) {
-			return function (evt) {
-				if (typeof(usercallback) === "function") {
-					usercallback(false);
-				} else {
-					console.error("LokiCatalog.deleteAppKey raised onerror");
-					console.error(request.error);
-				}
-			};
-		})(callback);
+		request.onerror = (((usercallback) => (evt) => {
+			if (typeof(usercallback) === "function") {
+				usercallback(false);
+			} else {
+				console.error("LokiCatalog.deleteAppKey raised onerror");
+				console.error(request.error);
+			}
+		}))(callback);
 	}
 
 	getAppKeys(app, callback) {
@@ -542,35 +522,31 @@ class LokiCatalog {
 		// this.data[] when done (similar to service)
 		const localdata = [];
 
-		cursor.onsuccess = (function (data, callback) {
-			return function (e) {
-				const cursor = e.target.result;
-				if (cursor) {
-					const currObject = cursor.value;
+		cursor.onsuccess = (((data, callback) => (e) => {
+			const cursor = e.target.result;
+			if (cursor) {
+				const currObject = cursor.value;
 
-					data.push(currObject);
+				data.push(currObject);
 
-					cursor.continue();
+				cursor.continue();
+			} else {
+				if (typeof(callback) === "function") {
+					callback(data);
 				} else {
-					if (typeof(callback) === "function") {
-						callback(data);
-					} else {
-						console.log(data);
-					}
+					console.log(data);
 				}
-			};
-		})(localdata, callback);
+			}
+		}))(localdata, callback);
 
-		cursor.onerror = (function (usercallback) {
-			return function (e) {
-				if (typeof(usercallback) === "function") {
-					usercallback(null);
-				} else {
-					console.error("LokiCatalog.getAppKeys raised onerror");
-					console.error(e);
-				}
-			};
-		})(callback);
+		cursor.onerror = (((usercallback) => (e) => {
+			if (typeof(usercallback) === "function") {
+				usercallback(null);
+			} else {
+				console.error("LokiCatalog.getAppKeys raised onerror");
+				console.error(e);
+			}
+		}))(callback);
 
 	}
 
@@ -582,29 +558,25 @@ class LokiCatalog {
 
 		const localdata = [];
 
-		cursor.onsuccess = (function (data, callback) {
-			return function (e) {
-				const cursor = e.target.result;
-				if (cursor) {
-					const currObject = cursor.value;
+		cursor.onsuccess = (((data, callback) => (e) => {
+			const cursor = e.target.result;
+			if (cursor) {
+				const currObject = cursor.value;
 
-					data.push(currObject);
+				data.push(currObject);
 
-					cursor.continue();
+				cursor.continue();
+			} else {
+				if (typeof(callback) === "function") {
+					callback(data);
 				} else {
-					if (typeof(callback) === "function") {
-						callback(data);
-					} else {
-						console.log(data);
-					}
+					console.log(data);
 				}
-			};
-		})(localdata, callback);
+			}
+		}))(localdata, callback);
 
-		cursor.onerror = (function (usercallback) {
-			return function (e) {
-				if (typeof(usercallback) === "function") usercallback(null);
-			};
-		})(callback);
+		cursor.onerror = (((usercallback) => (e) => {
+			if (typeof(usercallback) === "function") usercallback(null);
+		}))(callback);
 	}
 }

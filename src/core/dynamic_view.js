@@ -504,11 +504,10 @@ export class DynamicView extends LokiEventEmitter {
 		}
 		this.rebuildPending = true;
 
-		const self = this;
-		setTimeout(function () {
-			if (self.rebuildPending) {
-				self.rebuildPending = false;
-				self.emit('rebuild', self);
+		setTimeout(() => {
+			if (this.rebuildPending) {
+				this.rebuildPending = false;
+				this.emit('rebuild', this);
 			}
 		}, this.options.minRebuildInterval);
 	}
@@ -525,11 +524,10 @@ export class DynamicView extends LokiEventEmitter {
 		}
 		this.sortDirty = true;
 
-		const self = this;
 		if (this.options.sortPriority === "active") {
 			// active sorting... once they are done and yield js thread, run async performSortPhase()
-			setTimeout(function () {
-				self.performSortPhase();
+			setTimeout(() => {
+				this.performSortPhase();
 			}, this.options.minRebuildInterval);
 		} else {
 			// must be passive sorting... since not calling performSortPhase (until data call), lets use queueRebuildEvent to

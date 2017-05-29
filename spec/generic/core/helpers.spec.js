@@ -1,20 +1,20 @@
 /* global describe, it, expect, beforeEach */
 import {LokiOps} from '../../../src/core/resultset';
 
-describe('Testing comparator helpers', function () {
+describe('Testing comparator helpers', () => {
 
 	let ops;
-	beforeEach(function () {
+	beforeEach(() => {
 		ops = LokiOps;
 	});
 
-	it('$eq works as expected', function () {
+	it('$eq works as expected', () => {
 		expect(ops.$eq(true, true)).toEqual(true);
 
 		expect(ops.$eq(true, false)).toEqual(false);
 	});
 
-	it('$aeq works as expected', function () {
+	it('$aeq works as expected', () => {
 		expect(ops.$aeq(4, '4')).toEqual(true);
 		expect(ops.$aeq(4, 4)).toEqual(true);
 		expect(ops.$aeq(3, 2)).toEqual(false);
@@ -23,25 +23,25 @@ describe('Testing comparator helpers', function () {
 		expect(ops.$aeq('1.23', 1.23)).toEqual(true);
 	});
 
-	it('$ne works as expected', function () {
+	it('$ne works as expected', () => {
 		expect(ops.$ne(true, true)).toEqual(false);
 
 		expect(ops.$ne(true, false)).toEqual(true);
 	});
 
-	it('$in works as expected', function () {
+	it('$in works as expected', () => {
 		expect(ops.$in(4, [1, 3, 4])).toEqual(true);
 
 		expect(ops.$in(8, [1, 3, 4])).toEqual(false);
 	});
 
-	it('$nin works as expected', function () {
+	it('$nin works as expected', () => {
 		expect(ops.$nin(4, [1, 3, 4])).toEqual(false);
 
 		expect(ops.$nin(8, [1, 3, 4])).toEqual(true);
 	});
 
-	it('$gt works as expected', function () {
+	it('$gt works as expected', () => {
 		//Testing strategy:
 		// First, only the same type data will be compared,
 		// both with and without the third optional arg.
@@ -109,7 +109,7 @@ describe('Testing comparator helpers', function () {
 		expect(ops.$gt("", 12)).toEqual(false);
 	});
 
-	it('$lt works as expected', function () {
+	it('$lt works as expected', () => {
 		//Testing strategy:
 		// First, only the same type data will be compared,
 		// both with and without the third optional arg.

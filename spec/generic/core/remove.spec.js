@@ -1,8 +1,8 @@
 /* global describe, it, expect */
 import {Loki as loki} from '../../../src/core/loki';
 
-describe('remove', function () {
-	it('removes', function () {
+describe('remove', () => {
+	it('removes', () => {
 		const db = new loki();
 		const users = db.addCollection('users');
 
@@ -32,13 +32,9 @@ describe('remove', function () {
 		});
 
 		const dv = users.addDynamicView('testview');
-		dv.applyWhere(function (obj) {
-			return obj.name.length > 3;
-		});
+		dv.applyWhere(obj => obj.name.length > 3);
 
-		users.removeWhere(function (obj) {
-			return obj.age > 35;
-		});
+		users.removeWhere(obj => obj.age > 35);
 		expect(users.data.length).toEqual(4);
 		users.removeWhere({
 			'age': {
@@ -68,7 +64,7 @@ describe('remove', function () {
 		expect(users.data.length).toEqual(1);
 	});
 
-	it('removes with unique index', function () {
+	it('removes with unique index', () => {
 		const db = new loki();
 		const users1 = db.addCollection('userswithunique', {
 			unique: ['username']

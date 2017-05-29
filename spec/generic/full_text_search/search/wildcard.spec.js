@@ -3,7 +3,7 @@ import {FullTextSearch} from '../../../../src/inverted_index/full_text_search';
 import {QueryBuilder} from '../../../../src/inverted_index/queries';
 import {Tokenizer} from '../../../../src/inverted_index/tokenizer';
 
-describe('wildcard query', function () {
+describe('wildcard query', () => {
 	// from lucene 6.4.0 core: TestWildCard
 	let assertMatches = (searcher, query, docIds = []) => {
 		let res = searcher.search(query);
@@ -15,7 +15,7 @@ describe('wildcard query', function () {
 		expect(res).toEqual({});
 	};
 
-	it('Tests Wildcard queries with an asterisk.', function (done) {
+	it('Tests Wildcard queries with an asterisk.', done => {
 		let docs = ["metal", "metals", "mXtals", "mXtXls"];
 		let fts = new FullTextSearch([{name: "body"}]);
 		for (let i = 0; i < docs.length; i++) {
@@ -39,7 +39,7 @@ describe('wildcard query', function () {
 		done();
 	});
 
-	it('Tests Wildcard queries with a question mark.', function (done) {
+	it('Tests Wildcard queries with a question mark.', done => {
 		let docs = ["metal", "metals", "mXtals", "mXtXls"];
 		let fts = new FullTextSearch([{name: "body"}]);
 		for (let i = 0; i < docs.length; i++) {
@@ -65,14 +65,12 @@ describe('wildcard query', function () {
 		done();
 	});
 
-	it('Tests if wildcard escaping works.', function (done) {
+	it('Tests if wildcard escaping works.', done => {
 		let docs = ["foo*bar", "foo??bar", "fooCDbar", "fooSOMETHINGbar", "foo\\", "foo\\\\"];
 
 		let tkz = new Tokenizer();
 		// Don't split the text.
-		tkz.setSplitter("nosplit", function (text) {
-			return [text];
-		});
+		tkz.setSplitter("nosplit", text => [text]);
 
 		let fts = new FullTextSearch([{name: "body", tokenizer: tkz}]);
 		for (let i = 0; i < docs.length; i++) {

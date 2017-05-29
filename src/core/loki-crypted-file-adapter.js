@@ -145,8 +145,8 @@ lokiCryptedFileAdapter.prototype.setSecret = function setSecret(secret) {
 lokiCryptedFileAdapter.prototype.loadDatabase = function loadDatabase(dbname) {
 	const secret = this.secret;
 
-	return new Promise(function (resolve, reject) {
-		fs.readFile(dbname, 'utf8', function (err, data) {
+	return new Promise((resolve, reject) => {
+		fs.readFile(dbname, 'utf8', (err, data) => {
 			if (err) {
 				reject(err);
 			} else {
@@ -183,10 +183,10 @@ lokiCryptedFileAdapter.prototype.saveDatabase = function saveDatabase(dbname, db
 	const encrypted = encrypt(dbstring, this.secret);
 
 	if (!isError(encrypted)) {
-		return new Promise(function (resolve, reject) {
+		return new Promise((resolve, reject) => {
 			fs.writeFile(dbname,
 				JSON.stringify(encrypted, null, '  '),
-				'utf8', function (err) {
+				'utf8', (err) => {
 					if (err) {
 						reject(err);
 					} else {

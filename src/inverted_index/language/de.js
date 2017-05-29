@@ -12,7 +12,7 @@ let tkz = new Tokenizer();
 
 tkz.add('trimmer-de', trimmer);
 
-let stemmer = (function () {
+let stemmer = ((() => {
 	/* create the wrapped stemmer object */
 	let st = new (function GermanStemmer() {
 		let a_0 = [new Among("", -1, 6), new Among("U", 0, 2),
@@ -46,12 +46,10 @@ let stemmer = (function () {
 				117, 30, 4
 			],
 			I_x, I_p2, I_p1, sbp = new SnowballProgram();
-		this.setCurrent = function (word) {
+		this.setCurrent = word => {
 			sbp.setCurrent(word);
 		};
-		this.getCurrent = function () {
-			return sbp.getCurrent();
-		};
+		this.getCurrent = () => sbp.getCurrent();
 
 		function habr1(c1, c2, v_1) {
 			if (sbp.eq_s(1, c1)) {
@@ -278,7 +276,7 @@ let stemmer = (function () {
 			}
 		}
 
-		this.stem = function () {
+		this.stem = () => {
 			let v_1 = sbp.cursor;
 			r_prelude();
 			sbp.cursor = v_1;
@@ -293,11 +291,11 @@ let stemmer = (function () {
 	});
 
 	/* and return a function that stems a word for the current locale */
-	return function (token) {
+	return token => {
 		st.setCurrent(token);
 		st.stem();return st.getCurrent();
-	}
-})();
+	};
+}))();
 
 tkz.setSplitter("whitespace-splitter", function defaultSplitter(str) {
 	let trimmedTokens = [];

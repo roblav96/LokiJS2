@@ -1,11 +1,11 @@
 /* global describe, it, expect, beforeEach */
 import {Loki as loki} from '../../../src/core/loki';
 
-describe('eventEmitter', function () {
+describe('eventEmitter', () => {
 	let db;
 	let users;
 
-	beforeEach(function () {
+	beforeEach(() => {
 		db = new loki('test', {
 			persistenceMethod: null
 		}),
@@ -22,7 +22,7 @@ describe('eventEmitter', function () {
 		expect(db.asyncListeners).toBe(false);
 	});
 
-	it('emit', function () {
+	it('emit', () => {
 		const index = db.on('test', function test(obj) {
 			expect(obj).toEqual(42);
 		});

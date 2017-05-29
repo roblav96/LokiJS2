@@ -2,7 +2,7 @@
 import {Loki} from '../../src/core/loki';
 import {LokiIndexedAdapter} from '../../src/core/loki-indexed-adapter';
 
-it('indexed adapter', function (done) {
+it('indexed adapter', (done) => {
 	let db = new Loki();
 	let db2 = new Loki();
 
@@ -20,7 +20,7 @@ it('indexed adapter', function (done) {
 		.then(() => {
 			const ldx = new LokiIndexedAdapter("myTestApp");
 			// Should be promised?
-			ldx.getDatabaseList(function (result) {
+			ldx.getDatabaseList((result) => {
 				expect(result.length).toEqual(0);
 				done();
 			});

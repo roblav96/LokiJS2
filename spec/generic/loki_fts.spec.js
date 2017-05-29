@@ -3,8 +3,8 @@ import {Loki as loki} from '../../src/core/loki';
 import {FullTextSearch} from '../../src/inverted_index/full_text_search';
 import {QueryBuilder} from '../../src/inverted_index/queries';
 
-describe('changesApi', function () {
-	it('does what it says on the tin', function () {
+describe('changesApi', () => {
+	it('does what it says on the tin', () => {
 		const db = new loki(),
 			options = {
 				asyncListeners: false,

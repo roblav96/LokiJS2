@@ -10,7 +10,7 @@ const INDEX_TYPE = "MockUp";
 const FIELD_NAME_1 = "msg";
 const COMPARE_PRECISION = 1e4;
 
-describe("Compare scoring against elasticsearch", function () {
+describe("Compare scoring against elasticsearch", () => {
 
 	let client = new Client({
 		host: "localhost:9200",
@@ -20,7 +20,7 @@ describe("Compare scoring against elasticsearch", function () {
 	let fts = initFTS();
 	let es = initES();
 
-	beforeEach(function (done) {
+	beforeEach(done => {
 		es.then(() => {
 			done();
 		}, () => {
@@ -30,7 +30,7 @@ describe("Compare scoring against elasticsearch", function () {
 
 	for (let i = 0; i < QUERIES.length; i++) {
 		let query = QUERIES[i];
-		it(" -> " + i + ": " + JSON.stringify(query), function (done) {
+		it(" -> " + i + ": " + JSON.stringify(query), done => {
 			client.search({
 				index: INDEX_NAME,
 				type: INDEX_TYPE,
@@ -81,7 +81,7 @@ describe("Compare scoring against elasticsearch", function () {
 					}
 				})();
 				done();
-			}, function (error) {
+			}, error => {
 				console.trace(error.message);
 				done();
 			});

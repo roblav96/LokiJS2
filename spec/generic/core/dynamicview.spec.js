@@ -1,10 +1,10 @@
 /* global describe, it, expect */
 import {Loki as loki} from '../../../src/core/loki';
 
-describe('dynamicviews', function () {
+describe('dynamicviews', () => {
 	let testRecords;
 
-	beforeEach(function () {
+	beforeEach(() => {
 		testRecords = [
 			{name: 'mjolnir', owner: 'thor', maker: 'dwarves'},
 			{name: 'gungnir', owner: 'odin', maker: 'elves'},
@@ -13,8 +13,8 @@ describe('dynamicviews', function () {
 		];
 	});
 
-	describe('test empty filter across changes', function () {
-		it('works', function () {
+	describe('test empty filter across changes', () => {
+		it('works', () => {
 
 			const db = new loki('dvtest');
 			const items = db.addCollection('users');
@@ -36,17 +36,15 @@ describe('dynamicviews', function () {
 		});
 	});
 
-	describe('dynamic view rematerialize works as expected', function () {
-		it('works', function () {
+	describe('dynamic view rematerialize works as expected', () => {
+		it('works', () => {
 			const db = new loki('dvtest');
 			const items = db.addCollection('users');
 			items.insert(testRecords);
 			const dv = items.addDynamicView();
 
 			dv.applyFind({'owner': 'odin'});
-			dv.applyWhere(function (obj) {
-				return (obj.maker === 'elves');
-			});
+			dv.applyWhere(obj => obj.maker === 'elves');
 
 			expect(dv.data().length).toEqual(2);
 			expect(dv.filterPipeline.length).toEqual(2);
@@ -57,8 +55,8 @@ describe('dynamicviews', function () {
 		});
 	});
 
-	describe('dynamic view toJSON does not circularly reference', function () {
-		it('works', function () {
+	describe('dynamic view toJSON does not circularly reference', () => {
+		it('works', () => {
 			const db = new loki('dvtest');
 			const items = db.addCollection('users');
 			items.insert(testRecords);
@@ -69,17 +67,15 @@ describe('dynamicviews', function () {
 		});
 	});
 
-	describe('dynamic view removeFilters works as expected', function () {
-		it('works', function () {
+	describe('dynamic view removeFilters works as expected', () => {
+		it('works', () => {
 			const db = new loki('dvtest');
 			const items = db.addCollection('users');
 			items.insert(testRecords);
 			const dv = items.addDynamicView("ownr");
 
 			dv.applyFind({'owner': 'odin'});
-			dv.applyWhere(function (obj) {
-				return (obj.maker === 'elves');
-			});
+			dv.applyWhere(obj => obj.maker === 'elves');
 
 			expect(dv.filterPipeline.length).toEqual(2);
 			expect(dv.data().length).toEqual(2);
@@ -90,17 +86,15 @@ describe('dynamicviews', function () {
 		});
 	});
 
-	describe('removeDynamicView works correctly', function () {
-		it('works', function () {
+	describe('removeDynamicView works correctly', () => {
+		it('works', () => {
 			const db = new loki('dvtest');
 			const items = db.addCollection('users');
 			items.insert(testRecords);
 			const dv = items.addDynamicView("ownr", {persistent: true});
 
 			dv.applyFind({'owner': 'odin'});
-			dv.applyWhere(function (obj) {
-				return (obj.maker === 'elves');
-			});
+			dv.applyWhere(obj => obj.maker === 'elves');
 
 			expect(items.DynamicViews.length).toEqual(1);
 

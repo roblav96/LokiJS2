@@ -20,7 +20,7 @@ let assertMatches = (searcher, query, docIds = []) => {
 for (let key of Object.keys(testData)) {
 	let testDatum = testData[key];
 
-	describe('language ' + key, function () {
+	describe('language ' + key, () => {
 		let fts = new FullTextSearch([{
 			name: "body",
 			tokenizer: testDatum.tokenizer
@@ -34,7 +34,7 @@ for (let key of Object.keys(testData)) {
 
 		for (let i = 0; i < testDatum.tests.length; i++) {
 			let test = testDatum.tests[i];
-			it(test.what + " " + test.search, function (done) {
+			it(test.what + " " + test.search, done => {
 				let query = new QueryBuilder().match("body", test.search).build();
 				assertMatches(fts, query, test.found);
 

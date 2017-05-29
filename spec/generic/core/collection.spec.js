@@ -2,8 +2,8 @@
 import {Loki as loki} from '../../../src/core/loki';
 import {Collection} from '../../../src/core/collection';
 
-describe('collection', function () {
-	it('works', function () {
+describe('collection', () => {
+	it('works', () => {
 		// function SubclassedCollection() {
 		// 	Collection.apply(this, Array.prototype.slice.call(arguments));
 		// }
@@ -31,12 +31,12 @@ describe('collection', function () {
 		expect(coll.data.length).toEqual(1);
 	});
 
-	it('findAndUpdate works', function () {
+	it('findAndUpdate works', () => {
 		const db = new loki('test.db');
 		const coll = db.addCollection('testcoll');
 		coll.insert([{a: 3, b: 3}, {a: 6, b: 7}, {a: 1, b: 2}, {a: 7, b: 8}, {a: 6, b: 4}]);
 
-		coll.findAndUpdate({a: 6}, function (obj) {
+		coll.findAndUpdate({a: 6}, obj => {
 			obj.b += 1;
 		});
 
@@ -46,7 +46,7 @@ describe('collection', function () {
 		expect(result[1].b).toEqual(8);
 	});
 
-	it('findAndRemove works', function () {
+	it('findAndRemove works', () => {
 		const db = new loki('test.db');
 		const coll = db.addCollection('testcoll');
 		coll.insert([{a: 3, b: 3}, {a: 6, b: 7}, {a: 1, b: 2}, {a: 7, b: 8}, {a: 6, b: 4}]);
@@ -62,14 +62,12 @@ describe('collection', function () {
 		expect(result[2].b).toEqual(8);
 	});
 
-	it('removeWhere works', function () {
+	it('removeWhere works', () => {
 		const db = new loki('test.db');
 		const coll = db.addCollection('testcoll');
 		coll.insert([{a: 3, b: 3}, {a: 6, b: 7}, {a: 1, b: 2}, {a: 7, b: 8}, {a: 6, b: 4}]);
 
-		coll.removeWhere(function (obj) {
-			return obj.a === 6;
-		});
+		coll.removeWhere(obj => obj.a === 6);
 
 		expect(coll.data.length).toEqual(3);
 
@@ -80,15 +78,13 @@ describe('collection', function () {
 		expect(result[2].b).toEqual(8);
 	});
 
-	it('updateWhere works', function () {
+	it('updateWhere works', () => {
 		const db = new loki('test.db');
 		const coll = db.addCollection('testcoll');
 		coll.insert([{a: 3, b: 3}, {a: 6, b: 7}, {a: 1, b: 2}, {a: 7, b: 8}, {a: 6, b: 4}]);
 
 		// guess we need to return object for this to work
-		coll.updateWhere(function (fobj) {
-			return fobj.a === 6
-		}, function (obj) {
+		coll.updateWhere(fobj => fobj.a === 6, obj => {
 			obj.b += 1;
 			return obj;
 		});
@@ -101,7 +97,7 @@ describe('collection', function () {
 
 	// coll.mode(property) should return single value of property which occurs most in collection
 	// if more than one value 'ties' it will just pick one
-	it('mode works', function () {
+	it('mode works', () => {
 		const db = new loki('test.db');
 		const coll = db.addCollection('testcoll');
 		coll.insert([{a: 3, b: 3}, {a: 6, b: 7}, {a: 1, b: 2}, {a: 7, b: 8}, {a: 6, b: 4}]);
@@ -112,12 +108,12 @@ describe('collection', function () {
 		expect(result).toEqual(true);
 	});
 
-	it('single inserts emit with meta when async listeners false', function () {
+	it('single inserts emit with meta when async listeners false', () => {
 		const db = new loki('test.db');
 		const coll = db.addCollection('testcoll');
 
 		// listen for insert events to validate objects
-		coll.on("insert", function (obj) {
+		coll.on("insert", obj => {
 			expect(obj.hasOwnProperty('a')).toEqual(true);
 			expect([3, 6, 1, 7, 5].indexOf(obj.a)).toBeGreaterThan(-1);
 
@@ -157,12 +153,12 @@ describe('collection', function () {
 		coll.insert({a: 5, b: 4});
 	});
 
-	it('single inserts (with clone) emit meta and return instances correctly', function () {
+	it('single inserts (with clone) emit meta and return instances correctly', () => {
 		const db = new loki('test.db');
 		const coll = db.addCollection('testcoll', {clone: true});
 
 		// listen for insert events to validate objects
-		coll.on("insert", function (obj) {
+		coll.on("insert", obj => {
 			expect(obj.hasOwnProperty('a')).toEqual(true);
 			expect([3, 6, 1, 7, 5].indexOf(obj.a)).toBeGreaterThan(-1);
 
@@ -207,12 +203,12 @@ describe('collection', function () {
 		expect(result.b).toEqual(3);
 	});
 
-	it('batch inserts emit with meta', function () {
+	it('batch inserts emit with meta', () => {
 		const db = new loki('test.db');
 		const coll = db.addCollection('testcoll');
 
 		// listen for insert events to validate objects
-		coll.on("insert", function (objs) {
+		coll.on("insert", objs => {
 			expect(Array.isArray(objs)).toEqual(true);
 			expect(objs.length).toEqual(5);
 
@@ -245,12 +241,12 @@ describe('collection', function () {
 		coll.insert([{a: 3, b: 3}, {a: 6, b: 7}, {a: 1, b: 2}, {a: 7, b: 8}, {a: 5, b: 4}]);
 	});
 
-	it('batch inserts emit with meta and return clones', function () {
+	it('batch inserts emit with meta and return clones', () => {
 		const db = new loki('test.db');
 		const coll = db.addCollection('testcoll', {clone: true});
 
 		// listen for insert events to validate objects
-		coll.on("insert", function (objs) {
+		coll.on("insert", objs => {
 			expect(Array.isArray(objs)).toEqual(true);
 			expect(objs.length).toEqual(5);
 

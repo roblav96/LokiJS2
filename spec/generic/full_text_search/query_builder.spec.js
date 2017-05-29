@@ -1,9 +1,9 @@
 /* global describe, it, expect */
 import * as Query from '../../../src/inverted_index/queries';
 
-describe('query builder', function () {
+describe('query builder', () => {
 
-	it('BaseQuery', function (done) {
+	it('BaseQuery', done => {
 		let q = new Query.BaseQuery("custom").boost(1.5).build();
 		expect(q).toEqual({type: "custom", boost: 1.5});
 
@@ -14,7 +14,7 @@ describe('query builder', function () {
 		done();
 	});
 
-	it('TermQuery', function (done) {
+	it('TermQuery', done => {
 		let q = new Query.TermQuery("user", "albert").boost(2.5).build();
 		expect(q).toEqual({type: "term", field: "user", value: "albert", boost: 2.5});
 
@@ -32,7 +32,7 @@ describe('query builder', function () {
 		done();
 	});
 
-	it('TermsQuery', function (done) {
+	it('TermsQuery', done => {
 		let q = new Query.TermsQuery("user", ["albert", "einstein"]).boost(3.5).build();
 		expect(q).toEqual({type: "terms", field: "user", value: ["albert", "einstein"], boost: 3.5});
 
@@ -46,7 +46,7 @@ describe('query builder', function () {
 		done();
 	});
 
-	it('WildcardQuery', function (done) {
+	it('WildcardQuery', done => {
 		let q = new Query.WildcardQuery("user", "alb?rt").boost(4.5).build();
 		expect(q).toEqual({type: "wildcard", field: "user", value: "alb?rt", boost: 4.5});
 
@@ -58,7 +58,7 @@ describe('query builder', function () {
 		done();
 	});
 
-	it('FuzzyQuery', function (done) {
+	it('FuzzyQuery', done => {
 		let q = new Query.FuzzyQuery("user", "albrt").boost(5.5).fuzziness(3).prefixLength(3).build();
 		expect(q).toEqual({type: "fuzzy", field: "user", value: "albrt", boost: 5.5, fuzziness: 3, prefix_length: 3});
 
@@ -74,7 +74,7 @@ describe('query builder', function () {
 		done();
 	});
 
-	it('PrefixQuery', function (done) {
+	it('PrefixQuery', done => {
 		let q = new Query.PrefixQuery("user", "alb").boost(5.5).build();
 		expect(q).toEqual({type: "prefix", field: "user", value: "alb", boost: 5.5});
 
@@ -86,7 +86,7 @@ describe('query builder', function () {
 		done();
 	});
 
-	it('ExistsQuery', function (done) {
+	it('ExistsQuery', done => {
 		let q = new Query.ExistsQuery("user").boost(6.5).build();
 		expect(q).toEqual({type: "exists", field: "user", boost: 6.5});
 
@@ -97,7 +97,7 @@ describe('query builder', function () {
 		done();
 	});
 
-	it('MatchQuery', function (done) {
+	it('MatchQuery', done => {
 		let q = new Query.MatchQuery("user", "albert einstein").boost(7.5).build();
 		expect(q).toEqual({type: "match", field: "user", value: "albert einstein", boost: 7.5});
 
@@ -124,14 +124,14 @@ describe('query builder', function () {
 		done();
 	});
 
-	it('MatchAllQuery', function (done) {
+	it('MatchAllQuery', done => {
 		let q = new Query.MatchAllQuery().boost(8.5).build();
 		expect(q).toEqual({type: "match_all", boost: 8.5});
 
 		done();
 	});
 
-	it('ConstantScoreQuery', function (done) {
+	it('ConstantScoreQuery', done => {
 		let q = new Query.ConstantScoreQuery().boost(8.5).build();
 		expect(q).toEqual({type: "constant_score", boost: 8.5});
 
@@ -149,7 +149,7 @@ describe('query builder', function () {
 		done();
 	});
 
-	it('BoolQuery', function (done) {
+	it('BoolQuery', done => {
 		let q = new Query.BoolQuery().boost(8.5).build();
 		expect(q).toEqual({type: "bool", boost: 8.5});
 
@@ -208,7 +208,7 @@ describe('query builder', function () {
 		done();
 	});
 
-	it('QueryBuilder', function (done) {
+	it('QueryBuilder', done => {
 		let q = new Query.QueryBuilder()
 			.enableFinalScoring(true)
 			.useBM25(0.1, 0.5)

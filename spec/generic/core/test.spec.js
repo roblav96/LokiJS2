@@ -25,7 +25,7 @@ const suite = {
 	}
 };
 
-describe('loki', function () {
+describe('loki', () => {
 	let db, users, jonas, testObject;
 
 	function docCompare(a, b) {
@@ -35,7 +35,7 @@ describe('loki', function () {
 		return 0;
 	}
 
-	beforeEach(function () {
+	beforeEach(() => {
 		db = new loki('test.json');
 		users = db.addCollection('user');
 
@@ -59,8 +59,8 @@ describe('loki', function () {
 	});
 
 
-	describe('core methods', function () {
-		it('works', function () {
+	describe('core methods', () => {
+		it('works', () => {
 			const tdb = new loki('regextests');
 			const tcu = tdb.addCollection('user');
 			tcu.insert({
@@ -225,8 +225,8 @@ describe('loki', function () {
 		});
 	});
 
-	describe('dot notation', function () {
-		it('works', function () {
+	describe('dot notation', () => {
+		it('works', () => {
 			const dnc = db.addCollection('dncoll');
 
 			dnc.insert({
@@ -296,8 +296,8 @@ describe('loki', function () {
 
 	// We only support dot notation involving array when
 	// the leaf property is the array.  This verifies that functionality
-	describe('dot notation across leaf object array', function () {
-		it('works', function () {
+	describe('dot notation across leaf object array', () => {
+		it('works', () => {
 			const dna = db.addCollection('dnacoll');
 
 			dna.insert({
@@ -356,8 +356,8 @@ describe('loki', function () {
 	});
 
 
-	describe('dot notation terminating at leaf array', function () {
-		it('works', function () {
+	describe('dot notation terminating at leaf array', () => {
+		it('works', () => {
 			const dna = db.addCollection('dnacoll');
 
 			dna.insert({
@@ -386,8 +386,8 @@ describe('loki', function () {
 		});
 	});
 
-	describe('dot notation across child array', function () {
-		it('works', function () {
+	describe('dot notation across child array', () => {
+		it('works', () => {
 			const dna = db.addCollection('dnacoll');
 
 			dna.insert({
@@ -472,8 +472,8 @@ describe('loki', function () {
 		});
 	});
 
-	describe('calculateRange', function () {
-		it('works', function () {
+	describe('calculateRange', () => {
+		it('works', () => {
 			const eic = db.addCollection('eic');
 			eic.ensureIndex('testid');
 
@@ -601,8 +601,8 @@ describe('loki', function () {
 		});
 	});
 
-	describe('lazy indexLifecycle', function () {
-		it('works', function () {
+	describe('lazy indexLifecycle', () => {
+		it('works', () => {
 			const ilc = db.addCollection('ilc', {
 				adaptiveBinaryIndices: false
 			});
@@ -634,8 +634,8 @@ describe('loki', function () {
 		});
 	});
 
-	describe('indexes', function () {
-		it('works', function () {
+	describe('indexes', () => {
+		it('works', () => {
 			const itc = db.addCollection('test', {
 				indices: ['testid']
 			});
@@ -735,16 +735,14 @@ describe('loki', function () {
 		});
 	});
 
-	describe('resultSet', function () {
-		it('works', function () {
+	describe('resultSet', () => {
+		it('works', () => {
 			// Resultset find
 			expect(users.chain().find({
 				'age': {
 					'$gte': 30
 				}
-			}).where(function (obj) {
-				return obj.lang === 'Swedish';
-			}).data().length).toEqual(1);
+			}).where(obj => obj.lang === 'Swedish').data().length).toEqual(1);
 
 			// Resultset offset
 			expect(users.chain().offset(1).data().length).toEqual(users.data.length - 1);
@@ -754,8 +752,8 @@ describe('loki', function () {
 		});
 	});
 
-	describe('andOrOps', function () {
-		it('works', function () {
+	describe('andOrOps', () => {
+		it('works', () => {
 			const eic = db.addCollection('eic');
 
 			eic.insert({
@@ -900,8 +898,8 @@ describe('loki', function () {
 		});
 	});
 
-	describe('findOne', function () {
-		it('works', function () {
+	describe('findOne', () => {
+		it('works', () => {
 			const eic = db.addCollection('eic');
 
 			eic.insert({
@@ -921,14 +919,14 @@ describe('loki', function () {
 			}); //2
 
 			// coll.findOne return type
-			it('return type', function () {
+			it('return type', () => {
 				expect(typeof eic.findOne({
 					'testid': 1
 				})).toEqual('object');
 			});
 
 			// coll.findOne return match
-			it('should match 7.2', function () {
+			it('should match 7.2', () => {
 				expect(eic.findOne({
 					'testid': 5
 				}).testFloat).toEqual(7.2);
@@ -936,7 +934,7 @@ describe('loki', function () {
 			});
 
 			// findOne with $and op
-			it('findOne with $and op', function () {
+			it('findOne with $and op', () => {
 				expect(eic.findOne({
 					'$and': [{
 						'testid': 1
@@ -946,7 +944,7 @@ describe('loki', function () {
 				}).testFloat, 6.2);
 			});
 
-			it('findOne with $or op', function () {
+			it('findOne with $or op', () => {
 				expect(eic.findOne({
 					'$or': [{
 						'testid': 2
@@ -962,8 +960,8 @@ describe('loki', function () {
 		});
 	});
 
-	describe('resultset unfiltered simplesort works', function () {
-		it('works', function () {
+	describe('resultset unfiltered simplesort works', () => {
+		it('works', () => {
 			const ssdb = new loki('sandbox.db');
 
 			// Add a collection to the database
@@ -993,8 +991,8 @@ describe('loki', function () {
 		});
 	});
 
-	describe('resultset data removeMeta works', function () {
-		it('works', function () {
+	describe('resultset data removeMeta works', () => {
+		it('works', () => {
 			const idb = new loki('sandbox.db');
 
 			// Add a collection to the database
@@ -1072,8 +1070,8 @@ describe('loki', function () {
 		});
 	});
 
-	describe('chained removes', function () {
-		it('works', function () {
+	describe('chained removes', () => {
+		it('works', () => {
 			const rsc = db.addCollection('rsc');
 
 			rsc.insert({
@@ -1120,8 +1118,8 @@ describe('loki', function () {
 	});
 
 	/* Dynamic View Tests */
-	describe('stepEvaluateDocument', function () {
-		it('works', function () {
+	describe('stepEvaluateDocument', () => {
+		it('works', () => {
 			const view = users.addDynamicView('test');
 			const query = {
 				'age': {
@@ -1134,7 +1132,7 @@ describe('loki', function () {
 			// churn evaluateDocuments() to make sure it works right
 			jonas.age = 23;
 			users.update(jonas);
-			it('evaluate documents', function () {
+			it('evaluate documents', () => {
 				expect(view.data().length).toEqual(users.data.length - 1);
 				jonas.age = 30;
 				users.update(jonas);
@@ -1150,26 +1148,26 @@ describe('loki', function () {
 			// assert set equality of docArrays irrelevant of sort/sequence
 			const result1 = users.find(query).sort(docCompare);
 			const result2 = view.data().sort(docCompare);
-			result1.forEach(function (obj) {
+			result1.forEach(obj => {
 				delete obj.meta
 			});
-			result2.forEach(function (obj) {
+			result2.forEach(obj => {
 				delete obj.meta
 			});
 
-			it('Result data Equality', function () {
+			it('Result data Equality', () => {
 				expect(result1).toEqual(result2);
 			});
 
-			it('Strict Equality', function () {
+			it('Strict Equality', () => {
 				expect(users.find(query) === view.data()).toBeTruthy();
 			});
 
-			it('View data equality', function () {
+			it('View data equality', () => {
 				expect(view.resultset).toEqual(view.resultset.copy());
 			});
 
-			it('View data copy strict equality', function () {
+			it('View data copy strict equality', () => {
 				expect(view.resultset === view.resultset.copy()).toBeFalsy();
 			});
 
@@ -1178,7 +1176,7 @@ describe('loki', function () {
 		});
 	});
 
-	describe('stepDynamicViewPersistence', function () {
+	describe('stepDynamicViewPersistence', () => {
 		it('works', function stepDynamicViewPersistence() {
 			const query = {
 				'age': {
@@ -1196,10 +1194,10 @@ describe('loki', function () {
 			// the dynamic view depends on an internal resultset
 			// the persistent dynamic view also depends on an internal resultdata data array
 			// filteredrows should be applied immediately to resultset will be lazily built into resultdata later when data() is called
-			it('dynamic view initialization 1', function () {
+			it('dynamic view initialization 1', () => {
 				expect(pview.resultset.filteredrows.length).toEqual(3);
 			})
-			it('dynamic view initialization 2', function () {
+			it('dynamic view initialization 2', () => {
 				expect(pview.resultdata.length).toEqual(0);
 			});
 
@@ -1224,7 +1222,7 @@ describe('loki', function () {
 
 			// only one document should have been added to resultset (1 was filtered out)
 			it('dv resultset is valid',
-				function () {
+				() => {
 					expect(pviewResultsetLenBefore + 1).toEqual(pviewResultsetLenAfter);
 				});
 
@@ -1239,18 +1237,18 @@ describe('loki', function () {
 
 			// verify filteredrows logically matches resultdata (irrelevant of sort)
 			for (let idxFR = 0; idxFR < frcopy2.length; idxFR++) {
-				it('dynamic view resultset/resultdata consistency', function () {
+				it('dynamic view resultset/resultdata consistency', () => {
 					expect(pview.resultdata[idxFR]).toEqual(pview.collection.data[frcopy2[idxFR]]);
 				});
 			}
 			// now verify they are not exactly equal (verify sort moved stuff)
-			it('dynamic view sort', function () {
+			it('dynamic view sort', () => {
 				expect(frcopy).toEqual(frcopy2)
 			});
 		});
 	});
 
-	describe('stepDynamicViewPersistence', function () {
+	describe('stepDynamicViewPersistence', () => {
 		it('works', function duplicateItemFoundOnIndex() {
 			const test = db.addCollection('nodupes', ['index']);
 
@@ -1262,10 +1260,10 @@ describe('loki', function () {
 			let results = test.find({
 				index: 'key'
 			});
-			it('one result exists', function () {
+			it('one result exists', () => {
 				expect(results.length).toEqual(1);
 			});
-			it('the correct result is returned', function () {
+			it('the correct result is returned', () => {
 				expect(results[0].a).toEqual(1);
 			});
 
@@ -1277,16 +1275,16 @@ describe('loki', function () {
 				index: 'key'
 			});
 
-			it('one result exists', function () {
+			it('one result exists', () => {
 				expect(results.length).toEqual(1);
 			});
-			it('the correct result is returned', function () {
+			it('the correct result is returned', () => {
 				expect(results[0].a).toEqual(2);
 			});
 		});
 	});
 
-	describe('stepDynamicViewPersistence', function () {
+	describe('stepDynamicViewPersistence', () => {
 		it('works', function testEmptyTableWithIndex() {
 			const itc = db.addCollection('test', ['testindex']);
 
@@ -1298,34 +1296,34 @@ describe('loki', function () {
 			const resultsWithIndex = itc.find({
 				'testindex': 4
 			});
-			it('no results found', function () {
+			it('no results found', () => {
 				expect(resultsWithIndex.length).toEqual(0);
 			});
 		});
 	});
 
-	describe('stepDynamicViewPersistence', function () {
+	describe('stepDynamicViewPersistence', () => {
 		it('works', function testCollections(done) {
 			// mock persistence by using memory adapter
 			const mem = new LokiMemoryAdapter();
 			const db = new loki('testCollections', {adapter: mem});
 			db.name = 'testCollections';
-			it('DB name', function () {
+			it('DB name', () => {
 				expect(db.getName()).toEqual('testCollections');
 			});
 			const t = db.addCollection('test1', {
 				transactional: true
 			});
 			db.addCollection('test2');
-			suite.assertThrows('Throw error on wrong remove', function () {
+			suite.assertThrows('Throw error on wrong remove', () => {
 				t.remove('foo');
 			}, Error);
-			suite.assertThrows('Throw error on non-synced doc', function () {
+			suite.assertThrows('Throw error on non-synced doc', () => {
 				t.remove({
 					name: 'joe'
 				});
 			}, Error);
-			it('List collections', function () {
+			it('List collections', () => {
 				expect(db.listCollections().length).toEqual(2);
 			});
 			t.clear();
@@ -1336,11 +1334,11 @@ describe('loki', function () {
 			}];
 			t.insert(users);
 
-			it('2 docs after array insert', function () {
+			it('2 docs after array insert', () => {
 				expect(2).toEqual(t.data.length)
 			});
 			t.remove(users);
-			it('0 docs after array remove', function () {
+			it('0 docs after array remove', () => {
 				expect(0).toEqual(t.data.length)
 			});
 
@@ -1349,7 +1347,7 @@ describe('loki', function () {
 
 			TestError.prototype = new Error;
 			db.autosaveEnable();
-			db.on('close', function () {
+			db.on('close', () => {
 				throw new TestError;
 			});
 			db.close().then(done.fail, done);

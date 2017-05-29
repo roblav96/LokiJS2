@@ -1,10 +1,10 @@
 /* global describe, it, expect */
 import {Loki as loki} from '../../../src/core/loki';
 
-describe('binary indices', function () {
+describe('binary indices', () => {
 	let testRecords;
 
-	beforeEach(function () {
+	beforeEach(() => {
 		testRecords = [
 			{name: 'mjolnir', owner: 'thor', maker: 'dwarves'},
 			{name: 'gungnir', owner: 'odin', maker: 'elves'},
@@ -13,8 +13,8 @@ describe('binary indices', function () {
 		];
 	});
 
-	describe('collection.clear affects binary indices correctly', function () {
-		it('works', function () {
+	describe('collection.clear affects binary indices correctly', () => {
+		it('works', () => {
 			const db = new loki('idxtest');
 			const t2 = JSON.parse(JSON.stringify(testRecords));
 
@@ -31,8 +31,8 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('binary index loosly but reliably works across datatypes', function () {
-		it('works', function () {
+	describe('binary index loosly but reliably works across datatypes', () => {
+		it('works', () => {
 			const db = new loki('ugly.db');
 
 			// Add a collection to the database
@@ -56,8 +56,8 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('index maintained across inserts', function () {
-		it('works', function () {
+	describe('index maintained across inserts', () => {
+		it('works', () => {
 
 			const db = new loki('idxtest');
 			const items = db.addCollection('users', {indices: ['name']});
@@ -89,8 +89,8 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('index maintained across removes', function () {
-		it('works', function () {
+	describe('index maintained across removes', () => {
+		it('works', () => {
 
 			const db = new loki('idxtest');
 			const items = db.addCollection('users', {indices: ['name']});
@@ -122,8 +122,8 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('index maintained across updates', function () {
-		it('works', function () {
+	describe('index maintained across updates', () => {
+		it('works', () => {
 
 			const db = new loki('idxtest');
 			const items = db.addCollection('users', {indices: ['name']});
@@ -156,8 +156,8 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('positional lookup using get works', function () {
-		it('works', function () {
+	describe('positional lookup using get works', () => {
+		it('works', () => {
 			// Since we use coll.get's ability to do a positional lookup of a loki id during adaptive indexing we will test it here
 
 			// let's base this off of our 'remove' test so data is more meaningful
@@ -188,8 +188,8 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('positional index lookup using getBinaryIndexPosition works', function () {
-		it('works', function () {
+	describe('positional index lookup using getBinaryIndexPosition works', () => {
+		it('works', () => {
 
 			// Since our indexes contain -not loki id values- but coll.data[] positions
 			// we shall verify our getBinaryIndexPosition method's ability to look up an
@@ -222,8 +222,8 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('calculateRangeStart works for inserts', function () {
-		it('works', function () {
+	describe('calculateRangeStart works for inserts', () => {
+		it('works', () => {
 
 			// calculateRangeStart is helper function for adaptive inserts/updates
 			// we will use it to find position within index where (new) nonexistent value should be inserted into index
@@ -249,8 +249,8 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('adaptiveBinaryIndexInsert works', function () {
-		it('works', function () {
+	describe('adaptiveBinaryIndexInsert works', () => {
+		it('works', () => {
 
 			// Since we use coll.get's ability to do a positional lookup of a loki id during adaptive indexing we will test it here
 			// let's base this off of our 'remove' test so data is more meaningful
@@ -280,8 +280,8 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('adaptiveBinaryIndexUpdate works', function () {
-		it('works', function () {
+	describe('adaptiveBinaryIndexUpdate works', () => {
+		it('works', () => {
 
 			const db = new loki('idxtest');
 			const items = db.addCollection('users', {
@@ -312,8 +312,8 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('adaptiveBinaryIndexRemove works', function () {
-		it('works', function () {
+	describe('adaptiveBinaryIndexRemove works', () => {
+		it('works', () => {
 
 			// Since we use coll.get's ability to do a positional lookup of a loki id during adaptive indexing we will test it here
 
@@ -339,8 +339,8 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('adaptiveBinaryIndex high level operability test', function () {
-		it('works', function () {
+	describe('adaptiveBinaryIndex high level operability test', () => {
+		it('works', () => {
 
 			const db = new loki('idxtest');
 			const coll = db.addCollection('users', {
@@ -420,8 +420,8 @@ describe('binary indices', function () {
 		});
 	});
 
-	describe('adaptiveBinaryIndex high level random stress test', function () {
-		it('works', function () {
+	describe('adaptiveBinaryIndex high level random stress test', () => {
+		it('works', () => {
 			const db = new loki('idxtest');
 			const coll = db.addCollection('users', {
 				adaptiveBinaryIndices: true,
@@ -460,8 +460,8 @@ describe('binary indices', function () {
 
 	});
 
-	describe('adaptiveBinaryIndex collection serializes correctly', function () {
-		it('works', function () {
+	describe('adaptiveBinaryIndex collection serializes correctly', () => {
+		it('works', () => {
 
 			let db = new loki('idxtest');
 			let coll = db.addCollection('users', {

@@ -1,8 +1,8 @@
 /* global beforeEach, afterEach */
-beforeEach(function () {
+beforeEach(() => {
 
 });
 
-afterEach(function () {
+afterEach(() => {
 
 });

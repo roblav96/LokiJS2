@@ -22,7 +22,7 @@ LokiNativescriptAdapter.prototype.loadDatabase = function (dbname) {
 	const myFile = documents.getFile(dbname);
 
 	//Read from filesystem
-	return myFile.readText().then(function (content) {
+	return myFile.readText().then((content) => {
 		//The file is empty or missing
 		if (content === "") {
 			throw new Error("DB file does not exist");

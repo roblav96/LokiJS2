@@ -3,9 +3,9 @@ import {Loki as loki} from '../../../src/core/loki';
 import {LokiMemoryAdapter} from '../../../src/core/memory_adapter';
 import {LokiPartitioningAdapter} from '../../../src/core/partitioning_adapter';
 
-describe('testing unique index serialization', function () {
+describe('testing unique index serialization', () => {
 	let db, users;
-	beforeEach(function () {
+	beforeEach(() => {
 		db = new loki();
 		users = db.addCollection('users');
 		users.insert([{
@@ -20,7 +20,7 @@ describe('testing unique index serialization', function () {
 		users.ensureUniqueIndex('username');
 	});
 
-	it('should have a unique index', function () {
+	it('should have a unique index', () => {
 		const ser = db.serialize(), reloaded = new loki();
 		const loaded = reloaded.loadJSON(ser);
 		const coll = reloaded.getCollection('users');
@@ -35,8 +35,8 @@ describe('testing unique index serialization', function () {
 	});
 });
 
-describe('testing destructured serialization/deserialization', function () {
-	it('verify default (D) destructuring works as expected', function () {
+describe('testing destructured serialization/deserialization', () => {
+	it('verify default (D) destructuring works as expected', () => {
 		const ddb = new loki("test.db", {serializationMethod: "destructured"});
 		const coll = ddb.addCollection("testcoll");
 		coll.insert({
@@ -77,7 +77,7 @@ describe('testing destructured serialization/deserialization', function () {
 	// NDA : Non-Delimited Array : one iterable array with empty string collection partitions { partitioned: false, delimited: false }
 	// NDAA : Non-Delimited Array with subArrays. db at [0] and collection subarrays at [n] { partitioned: true, delimited : false }
 
-	it('verify custom destructuring works as expected', function () {
+	it('verify custom destructuring works as expected', () => {
 		const methods = ['D', 'DA', 'NDA', 'NDAA'];
 		let idx, options, result;
 		let cddb;
@@ -140,7 +140,7 @@ describe('testing destructured serialization/deserialization', function () {
 		}
 	});
 
-	it('verify individual partitioning works correctly', function () {
+	it('verify individual partitioning works correctly', () => {
 		let idx, options, result;
 		let cddb;
 		const ddb = new loki("test.db");
@@ -220,8 +220,8 @@ describe('testing destructured serialization/deserialization', function () {
 
 });
 
-describe('testing adapter functionality', function () {
-	it('verify basic memory adapter functionality works', function (done) {
+describe('testing adapter functionality', () => {
+	it('verify basic memory adapter functionality works', done => {
 		let idx, options, result;
 
 		const memAdapter = new LokiMemoryAdapter();
@@ -249,7 +249,7 @@ describe('testing adapter functionality', function () {
 			b: 2
 		});
 
-		const p1 = ddb.saveDatabase().then(function () {
+		const p1 = ddb.saveDatabase().then(() => {
 			expect(memAdapter.hashStore.hasOwnProperty("test.db")).toEqual(true);
 			expect(memAdapter.hashStore["test.db"].savecount).toEqual(1);
 		});
@@ -258,7 +258,7 @@ describe('testing adapter functionality', function () {
 
 		cdb.initializePersistence({adapter: memAdapter});
 
-		const p2 = cdb.loadDatabase().then(function () {
+		const p2 = cdb.loadDatabase().then(() => {
 			expect(cdb.collections.length).toEqual(2);
 			expect(cdb.getCollection("testcoll").findOne({name: "test2"}).val).toEqual(101);
 			expect(cdb.collections[0].data.length).toEqual(3);
@@ -268,7 +268,7 @@ describe('testing adapter functionality', function () {
 		Promise.all([p1, p2]).then(done, done.fail);
 	});
 
-	it('verify loki deleteDatabase works', function (done) {
+	it('verify loki deleteDatabase works', done => {
 		const memAdapter = new LokiMemoryAdapter();
 		const ddb = new loki("test.db");
 		ddb.initializePersistence({adapter: memAdapter});
@@ -287,17 +287,17 @@ describe('testing adapter functionality', function () {
 			val: 102
 		});
 
-		ddb.saveDatabase().then(function () {
+		ddb.saveDatabase().then(() => {
 			expect(memAdapter.hashStore.hasOwnProperty("test.db")).toEqual(true);
 			expect(memAdapter.hashStore["test.db"].savecount).toEqual(1);
 
 			return ddb.deleteDatabase();
-		}).then(function () {
+		}).then(() => {
 			expect(memAdapter.hashStore.hasOwnProperty("test.db")).toEqual(false);
 		}).then(done, done.fail);
 	});
 
-	it('verify partioning adapter works', function (done) {
+	it('verify partioning adapter works', done => {
 		const mem = new LokiMemoryAdapter();
 		const adapter = new LokiPartitioningAdapter(mem);
 
@@ -316,7 +316,7 @@ describe('testing adapter functionality', function () {
 		const another = db.addCollection('another');
 		const ai = another.insert({a: 1, b: 2});
 
-		db.saveDatabase().then(function () {
+		db.saveDatabase().then(() => {
 			// should have partitioned the data
 			expect(Object.keys(mem.hashStore).length).toEqual(3);
 			expect(mem.hashStore.hasOwnProperty("sandbox.db")).toEqual(true);
@@ -333,7 +333,7 @@ describe('testing adapter functionality', function () {
 
 			// and save again to ensure lastsave is different on for db container and that one collection
 			return db.saveDatabase();
-		}).then(function () {
+		}).then(() => {
 			// db container always gets saved since we currently have no 'dirty' flag on it to check
 			expect(mem.hashStore["sandbox.db"].savecount).toEqual(2);
 			// we didn't change this
@@ -347,7 +347,7 @@ describe('testing adapter functionality', function () {
 			db2.initializePersistence({adapter: adapter});
 
 			return db2.loadDatabase();
-		}).then(function () {
+		}).then(() => {
 			expect(db2.collections.length).toEqual(2);
 			expect(db2.collections[0].data.length).toEqual(4);
 			expect(db2.collections[1].data.length).toEqual(1);
@@ -356,7 +356,7 @@ describe('testing adapter functionality', function () {
 		}).then(done, done.fail);
 	});
 
-	it('verify partioning adapter with paging mode enabled works', function (done) {
+	it('verify partioning adapter with paging mode enabled works', done => {
 		const mem = new LokiMemoryAdapter();
 
 		// we will use an exceptionally low page size (128bytes) to test with small dataset
@@ -378,7 +378,7 @@ describe('testing adapter functionality', function () {
 		const ai = another.insert({a: 1, b: 2});
 
 		// for purposes of our memory adapter it is pretty much synchronous
-		db.saveDatabase().then(function () {
+		db.saveDatabase().then(() => {
 			// should have partitioned the data
 			expect(Object.keys(mem.hashStore).length).toEqual(4);
 			expect(mem.hashStore.hasOwnProperty("sandbox.db")).toEqual(true);
@@ -397,7 +397,7 @@ describe('testing adapter functionality', function () {
 
 			// and save again to ensure lastsave is different on for db container and that one collection
 			return db.saveDatabase();
-		}).then(function () {
+		}).then(() => {
 			// db container always gets saved since we currently have no 'dirty' flag on it to check
 			expect(mem.hashStore["sandbox.db"].savecount).toEqual(2);
 			// we didn't change this
@@ -411,7 +411,7 @@ describe('testing adapter functionality', function () {
 			items.update(tyr);
 
 			return db.saveDatabase();
-		}).then(function () {
+		}).then(() => {
 			expect(mem.hashStore["sandbox.db"].savecount).toEqual(3);
 			expect(mem.hashStore["sandbox.db.0.0"].savecount).toEqual(2);
 			expect(mem.hashStore["sandbox.db.0.0"].savecount).toEqual(2);
@@ -421,7 +421,7 @@ describe('testing adapter functionality', function () {
 			db2 = new loki('sandbox.db');
 			db2.initializePersistence({adapter: adapter});
 			return db2.loadDatabase();
-		}).then(function () {
+		}).then(() => {
 			expect(db2.collections.length).toEqual(2);
 			expect(db2.collections[0].data.length).toEqual(4);
 			expect(db2.collections[1].data.length).toEqual(1);
@@ -431,7 +431,7 @@ describe('testing adapter functionality', function () {
 			// verify empty collection saves with paging
 			db.addCollection("extracoll");
 			return db.saveDatabase();
-		}).then(function () {
+		}).then(() => {
 			expect(mem.hashStore["sandbox.db"].savecount).toEqual(4);
 			expect(mem.hashStore["sandbox.db.0.0"].savecount).toEqual(2);
 			expect(mem.hashStore["sandbox.db.0.0"].savecount).toEqual(2);
@@ -442,7 +442,7 @@ describe('testing adapter functionality', function () {
 			db2 = new loki('sandbox.db');
 			db2.initializePersistence({adapter: adapter});
 			return db2.loadDatabase();
-		}).then(function () {
+		}).then(() => {
 			expect(db2.collections.length).toEqual(3);
 			expect(db2.collections[0].data.length).toEqual(4);
 			expect(db2.collections[1].data.length).toEqual(1);
@@ -450,7 +450,7 @@ describe('testing adapter functionality', function () {
 		}).then(done, done.fail);
 	});
 
-	it('verify reference adapters get db reference which is copy and serializable-safe', function (done) {
+	it('verify reference adapters get db reference which is copy and serializable-safe', done => {
 		// Current loki functionality with regards to reference mode adapters:
 		// Since we don't use serializeReplacer on reference mode adapters, we make
 		// lightweight clone, cloning only db container and collection containers (object refs are same).
@@ -459,7 +459,7 @@ describe('testing adapter functionality', function () {
 			this.mode = "reference";
 		}
 
-		MyFakeReferenceAdapter.prototype.loadDatabase = function (dbname) {
+		MyFakeReferenceAdapter.prototype.loadDatabase = dbname => {
 			expect(typeof(dbname)).toEqual("string");
 
 			const result = new loki("new db");
@@ -471,7 +471,7 @@ describe('testing adapter functionality', function () {
 			return result;
 		};
 
-		MyFakeReferenceAdapter.prototype.exportDatabase = function (dbname, dbref) {
+		MyFakeReferenceAdapter.prototype.exportDatabase = (dbname, dbref) => {
 			expect(typeof(dbname)).toEqual("string");
 			expect(dbref.constructor.name).toEqual("Loki");
 
@@ -494,7 +494,7 @@ describe('testing adapter functionality', function () {
 		c1.insert({a: 1, b: 2});
 		c2.insert({a: 3, b: 4});
 
-		db.saveDatabase().then(function () {
+		db.saveDatabase().then(() => {
 			expect(db.persistenceAdapter).not.toEqual(null);
 			expect(db.filename).toEqual("rma test");
 			expect(db.collections[0].name).toEqual("c1");
@@ -504,7 +504,7 @@ describe('testing adapter functionality', function () {
 			db2.initializePersistence({adapter: adapter});
 
 			return db2.loadDatabase();
-		}).then(function () {
+		}).then(() => {
 			expect(db2.collections.length).toEqual(2);
 			expect(db2.collections[0].name).toEqual("n1");
 			expect(db2.collections[1].name).toEqual("n2");
@@ -513,8 +513,8 @@ describe('testing adapter functionality', function () {
 	});
 });
 
-describe('async adapter tests', function () {
-	it('verify throttled async drain', function (done) {
+describe('async adapter tests', () => {
+	it('verify throttled async drain', done => {
 		const mem = new LokiMemoryAdapter({asyncResponses: true, asyncTimeout: 50});
 		const db = new loki('sandbox.db');
 		db.initializePersistence({adapter: mem, throttledSaves: true});
@@ -545,13 +545,13 @@ describe('async adapter tests', function () {
 		items.update(drau);
 		db.saveDatabase();
 
-		db.throttledSaveDrain().then(function () {
+		db.throttledSaveDrain().then(() => {
 			// Wait until saves are complete and then loading the database and make
 			// sure all saves are complete and includes their changes
 			const db2 = new loki('sandbox.db');
 			db2.initializePersistence({adapter: mem});
 
-			db2.loadDatabase().then(function () {
+			db2.loadDatabase().then(() => {
 				// total of 2 saves should have occurred
 				expect(mem.hashStore["sandbox.db"].savecount).toEqual(2);
 
@@ -564,7 +564,7 @@ describe('async adapter tests', function () {
 		});
 	});
 
-	it('verify throttledSaveDrain with duration timeout works', function (done) {
+	it('verify throttledSaveDrain with duration timeout works', done => {
 		const mem = new LokiMemoryAdapter({asyncResponses: true, asyncTimeout: 100});
 		const db = new loki('sandbox.db');
 		db.initializePersistence({adapter: mem});
@@ -585,11 +585,11 @@ describe('async adapter tests', function () {
 		// now queue up a sequence to be run one after the other, at ~50ms each (~300ms total) when first completes
 		ai.b = 3;
 		another.update(ai);
-		db.saveDatabase(function () {
+		db.saveDatabase(() => {
 			tyr.owner = "arngrim";
 			items.update(tyr);
 
-			db.saveDatabase(function () {
+			db.saveDatabase(() => {
 				drau.maker = 'dwarves';
 				items.update(drau);
 
@@ -604,18 +604,18 @@ describe('async adapter tests', function () {
 		// saves which take about 400ms to complete.
 		// The full drain can take one save/callback cycle longer than duration (~100ms).
 		db.throttledSaveDrain({recursiveWaitLimit: true, recursiveWaitLimitDuration: 200})
-			.then(function () {
+			.then(() => {
 				expect(true).toEqual(true);
-			}, function () {
+			}, () => {
 				expect(true).toEqual(false);
 			});
 
-		setTimeout(function () {
+		setTimeout(() => {
 			done();
 		}, 600);
 	});
 
-	it('verify throttled async throttles', function (done) {
+	it('verify throttled async throttles', done => {
 		const mem = new LokiMemoryAdapter({asyncResponses: true, asyncTimeout: 50});
 		const db = new loki('sandbox.db');
 		db.initializePersistence({adapter: mem});
@@ -647,14 +647,14 @@ describe('async adapter tests', function () {
 		db.saveDatabase();
 
 		// give all async saves time to complete and then verify outcome
-		setTimeout(function () {
+		setTimeout(() => {
 			// total of 2 saves should have occurred
 			expect(mem.hashStore["sandbox.db"].savecount).toEqual(2);
 
 			// verify the saved database contains all expected changes
 			const db2 = new loki('sandbox.db');
 			db2.initializePersistence({adapter: mem});
-			db2.loadDatabase().then(function () {
+			db2.loadDatabase().then(() => {
 				expect(db2.getCollection("another").findOne({a: 1}).b).toEqual(3);
 				expect(db2.getCollection("items").findOne({name: 'tyrfing'}).owner).toEqual('arngrim');
 				expect(db2.getCollection("items").findOne({name: 'draupnir'}).maker).toEqual('dwarves');
@@ -663,7 +663,7 @@ describe('async adapter tests', function () {
 		}, 200);
 	});
 
-	it('verify throttled async works as expected', function (done) {
+	it('verify throttled async works as expected', done => {
 		const mem = new LokiMemoryAdapter({asyncResponses: true, asyncTimeout: 50});
 		const adapter = new LokiPartitioningAdapter(mem);
 		const throttled = true;
@@ -680,7 +680,7 @@ describe('async adapter tests', function () {
 		const another = db.addCollection('another');
 		const ai = another.insert({a: 1, b: 2});
 
-		db.saveDatabase().then(function () {
+		db.saveDatabase().then(() => {
 			// should have partitioned the data
 			expect(Object.keys(mem.hashStore).length).toEqual(3);
 			expect(mem.hashStore.hasOwnProperty("sandbox.db")).toEqual(true);
@@ -696,7 +696,7 @@ describe('async adapter tests', function () {
 			another.update(ai);
 
 			// and save again to ensure lastsave is different on for db container and that one collection
-			db.saveDatabase().then(function () {
+			db.saveDatabase().then(() => {
 				// db container always gets saved since we currently have no 'dirty' flag on it to check
 				expect(mem.hashStore["sandbox.db"].savecount).toEqual(2);
 				// we didn't change this
@@ -707,7 +707,7 @@ describe('async adapter tests', function () {
 				// now update a multi page items collection and verify both pages were saved
 				tyr.maker = "elves";
 				items.update(tyr);
-				db.saveDatabase().then(function () {
+				db.saveDatabase().then(() => {
 					expect(mem.hashStore["sandbox.db"].savecount).toEqual(3);
 					expect(mem.hashStore["sandbox.db.0"].savecount).toEqual(2);
 					expect(mem.hashStore["sandbox.db.1"].savecount).toEqual(2);
@@ -715,7 +715,7 @@ describe('async adapter tests', function () {
 					// ok now lets load from it
 					let db2 = new loki('sandbox.db');
 					db2.initializePersistence({adapter: adapter, throttledSaves: throttled});
-					db2.loadDatabase().then(function () {
+					db2.loadDatabase().then(() => {
 						expect(db2.collections.length).toEqual(2);
 						expect(db2.collections[0].data.length).toEqual(4);
 						expect(db2.collections[1].data.length).toEqual(1);
@@ -724,7 +724,7 @@ describe('async adapter tests', function () {
 
 						// verify empty collection saves with paging
 						db.addCollection("extracoll");
-						db.saveDatabase().then(function () {
+						db.saveDatabase().then(() => {
 							expect(mem.hashStore["sandbox.db"].savecount).toEqual(4);
 							expect(mem.hashStore["sandbox.db.0"].savecount).toEqual(2);
 							expect(mem.hashStore["sandbox.db.1"].savecount).toEqual(2);
@@ -733,7 +733,7 @@ describe('async adapter tests', function () {
 							// now verify loading empty collection works with paging codepath
 							db2 = new loki('sandbox.db');
 							db2.initializePersistence({adapter: adapter, throttledSaves: throttled});
-							db2.loadDatabase().then(function () {
+							db2.loadDatabase().then(() => {
 								expect(db2.collections.length).toEqual(3);
 								expect(db2.collections[0].data.length).toEqual(4);
 								expect(db2.collections[1].data.length).toEqual(1);
@@ -750,7 +750,7 @@ describe('async adapter tests', function () {
 	});
 
 
-	it('verify loadDatabase in the middle of throttled saves will wait for queue to drain first', function (done) {
+	it('verify loadDatabase in the middle of throttled saves will wait for queue to drain first', done => {
 		const mem = new LokiMemoryAdapter({asyncResponses: true, asyncTimeout: 75});
 		const db = new loki('sandbox.db');
 		db.initializePersistence({adapter: mem});
@@ -771,11 +771,11 @@ describe('async adapter tests', function () {
 		// now queue up a sequence to be run one after the other, at ~50ms each (~300ms total) when first completes
 		ai.b = 3;
 		another.update(ai);
-		db.saveDatabase().then(function () {
+		db.saveDatabase().then(() => {
 			tyr.owner = "arngrim";
 			items.update(tyr);
 
-			db.saveDatabase().then(function () {
+			db.saveDatabase().then(() => {
 				drau.maker = 'dwarves';
 				items.update(drau);
 
@@ -790,21 +790,21 @@ describe('async adapter tests', function () {
 		// a load at this scope (possibly simulating script run from different code path)
 		// should wait until any pending saves are complete, then freeze saves (queue them ) while loading,
 		// then re-enable saves
-		db.loadDatabase().then(function () {
+		db.loadDatabase().then(() => {
 
 			expect(db.getCollection('another').findOne({a: 1}).b).toEqual(3);
 			expect(db.getCollection('items').findOne({name: 'tyrfing'}).owner).toEqual('arngrim');
 			expect(db.getCollection('items').findOne({name: 'draupnir'}).maker).toEqual('dwarves');
 		});
 
-		setTimeout(function () {
+		setTimeout(() => {
 			done();
 		}, 600);
 	});
 });
 
-describe('testing changesAPI', function () {
-	it('verify pending changes persist across save/load cycle', function (done) {
+describe('testing changesAPI', () => {
+	it('verify pending changes persist across save/load cycle', done => {
 		const mem = new LokiMemoryAdapter();
 		const db = new loki('sandbox.db');
 		let db2;
@@ -825,12 +825,12 @@ describe('testing changesAPI', function () {
 		items.update(tyrfing);
 
 		// memory adapter is synchronous so i will not bother with callbacks
-		db.saveDatabase().then(function () {
+		db.saveDatabase().then(() => {
 			db2 = new loki('sandbox.db');
 			db2.initializePersistence({adapter: mem});
 
 			return db2.loadDatabase();
-		}).then(function () {
+		}).then(() => {
 			const result = JSON.parse(db2.serializeChanges());
 			expect(result.length).toEqual(5);
 

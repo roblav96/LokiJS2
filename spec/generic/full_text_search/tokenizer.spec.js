@@ -1,7 +1,7 @@
 /* global describe, it, expect */
 import {Tokenizer} from '../../../src/inverted_index/tokenizer';
 
-describe('tokenizer', function () {
+describe('tokenizer', () => {
 
 	function splitter() {
 	}
@@ -22,7 +22,7 @@ describe('tokenizer', function () {
 	function f5() {
 	}
 
-	it('splitter', function (done) {
+	it('splitter', done => {
 		let tkz = new Tokenizer();
 
 		expect(tkz.getSplitter()).toBeArray();
@@ -36,7 +36,7 @@ describe('tokenizer', function () {
 		done();
 	});
 
-	it('add, get', function (done) {
+	it('add, get', done => {
 		let tkz = new Tokenizer();
 
 		expect(() => tkz.add(1, f1)).not.toThrowErrorOfType('TypeError');
@@ -55,7 +55,7 @@ describe('tokenizer', function () {
 		done();
 	});
 
-	it('addBefore, addAfter', function (done) {
+	it('addBefore, addAfter', done => {
 		let tkz = new Tokenizer();
 		tkz.add("f2", f2);
 		tkz.addBefore(f2, "f1", f1);
@@ -77,7 +77,7 @@ describe('tokenizer', function () {
 		done();
 	});
 
-	it('remove, reset', function (done) {
+	it('remove, reset', done => {
 		let tkz = new Tokenizer();
 		tkz.add("f1", f1);
 		tkz.add("f2", f2);
@@ -100,7 +100,7 @@ describe('tokenizer', function () {
 		done();
 	});
 
-	it('tokenize', function (done) {
+	it('tokenize', done => {
 		let tkz = new Tokenizer();
 		tkz.add("f1", f1);
 
@@ -109,7 +109,7 @@ describe('tokenizer', function () {
 		done();
 	});
 
-	it('serialize from tokenizer', function (done) {
+	it('serialize from tokenizer', done => {
 		let tkz = new Tokenizer();
 		tkz.add("f1", f1);
 		tkz.add("f2", f2);
@@ -131,7 +131,7 @@ describe('tokenizer', function () {
 		done();
 	});
 
-	it('serialize from functions', function (done) {
+	it('serialize from functions', done => {
 		let tkz = new Tokenizer();
 		tkz.add("f1", f1);
 		tkz.add("f2", f2);

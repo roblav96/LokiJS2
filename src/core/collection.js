@@ -44,7 +44,7 @@ function average(array) {
 
 function standardDeviation(values) {
 	const avg = average(values);
-	const squareDiffs = values.map(function (value) {
+	const squareDiffs = values.map((value) => {
 		const diff = value - avg;
 		const sqrDiff = diff * diff;
 		return sqrDiff;
@@ -124,7 +124,6 @@ export class Collection extends LokiEventEmitter {
 		this.cachedIndex = null;
 		this.cachedBinaryIndex = null;
 		this.cachedData = null;
-		const self = this;
 
 		/* OPTIONS */
 		options = options || {};
@@ -134,15 +133,15 @@ export class Collection extends LokiEventEmitter {
 			if (!Array.isArray(options.unique)) {
 				options.unique = [options.unique];
 			}
-			options.unique.forEach(function (prop) {
-				self.uniqueNames.push(prop); // used to regenerate on subsequent database loads
-				self.constraints.unique[prop] = new UniqueIndex(prop);
+			options.unique.forEach((prop) => {
+				this.uniqueNames.push(prop); // used to regenerate on subsequent database loads
+				this.constraints.unique[prop] = new UniqueIndex(prop);
 			});
 		}
 
 		if (options.hasOwnProperty('exact')) {
-			options.exact.forEach(function (prop) {
-				self.constraints.exact[prop] = new ExactIndex(prop);
+			options.exact.forEach((prop) => {
+				this.constraints.exact[prop] = new ExactIndex(prop);
 			});
 		}
 
@@ -238,15 +237,15 @@ export class Collection extends LokiEventEmitter {
 					return this;
 				};
 
-			changes.forEach(function (change) {
+			changes.forEach((change) => {
 				changedObjects.add(change.object);
 			});
 
-			changedObjects.forEach(function (object) {
+			changedObjects.forEach((object) => {
 				if (!hasOwnProperty.call(object, '$loki'))
-					return self.removeAutoUpdateObserver(object);
+					return this.removeAutoUpdateObserver(object);
 				try {
-					self.update(object);
+					this.update(object);
 				} catch (err) {
 				}
 			});
@@ -254,6 +253,7 @@ export class Collection extends LokiEventEmitter {
 
 		this.observerCallback = observerCallback;
 
+		const self = this;
 		/*
 		 * This method creates a clone of the current status of an object and associates operation and collection name,
 		 * so the parent db can aggregate and generate a changes object for the entire db
@@ -271,9 +271,7 @@ export class Collection extends LokiEventEmitter {
 			self.changes = [];
 		}
 
-		this.getChanges = function () {
-			return self.changes;
-		};
+		this.getChanges = () => this.changes;
 
 		this.flushChanges = flushChanges;
 
@@ -349,29 +347,29 @@ export class Collection extends LokiEventEmitter {
 
 		setHandlers();
 
-		this.setChangesApi = function (enabled) {
-			self.disableChangesApi = !enabled;
+		this.setChangesApi = (enabled) => {
+			this.disableChangesApi = !enabled;
 			setHandlers();
 		};
 		/**
 		 * built-in events
 		 */
-		this.on('insert', function insertCallback(obj) {
+		this.on('insert', (obj) => {
 			insertHandler(obj);
 		});
 
-		this.on('update', function updateCallback(obj) {
+		this.on('update', (obj) => {
 			updateHandler(obj);
 		});
 
-		this.on('delete', function deleteCallback(obj) {
-			if (!self.disableChangesApi) {
-				createChange(self.name, 'R', obj);
+		this.on('delete', (obj) => {
+			if (!this.disableChangesApi) {
+				createChange(this.name, 'R', obj);
 			}
 		});
 
-		this.on('warning', function (warning) {
-			self.console.warn(warning);
+		this.on('warning', (warning) => {
+			this.console.warn(warning);
 		});
 		// for de-serialization purposes
 		flushChanges();
@@ -559,16 +557,14 @@ export class Collection extends LokiEventEmitter {
 		this.binaryIndices[property] = index;
 
 		const wrappedComparer =
-			(function (p, data) {
-				return function (a, b) {
-					const objAp = data[a][p], objBp = data[b][p];
-					if (objAp !== objBp) {
-						if (ltHelper(objAp, objBp, false)) return -1;
-						if (gtHelper(objAp, objBp, false)) return 1;
-					}
-					return 0;
-				};
-			})(property, this.data);
+			(((p, data) => (a, b) => {
+				const objAp = data[a][p], objBp = data[b][p];
+				if (objAp !== objBp) {
+					if (ltHelper(objAp, objBp, false)) return -1;
+					if (gtHelper(objAp, objBp, false)) return 1;
+				}
+				return 0;
+			}))(property, this.data);
 
 		index.values.sort(wrappedComparer);
 		index.dirty = false;
@@ -599,7 +595,7 @@ export class Collection extends LokiEventEmitter {
 
 		// if index already existed, (re)loading it will likely cause collisions, rebuild always
 		this.constraints.unique[field] = index = new UniqueIndex(field);
-		this.data.forEach(function (obj) {
+		this.data.forEach((obj) => {
 			index.set(obj);
 		});
 		return index;
@@ -828,8 +824,6 @@ export class Collection extends LokiEventEmitter {
 	 * @memberof Collection
 	 */
 	clear(options) {
-		const self = this;
-
 		options = options || {};
 
 		this.data = [];
@@ -855,9 +849,9 @@ export class Collection extends LokiEventEmitter {
 		else {
 			// clear binary indices
 			const keys = Object.keys(this.binaryIndices);
-			keys.forEach(function (biname) {
-				self.binaryIndices[biname].dirty = false;
-				self.binaryIndices[biname].values = [];
+			keys.forEach((biname) => {
+				this.binaryIndices[biname].dirty = false;
+				this.binaryIndices[biname].values = [];
 			});
 
 			// clear entire unique indices definition
@@ -867,8 +861,8 @@ export class Collection extends LokiEventEmitter {
 			};
 
 			// add definitions back
-			this.uniqueNames.forEach(function (uiname) {
-				self.ensureUniqueIndex(uiname);
+			this.uniqueNames.forEach((uiname) => {
+				this.ensureUniqueIndex(uiname);
 			});
 		}
 	}
@@ -896,14 +890,13 @@ export class Collection extends LokiEventEmitter {
 			this.startTransaction();
 			const arr = this.get(doc.$loki, true);
 
-			let // ref to existing obj
-				oldInternal;
+			// ref to existing obj
+			let oldInternal;
 
-			let // ref to new internal obj
-				newInternal;
+			// ref to new internal obj
+			let newInternal;
 
 			let position;
-			const self = this;
 
 			if (!arr) {
 				throw new Error('Trying to update a document not in collection.');
@@ -917,8 +910,8 @@ export class Collection extends LokiEventEmitter {
 
 			this.emit('pre-update', doc);
 
-			Object.keys(this.constraints.unique).forEach(function (key) {
-				self.constraints.unique[key].update(oldInternal, newInternal);
+			Object.keys(this.constraints.unique).forEach((key) => {
+				this.constraints.unique[key].update(oldInternal, newInternal);
 			});
 
 			// operate the update
@@ -1114,10 +1107,9 @@ export class Collection extends LokiEventEmitter {
 			const arr = this.get(doc.$loki, true),
 				// obj = arr[0],
 				position = arr[1];
-			const self = this;
-			Object.keys(this.constraints.unique).forEach(function (key) {
+			Object.keys(this.constraints.unique).forEach((key) => {
 				if (doc[key] !== null && typeof doc[key] !== 'undefined') {
-					self.constraints.unique[key].remove(doc[key]);
+					this.constraints.unique[key].remove(doc[key]);
 				}
 			});
 			// now that we can efficiently determine the data[] position of newly added document,
@@ -1647,12 +1639,8 @@ export class Collection extends LokiEventEmitter {
 	 * @memberof Collection
 	 */
 	by(field, value) {
-		let self;
 		if (value === undefined) {
-			self = this;
-			return function (value) {
-				return self.by(field, value);
-			};
+			return (value) => this.by(field, value);
 		}
 
 		const result = this.constraints.unique[field].get(value);
@@ -1978,9 +1966,7 @@ export class Collection extends LokiEventEmitter {
 	 * @memberof Collection
 	 */
 	extractNumerical(field) {
-		return this.extract(field).map(parseBase10).filter(Number).filter(function (n) {
-			return !(isNaN(n));
-		});
+		return this.extract(field).map(parseBase10).filter(Number).filter((n) => !(isNaN(n)));
 	}
 
 	/**
@@ -2009,7 +1995,7 @@ export class Collection extends LokiEventEmitter {
 	 */
 	mode(field) {
 		const dict = {}, data = this.extract(field);
-		data.forEach(function (obj) {
+		data.forEach((obj) => {
 			if (dict[obj]) {
 				dict[obj] += 1;
 			} else {

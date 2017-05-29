@@ -17,13 +17,9 @@ import {ltHelper, gtHelper, aeqHelper} from './helper';
 
 function containsCheckFn(a) {
 	if (typeof a === 'string' || Array.isArray(a)) {
-		return function (b) {
-			return a.indexOf(b) !== -1;
-		};
+		return (b) => a.indexOf(b) !== -1;
 	} else if (typeof a === 'object' && a !== null) {
-		return function (b) {
-			return hasOwnProperty.call(a, b);
-		};
+		return (b) => hasOwnProperty.call(a, b);
 	}
 	return null;
 }
@@ -507,11 +503,7 @@ export class Resultset {
 		}
 
 		const wrappedComparer =
-			(function (userComparer, data) {
-				return function (a, b) {
-					return userComparer(data[a], data[b]);
-				};
-			})(comparefun, this.collection.data);
+			(((userComparer, data) => (a, b) => userComparer(data[a], data[b])))(comparefun, this.collection.data);
 
 		this.filteredrows.sort(wrappedComparer);
 
@@ -555,11 +547,7 @@ export class Resultset {
 		}
 
 		const wrappedComparer =
-			(function (prop, desc, data) {
-				return function (a, b) {
-					return sortHelper(data[a][prop], data[b][prop], desc);
-				};
-			})(propname, isdesc, this.collection.data);
+			(((prop, desc, data) => (a, b) => sortHelper(data[a][prop], data[b][prop], desc)))(propname, isdesc, this.collection.data);
 
 		this.filteredrows.sort(wrappedComparer);
 
@@ -606,11 +594,7 @@ export class Resultset {
 		}
 
 		const wrappedComparer =
-			(function (props, data) {
-				return function (a, b) {
-					return compoundeval(props, data[a], data[b]);
-				};
-			})(properties, this.collection.data);
+			(((props, data) => (a, b) => compoundeval(props, data[a], data[b])))(properties, this.collection.data);
 
 		this.filteredrows.sort(wrappedComparer);
 
@@ -1191,12 +1175,10 @@ export class Resultset {
 		}
 
 		if (!mapFun) {
-			mapFun = function (left, right) {
-				return {
-					left: left,
-					right: right
-				};
-			};
+			mapFun = (left, right) => ({
+				left: left,
+				right: right
+			});
 		}
 
 		//Run map function over each object in the resultset

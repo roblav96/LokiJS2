@@ -2,10 +2,10 @@
 import {Loki as loki} from '../../../src/core/loki';
 import {LokiOps} from '../../../src/core/resultset';
 
-describe('Testing operators', function () {
+describe('Testing operators', () => {
 
 	let db, tree, res;
-	beforeEach(function () {
+	beforeEach(() => {
 		db = new loki('testOps'),
 			tree = db.addCollection('tree'),
 
@@ -80,7 +80,7 @@ describe('Testing operators', function () {
 			]);
 	});
 
-	it('$size works', function () {
+	it('$size works', () => {
 		res = tree
 			.chain()
 			.find({
@@ -91,14 +91,14 @@ describe('Testing operators', function () {
 	});
 });
 
-describe("Individual operator tests", function () {
+describe("Individual operator tests", () => {
 
 	let ops;
-	beforeEach(function () {
+	beforeEach(() => {
 		ops = LokiOps;
 	});
 
-	it('$ne op works as expected', function () {
+	it('$ne op works as expected', () => {
 		expect(ops.$ne(15, 20)).toEqual(true);
 
 		expect(ops.$ne(15, 15.0)).toEqual(false);
@@ -112,7 +112,7 @@ describe("Individual operator tests", function () {
 		expect(ops.$ne(0, NaN)).toEqual(true);
 	});
 
-	it('misc eq ops works as expected', function () {
+	it('misc eq ops works as expected', () => {
 		expect(ops.$aeq(1, 11)).toEqual(false);
 		expect(ops.$aeq(1, '1')).toEqual(true);
 		expect(ops.$aeq(undefined, null)).toEqual(true);
@@ -127,7 +127,7 @@ describe("Individual operator tests", function () {
 		expect(ops.$dteq(dt1, dt3)).toEqual(false);
 	});
 
-	it('$type op works as expected', function () {
+	it('$type op works as expected', () => {
 		expect(ops.$type('test', 'string')).toEqual(true);
 		expect(ops.$type(4, 'number')).toEqual(true);
 		expect(ops.$type({a: 1}, 'object')).toEqual(true);
@@ -141,14 +141,14 @@ describe("Individual operator tests", function () {
 		expect(ops.$type([1, 2], 'number')).toEqual(false);
 	});
 
-	it('$in op works as expected', function () {
+	it('$in op works as expected', () => {
 		expect(ops.$in(4, [1, 2, 3, 4])).toEqual(true);
 		expect(ops.$in(7, [1, 2, 3, 4])).toEqual(false);
 		expect(ops.$in("el", "hello")).toEqual(true);
 		expect(ops.$in("le", "hello")).toEqual(false);
 	});
 
-	it('$between op works as expected', function () {
+	it('$between op works as expected', () => {
 		expect(ops.$between(75, [5, 100])).toEqual(true);
 		expect(ops.$between(75, [75, 100])).toEqual(true);
 		expect(ops.$between(75, [5, 75])).toEqual(true);
@@ -157,7 +157,7 @@ describe("Individual operator tests", function () {
 		expect(ops.$between(null, [5, 100])).toEqual(false);
 	});
 
-	it('$between find works as expected', function () {
+	it('$between find works as expected', () => {
 		// test unindexed code path
 		let db = new loki('db');
 		let coll = db.addCollection('coll');
@@ -227,7 +227,7 @@ describe("Individual operator tests", function () {
 		expect(coll.find({count: {$between: [20, 60]}}).length).toEqual(0);
 	});
 
-	it('indexed $in find works as expected', function () {
+	it('indexed $in find works as expected', () => {
 		// test unindexed code path
 		const db = new loki('db');
 		const coll = db.addCollection('coll', {indices: ['count']});
@@ -242,7 +242,7 @@ describe("Individual operator tests", function () {
 		expect(results[1].count).toEqual(73);
 	});
 
-	it('ops work with mixed datatypes', function () {
+	it('ops work with mixed datatypes', () => {
 		const db = new loki('db');
 		const coll = db.addCollection('coll');
 

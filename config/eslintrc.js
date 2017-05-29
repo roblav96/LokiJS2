@@ -21,6 +21,7 @@ module.exports = {
         "semi": [
             "error",
             "always"
-        ]
+        ],
+			"arrow-parens": [2, "always"],
     }
 };

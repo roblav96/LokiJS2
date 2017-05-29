@@ -4,7 +4,7 @@
  *
  * A lightweight document oriented javascript database
  */
-(function (root, factory) {
+(((root, factory) => {
 	if (typeof define === 'function' && define.amd) {
 		// AMD. Register as an anonymous module.
 		define(['angular', 'lokijs'], factory);
@@ -20,7 +20,7 @@
 				root.thirdParty.loki : root.loki
 		);
 	}
-}(this, function (angular, lokijs) {
+})(this, (angular, lokijs) => {
 	const module = angular.module('lokijs', [])
 		.factory('Loki', Loki)
 		.service('Lokiwork', Lokiwork);
@@ -70,13 +70,13 @@
 		}
 
 		function deleteDocument(dbName, collName, doc) { //doc should be in {name:value} format
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				userDbPreference = dbName;
 				_getem('delete_doc', dbName, collName, doc)
-					.then(function (data) {
+					.then((data) => {
 						currentDoc = {};
 						resolve(data);
-					}, function (data) {
+					}, (data) => {
 						reject(data);
 					});
 			});
@@ -84,66 +84,66 @@
 
 
 		function insertItemInDoc(item) {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				_getem('insert_item_in_doc', currentDoc.dbName, currentDoc.collName, currentDoc.doc, "", item)
-					.then(function (data) {
+					.then((data) => {
 						resolve(data);
-					}, function (data) {
+					}, (data) => {
 						reject(data);
 					});
 			});
 		}
 
 		function deleteCurrentDoc() {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				_getem('delete_current_doc')
-					.then(function (data) {
+					.then((data) => {
 						resolve(data);
-					}, function (data) {
+					}, (data) => {
 						reject(data);
 					});
 			});
 		}
 
 		function addDocument(dbName, collName, newDoc) {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				userDbPreference = dbName;
 				_getem('create_doc', dbName, collName, "", "", newDoc)
-					.then(function (data) {
+					.then((data) => {
 						currentDoc.dbName = dbName;
 						currentDoc.collName = collName;
 						currentDoc.doc = data;
 						currentDoc.lokiNum = data[0].$loki;
 						resolve(data[0]);
-					}, function (data) {
+					}, (data) => {
 						reject(data);
 					});
 			});
 		}
 
 		function setCurrentDoc(dbName, collName, docName) {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				userDbPreference = dbName;
 				_getem('set_doc', dbName, collName, docName)
-					.then(function (data) {
+					.then((data) => {
 						currentDoc.dbName = dbName;
 						currentDoc.collName = collName;
 						currentDoc.doc = data;
 						currentDoc.lokiNum = data[0].$loki;
 						resolve(data[0]);
-					}, function (data) {
+					}, (data) => {
 						reject(data);
 					});
 			});
 		}
 
 		function updateCurrentDoc(thekey, thevalue) {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				if (currentDoc) {
 					_getem('update_current_doc', currentDoc.dbName, currentDoc.collName, currentDoc.doc, thekey, thevalue)
-						.then(function (data) {
+						.then((data) => {
 							resolve(data[0]);
-						}, function (data) {
+						}, (data) => {
 							reject(data);
 						});
 				} else {
@@ -153,13 +153,13 @@
 		}
 
 		function updateDoc(dbName, collName, docName, thekey, thevalue) {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				userDbPreference = dbName;
 				if (currentDoc) {
 					_getem('update_doc', dbName, collName, docName, thekey, thevalue)
-						.then(function (data) {
+						.then((data) => {
 							resolve(data[0]);
-						}, function (data) {
+						}, (data) => {
 							reject(data);
 						});
 				} else {
@@ -169,83 +169,83 @@
 		}
 
 		function getDoc(dbName, collName, docName) {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				userDbPreference = dbName;
 				_getem('get_doc', dbName, collName, docName)
-					.then(function (data) {
+					.then((data) => {
 						currentDoc.dbName = dbName;
 						currentDoc.collName = collName;
 						currentDoc.doc = data;
 						currentDoc.lokiNum = data[0].$loki;
 						resolve(data[0]);
-					}, function (data) {
+					}, (data) => {
 						reject(data);
 					});
 			});
 		}
 
 		function getCollection(dbName, collName) {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				userDbPreference = dbName;
 				_getem('get_collection', dbName, collName)
-					.then(function (data) {
+					.then((data) => {
 						currentColl.dbName = dbName;
 						currentColl.collName = collName;
 						resolve(data);
-					}, function (data) {
+					}, (data) => {
 						reject(data);
 					});
 			});
 		}
 
 		function removeCollection(dbName, collName) {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				userDbPreference = dbName;
 				_getem('remove_collection', dbName, collName)
-					.then(function (data) {
+					.then((data) => {
 						currentColl = {};
 						resolve(data);
-					}, function (data) {
+					}, (data) => {
 						reject(data);
 					});
 			});
 		}
 
 		function addCollection(collData) {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				const dbobj = breakdown_components(collData);
 				userDbPreference = collData[dbobj.db];
 				_getem('add_collection', userDbPreference, '', '', '', collData)
-					.then(function (data) {
+					.then((data) => {
 						currentColl.dbName = userDbPreference;
 						resolve(data);
-					}, function (data) {
+					}, (data) => {
 						reject(data);
 					});
 			});
 		}
 
 		function _getem(operation, dbName, collName, docName, thekey, thevalue) {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				if (db) {
 					if (db.filename === dbName) {
 						getdata();
 					} else {
 						loadDb(dbName)
-							.then(function () {
+							.then(() => {
 								getdata();
 							});
 					}
 				} else {
 					if (statesChecked) {
 						loadDb(dbName)
-							.then(function () {
+							.then(() => {
 								getdata();
 							});
 					} else {
-						checkStates().then(function () {
+						checkStates().then(() => {
 							getdata();
-						}, function (data) {
+						}, (data) => {
 							reject(data);
 						});
 					}
@@ -321,7 +321,7 @@
 						db.loadDatabase(dbName);
 						db.removeCollection(collName);
 						//coll = db.getCollection(collName);
-						db.save(function () {
+						db.save(() => {
 							resolve('collection deleted');
 						});
 					} else if (operation === 'add_collection') {
@@ -333,7 +333,7 @@
 							items.insert(thevalue[dbobj.coll_array[w].docs]);
 						}
 
-						db.save(function () {
+						db.save(() => {
 							resolve('collection(s) added');
 						});
 
@@ -341,7 +341,7 @@
 						db.loadDatabase(dbName);
 						const coll3 = db.getCollection(collName);
 						coll3.insert(thevalue);
-						db.save(function () {
+						db.save(() => {
 							const found = coll3.find({
 								name: thevalue.name
 							});
@@ -374,7 +374,7 @@
 		}
 
 		function closeAllDbs() {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				let current = 0;
 				for (let x = 0; x < lokidbs.length; x++) {
 					current++;
@@ -387,7 +387,7 @@
 		}
 
 		function closeDb(databaseName) {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 
 				for (let x = 0; x < lokidbs.length; x++) {
 					if (lokidbs.filename === databaseName) {
@@ -402,13 +402,13 @@
 
 
 		function checkStates() {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				if (dbitems.length === 0) {
-					initialiseAll().then(function () {
+					initialiseAll().then(() => {
 						console.log('had to initialize all dbs');
 						statesChecked = true;
 						resolve();
-					}, function (data) {
+					}, (data) => {
 						reject(data);
 					});
 				} else {
@@ -419,7 +419,7 @@
 		}
 
 		function firstFewItemsOfDbList() {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				for (let x = 0; x >= 0; x++) {
 					if ($injector.has('json' + (x + 1))) {
 						const item = {};
@@ -448,9 +448,9 @@
 		}
 
 		function initialiseDbList() {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				firstFewItemsOfDbList()
-					.then(function () {
+					.then(() => {
 						if (userPrefJsonFile === 0) {
 							reject('Oops!, you didn\'t specify any starting document');
 						}
@@ -486,9 +486,9 @@
 		let current_iteration = 1;
 
 		function initialiseAll() {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				initialiseDbList()
-					.then(function () {
+					.then(() => {
 
 						function iterate_me() {
 							if ($injector.has('json' + dbitems[current_iteration - 1].json)) {
@@ -498,7 +498,7 @@
 								const set = angular.fromJson(setting);
 								still_running = true;
 								initiateDb(set)
-									.then(function () {
+									.then(() => {
 										//lokidbs.push(angular.copy(db));
 										if (!doesDBAlreadyExistInArray(db.filename)) {
 											lokidbs.push(angular.copy(db));
@@ -516,7 +516,7 @@
 						}
 
 						iterate_me();
-					}, function (data) {
+					}, (data) => {
 						reject(data);
 					});
 			});
@@ -543,7 +543,7 @@
 		}
 
 		function loadDb(databaseName) {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				for (let x = 0; x < lokidbs.length; x++) {
 					if (lokidbs[x].filename === databaseName) {
 						db = lokidbs[x];
@@ -555,7 +555,7 @@
 
 
 		function initiateDb(database) {
-			return $q(function (resolve, reject) {
+			return $q((resolve, reject) => {
 				const dbobj = breakdown_components(database);
 				let db_does_exist = false;
 				if (dbExists(database[dbobj.db])) {

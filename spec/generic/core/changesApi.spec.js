@@ -1,8 +1,8 @@
 /* global describe, it, expect */
 import {Loki as loki} from '../../../src/core/loki';
 
-describe('changesApi', function () {
-	it('does what it says on the tin', function () {
+describe('changesApi', () => {
+	it('does what it says on the tin', () => {
 		const db = new loki(),
 			// gordian = require('gordian'),
 			// suite = new gordian('testEvents'),

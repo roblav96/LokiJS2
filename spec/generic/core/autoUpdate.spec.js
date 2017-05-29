@@ -1,9 +1,9 @@
 /* global describe, it, expect */
 import {Loki as loki} from '../../../src/core/loki';
 
-describe('autoupdate', function () {
+describe('autoupdate', () => {
 
-	it('auto updates inserted documents', function (done) {
+	it('auto updates inserted documents', done => {
 
 		if (typeof Object.observe !== 'function') {
 			done();
@@ -24,7 +24,7 @@ describe('autoupdate', function () {
 		});
 
 		function change1() {
-			coll.on('update', function (target) {
+			coll.on('update', target => {
 				expect(target).toBe(doc);
 
 				change2();
@@ -33,7 +33,7 @@ describe('autoupdate', function () {
 		}
 
 		function change2() {
-			coll.on('error', function (err) {
+			coll.on('error', err => {
 				expect(err).toEqual(new Error('Duplicate key for property name: ' + doc.name));
 				done();
 			});
@@ -43,7 +43,7 @@ describe('autoupdate', function () {
 		change1();
 	});
 
-	it('auto updates documents loaded from storage', function (done) {
+	it('auto updates documents loaded from storage', done => {
 
 		if (typeof Object.observe !== 'function') {
 			done();
@@ -73,7 +73,7 @@ describe('autoupdate', function () {
 		expect(doc).toEqual(originalDocs[1]);
 
 		function change1() {
-			coll.on('update', function (target) {
+			coll.on('update', target => {
 				expect(target).toBe(doc);
 
 				change2();
@@ -82,7 +82,7 @@ describe('autoupdate', function () {
 		}
 
 		function change2() {
-			coll.on('error', function (err) {
+			coll.on('error', err => {
 				expect(err).toEqual(new Error('Duplicate key for property name: ' + doc.name));
 				done();
 			});

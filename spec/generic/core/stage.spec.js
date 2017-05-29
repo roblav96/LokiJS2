@@ -1,10 +1,10 @@
 /* global describe, it, expect */
 import {Loki as loki} from '../../../src/core/loki';
 
-describe('Staging and commits', function () {
+describe('Staging and commits', () => {
 	let db, directors, films;
 
-	beforeEach(function () {
+	beforeEach(() => {
 		db = new loki('testJoins', {
 			persistenceMethod: null
 		});
@@ -26,7 +26,7 @@ describe('Staging and commits', function () {
 		}]);
 	});
 
-	it('work', function () {
+	it('work', () => {
 
 		const stageName = 'tentative directors', newDirectorsName = 'Joel and Ethan Cohen',
 			message = 'Edited Cohen brothers name';

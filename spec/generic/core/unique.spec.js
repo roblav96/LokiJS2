@@ -1,9 +1,9 @@
 /* global describe, it, expect */
 import {Loki as loki} from '../../../src/core/loki';
 
-describe('Constraints', function () {
+describe('Constraints', () => {
 
-	it('should retrieve records with by()', function () {
+	it('should retrieve records with by()', () => {
 		const db = new loki();
 		const coll = db.addCollection('users', {
 			unique: ['username']
@@ -23,7 +23,7 @@ describe('Constraints', function () {
 
 		const joe = coll.by('username', 'joe');
 		joe.username = 'jack';
-		expect(function () {
+		expect(() => {
 			coll.update(joe);
 		}).toThrow(new Error('Duplicate key for property username: ' + joe.username));
 		joe.username = 'jim';
@@ -31,7 +31,7 @@ describe('Constraints', function () {
 		expect(byUsername('jim')).toEqual(joe);
 	});
 
-	it('should create a unique index', function () {
+	it('should create a unique index', () => {
 		const db = new loki();
 		const coll2 = db.addCollection('moreusers');
 		coll2.insert({
@@ -43,7 +43,7 @@ describe('Constraints', function () {
 		coll2.ensureUniqueIndex('name');
 	});
 
-	it('should not add record with null index', function () {
+	it('should not add record with null index', () => {
 		const db = new loki();
 		const coll3 = db.addCollection('nullusers', {
 			unique: ['username']
@@ -60,7 +60,7 @@ describe('Constraints', function () {
 		expect(Object.keys(coll3.constraints.unique.username.keyMap).length).toEqual(1);
 	});
 
-	it('should not throw an error id multiple nulls are added', function () {
+	it('should not throw an error id multiple nulls are added', () => {
 		const db = new loki();
 		const coll4 = db.addCollection('morenullusers', {
 			unique: ['username']
@@ -80,7 +80,7 @@ describe('Constraints', function () {
 		expect(Object.keys(coll4.constraints.unique.username.keyMap).length).toEqual(1);
 	});
 
-	it('coll.clear should affect unique indices correctly', function () {
+	it('coll.clear should affect unique indices correctly', () => {
 		let db = new loki();
 		let coll = db.addCollection('users', {unique: ['username']});
 
