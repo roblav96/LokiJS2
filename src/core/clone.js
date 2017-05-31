@@ -36,7 +36,7 @@ export function cloneObjectArray(objarray, method) {
 	let i;
 	const result = [];
 
-	if (method == "parse-stringify") {
+	if (method === "parse-stringify") {
 		return clone(objarray, method);
 	}
 

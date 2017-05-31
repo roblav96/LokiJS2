@@ -1,8 +1,7 @@
 var path = require('path');
 
 module.exports = function (config) {
-	config.set({
-		browsers: ['Chrome'],
+	var configuration = {
 		files: [
 			{pattern: '../spec/generic/**/*.spec.js', watched: false},
 			{pattern: '../spec/web/**/*.spec.js', watched: false},
@@ -25,6 +24,15 @@ module.exports = function (config) {
 			type: 'html',
 			dir: '../reports/coverage/'
 		},
+		
+		browsers: ['Chrome'],
+		// Launcher for travis.
+		customLaunchers: {
+      Chrome_travis_ci: {
+        base: 'Chrome',
+        flags: ['--no-sandbox']
+      }
+    },
 
 		webpack: {
 			externals: {
@@ -42,5 +50,10 @@ module.exports = function (config) {
 			'karma-jasmine-matchers',
 			'karma-webpack'
 		],
-	});
+	};
+	
+	if(process.env.TRAVIS){
+    configuration.browsers = ['Chrome_travis_ci'];
+  }
+  config.set(configuration);
 };
