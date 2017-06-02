@@ -314,7 +314,7 @@ export class MatchQuery extends BaseQuery {
 		if (!Utils.isNumber(minShouldMatch)) {
 			throw TypeError("Minimum should match must be a number or a string.");
 		}
-		if (this._data.hasOwnProperty("operator") && this._data.operator === "and") {
+		if (this._data.operator !== undefined && this._data.operator === "and") {
 			throw SyntaxError("Match query with \"and\" operator does not support minimum should match.");
 		}
 		this._data.minimum_should_match = minShouldMatch;
@@ -332,7 +332,7 @@ export class MatchQuery extends BaseQuery {
 			throw SyntaxError("Unknown operator.");
 		}
 		this._data.operator = op;
-		if (this._data.hasOwnProperty("minimum_should_match") && this._data.operator === "and") {
+		if (this._data.minimum_should_match !== undefined && this._data.operator === "and") {
 			throw SyntaxError("Match query with \"and\" operator does not support minimum should match.");
 		}
 		return this;

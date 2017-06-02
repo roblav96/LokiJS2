@@ -207,7 +207,7 @@ export class Tokenizer {
 		let tokenizer = new Tokenizer();
 
 		if (funcTok !== undefined && funcTok instanceof Tokenizer) {
-			if (serialized.hasOwnProperty("splitter")) {
+			if (serialized.splitter !== undefined) {
 				let splitter = funcTok.getSplitter();
 				if (serialized.splitter !== splitter[0]) {
 					throw Error("Splitter function not found.");
@@ -223,14 +223,14 @@ export class Tokenizer {
 				tokenizer.add(labelFunc[0], labelFunc[1]);
 			}
 		} else {
-			if (serialized.hasOwnProperty("splitter")) {
-				if (!funcTok.splitters.hasOwnProperty(serialized.splitter)) {
+			if (serialized.splitter !== undefined) {
+				if (funcTok.splitters[serialized.splitter] === undefined) {
 					throw Error("Splitter function not found.");
 				}
 				tokenizer.setSplitter(serialized.splitter, funcTok.splitters[serialized.splitter]);
 			}
 			for (let i = 0; i < serialized.tokenizers.length; i++) {
-				if (!funcTok.tokenizers.hasOwnProperty(serialized.tokenizers[i])) {
+				if (funcTok.tokenizers[serialized.tokenizers[i]] === undefined) {
 					throw Error("Tokenizer function not found.");
 				}
 				tokenizer.add(serialized.tokenizers[i], funcTok.tokenizers[serialized.tokenizers[i]]);

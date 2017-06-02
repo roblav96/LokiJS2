@@ -17,7 +17,7 @@ export class IndexSearcher {
 		let docResults = this._recursive(query.query, true);
 
 		// Final scoring.
-		let finalScoring = query.hasOwnProperty("final_scoring") ? query.final_scoring : true;
+		let finalScoring = query.final_scoring !== undefined ? query.final_scoring : true;
 		if (finalScoring) {
 			return this._scorer.finalScore(query, docResults);
 		}
@@ -30,13 +30,13 @@ export class IndexSearcher {
 
 	_recursive(query, doScoring) {
 		let docResults = {};
-		let boost = query.hasOwnProperty('boost') ? query.boost : 1;
-		let fieldName = query.hasOwnProperty("field") ? query.field : null;
-		let enableScoring = query.hasOwnProperty("enable_scoring") ? query.enable_scoring : false;
+		let boost = query.boost !== undefined ? query.boost : 1;
+		let fieldName = query.field !== undefined ? query.field : null;
+		let enableScoring = query.enable_scoring !== undefined ? query.enable_scoring : false;
 
 		let root = null;
 		let tokenizer = null;
-		if (this._invIdxs.hasOwnProperty(fieldName)) {
+		if (this._invIdxs[fieldName] !== undefined) {
 			root = this._invIdxs[fieldName].root;
 			tokenizer = this._invIdxs[fieldName].tokenizer;
 		}
@@ -44,14 +44,14 @@ export class IndexSearcher {
 		switch (query.type) {
 			case "bool": {
 				docResults = null;
-				if (query.hasOwnProperty("must")) {
+				if (query.must !== undefined) {
 					docResults = this._getUnique(query.must.values, doScoring, docResults);
 				}
-				if (query.hasOwnProperty("filter")) {
+				if (query.filter !== undefined) {
 					docResults = this._getUnique(query.filter.values, false, docResults);
 				}
 
-				if (query.hasOwnProperty("should")) {
+				if (query.should !== undefined) {
 					let shouldDocs = this._getAll(query.should.values, doScoring);
 
 					let empty = false;
@@ -62,7 +62,7 @@ export class IndexSearcher {
 
 					let msm = 1;
 					// TODO: Enable percent and ranges.
-					if (query.hasOwnProperty("minimum_should_match")) {
+					if (query.minimum_should_match !== undefined) {
 						msm = query.minimum_should_match;
 						let shouldLength = query.should.values.length;
 						if (msm <= -1) {
@@ -77,7 +77,7 @@ export class IndexSearcher {
 					let docs = Object.keys(shouldDocs);
 					for (let i = 0, docId; i < docs.length, docId = docs[i]; i++) {
 						if (shouldDocs[docId].length >= msm) {
-							if (docResults.hasOwnProperty(docId)) {
+							if (docResults[docId] !== undefined) {
 								docResults[docId].push(...shouldDocs[docId]);
 							} else if (empty) {
 								docResults[docId] = shouldDocs[docId];
@@ -87,12 +87,12 @@ export class IndexSearcher {
 						}
 					}
 				}
-				if (query.hasOwnProperty("not")) {
+				if (query.not !== undefined) {
 					let notDocs = this._getAll(query.not.values, false);
 					// Remove all docs.
 					let docs = Object.keys(notDocs);
 					for (let i = 0, docId; i < docs.length, docId = docs[i]; i++) {
-						if (docResults.hasOwnProperty(docId)) {
+						if (docResults[docId] !== undefined) {
 							delete docResults[docId];
 						}
 					}
@@ -163,11 +163,11 @@ export class IndexSearcher {
 			}
 			case "match": {
 				let terms = tokenizer.tokenize(query.value);
-				let operator = query.hasOwnProperty("operator") ? query.operator : "or";
+				let operator = query.operator !== undefined ? query.operator : "or";
 
 				let tmpQuery = new QueryBuilder().bool();
 				if (operator === "or") {
-					if (query.hasOwnProperty("minimum_should_match")) {
+					if (query.minimum_should_match !== undefined) {
 						tmpQuery = tmpQuery.minimumShouldMatch(query.minimum_should_match);
 					}
 					// Build a should query.
@@ -178,8 +178,8 @@ export class IndexSearcher {
 				}
 				tmpQuery = tmpQuery.boost(boost);
 
-				if (query.hasOwnProperty("fuzziness")) {
-					let prefixLength = query.hasOwnProperty("prefix_length") ? query.prefix_length : 2;
+				if (query.fuzziness !== undefined) {
+					let prefixLength = query.prefix_length !== undefined ? query.prefix_length : 2;
 					// Add each fuzzy.
 					for (let i = 0; i < terms.length; i++) {
 						tmpQuery = tmpQuery.fuzzy(fieldName, terms[i]).fuzziness(query.fuzziness).prefixLength(prefixLength);
@@ -219,7 +219,7 @@ export class IndexSearcher {
 
 			let docs = Object.keys(docResults);
 			for (let j = 0, docId; j < docs.length, docId = docs[j]; j++) {
-				if (!currDocs.hasOwnProperty(docId)) {
+				if (currDocs[docId] === undefined) {
 					delete docResults[docId];
 				} else {
 					docResults[docId].push(...currDocs[docId]);
@@ -235,7 +235,7 @@ export class IndexSearcher {
 			let currDocs = this._recursive(values[i], doScoring);
 			let docs = Object.keys(currDocs);
 			for (let j = 0, docId; j < docs.length, docId = docs[j]; j++) {
-				if (!docResults.hasOwnProperty(docId)) {
+				if (docResults[docId] === undefined) {
 					docResults[docId] = currDocs[docId];
 				} else {
 					docResults[docId].push(...currDocs[docId]);
@@ -250,7 +250,7 @@ export class IndexSearcher {
 class FuzzySearch {
 	constructor(query) {
 		this._fuzzy = query.value;
-		this._fuzziness = query.hasOwnProperty('fuzziness') ? query.fuzziness : "AUTO";
+		this._fuzziness = query.fuzziness !== undefined ? query.fuzziness : "AUTO";
 		if (this._fuzziness === "AUTO") {
 			if (this._fuzzy.length <= 2) {
 				this._fuzziness = 0;
@@ -260,7 +260,7 @@ class FuzzySearch {
 				this._fuzziness = 2;
 			}
 		}
-		this._prefixLength = query.hasOwnProperty('prefix_length') ? query.prefix_length : 2;
+		this._prefixLength = query.prefix_length !== undefined ? query.prefix_length : 2;
 	}
 
 	/**
@@ -276,7 +276,7 @@ class FuzzySearch {
 		let j;
 		let prev;
 		let val;
-        // swap to save some memory O(min(a,b)) instead of O(a)
+		// swap to save some memory O(min(a,b)) instead of O(a)
 		if (a.length > b.length) {
 			tmp = a;
 			a = b;
@@ -284,12 +284,12 @@ class FuzzySearch {
 		}
 
 		const row = Array(a.length + 1);
-        // init the row
+		// init the row
 		for (i = 0; i <= a.length; i++) {
 			row[i] = i;
 		}
 
-        // fill in the rest
+		// fill in the rest
 		for (i = 1; i <= b.length; i++) {
 			prev = i;
 			for (j = 1; j <= a.length; j++) {
@@ -349,7 +349,7 @@ class FuzzySearch {
 			let treeTerms = treeStack.pop();
 
 			// Compare tokens if they are in near distance.
-			if (root.hasOwnProperty('df') && Math.abs(fuzzy.length - treeTerms.length) <= this._fuzziness) {
+			if (root.df !== undefined && Math.abs(fuzzy.length - treeTerms.length) <= this._fuzziness) {
 				const distance = this.levenshtein_distance(fuzzy, treeTerms);
 				if (distance <= this._fuzziness) {
 					let term = pre + treeTerms;
@@ -410,7 +410,7 @@ class WildcardSearch {
 		}
 
 		if (idx === this._wildcard.length) {
-			if (root.hasOwnProperty('df')) {
+			if (root.df !== undefined) {
 				this._result.push({index: root, term});
 			}
 			return;

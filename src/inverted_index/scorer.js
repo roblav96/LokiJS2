@@ -9,7 +9,7 @@ export class Scorer {
 	}
 
 	prepare(fieldName, boost, termIdx, doScoring, docResults = {}, term = null) {
-		if (termIdx === null || !termIdx.hasOwnProperty('docs')) {
+		if (termIdx === null || termIdx.docs === undefined) {
 			return null;
 		}
 
@@ -17,7 +17,7 @@ export class Scorer {
 		let docIds = Object.keys(termIdx.docs);
 		for (let j = 0; j < docIds.length; j++) {
 			let docId = docIds[j];
-			if (!docResults.hasOwnProperty(docId)) {
+			if (docResults[docId] === undefined) {
 				docResults[docId] = [];
 			}
 
@@ -42,7 +42,7 @@ export class Scorer {
 	}
 
 	scoreConstant(boost, docId, docResults = {}) {
-		if (!docResults.hasOwnProperty(docId)) {
+		if (docResults[docId] === undefined) {
 			docResults[docId] = [];
 		}
 		docResults[docId].push({type: "constant", value: 1, boost});
@@ -121,7 +121,7 @@ export class Scorer {
 	}
 
 	_getCache(fieldName) {
-		if (!this._cache.hasOwnProperty(fieldName)) {
+		if (this._cache[fieldName] === undefined) {
 			let avgFieldLength = this._invIdxs[fieldName].totalFieldLength / this._invIdxs[fieldName].documentCount;
 			this._cache[fieldName] = {idfs: {}, avgFieldLength};
 		}
@@ -137,7 +137,7 @@ export class Scorer {
 	 */
 	_idf(fieldName, docFreq) {
 		let cache = this._getCache(fieldName);
-		if (cache.idfs.hasOwnProperty(String(docFreq))) {
+		if (cache.idfs[docFreq] !== undefined) {
 			return cache.idfs[docFreq];
 		}
 		return cache.idfs[docFreq] = Math.log(1 + (this._invIdxs[fieldName].documentCount - docFreq + 0.5) / (docFreq + 0.5));

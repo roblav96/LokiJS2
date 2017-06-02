@@ -49,7 +49,7 @@ export class InvertedIndex {
 	 * @param {number} docId - the doc id of the field
 	 */
 	insert(field, docId) {
-		if (this._docStore.hasOwnProperty(docId)) {
+		if (this._docStore[docId] !== undefined) {
 			throw Error('Field already added.');
 		}
 
@@ -83,7 +83,7 @@ export class InvertedIndex {
 			let branch = this._root;
 			for (let i = 0; i < term.length; i++) {
 				let c = term[i];
-				if (!branch.hasOwnProperty(c)) {
+				if (branch[c] === undefined) {
 					let child = {};
 					Object.defineProperties(child, {
 						parent: {enumerable: false, configurable: true, writable: true, value: branch}
@@ -93,7 +93,7 @@ export class InvertedIndex {
 				branch = branch[c];
 			}
 			// Add term info to index leaf.
-			if (!branch.hasOwnProperty('docs')) {
+			if (branch.docs === undefined) {
 				branch.docs = {};
 				branch.df = 0;
 			}
@@ -110,7 +110,7 @@ export class InvertedIndex {
 	 * @param {number} docId - the document.
 	 */
 	remove(docId) {
-		if (!this._docStore.hasOwnProperty(String(docId))) {
+		if (this._docStore[docId] === undefined) {
 			return;
 		}
 		let docStore = this._docStore[docId];
@@ -162,7 +162,7 @@ export class InvertedIndex {
 						}
 					}
 					index = parent;
-				} while (index.hasOwnProperty('parent') && keys.length === 1);
+				} while (index.parent !== undefined && keys.length === 1);
 			}
 		}
 	}
@@ -179,7 +179,7 @@ export class InvertedIndex {
 			return null;
 		}
 		for (let i = start; i < term.length; i++) {
-			if (!root.hasOwnProperty(term[i])) {
+			if (root[term[i]] === undefined) {
 				return null;
 			}
 			root = root[term[i]];
@@ -216,7 +216,7 @@ export class InvertedIndex {
 			let root = stack.pop();
 			let treeTermn = treeStack.pop();
 
-			if (root.hasOwnProperty('df')) {
+			if (root.df !== undefined) {
 				termIndices.push({index: root, term: treeTermn});
 			}
 
@@ -282,7 +282,7 @@ export class InvertedIndex {
 					for (let j = 0; j < docIds.length; j++) {
 						// Get document store at specific document/field.
 						let ref = self._docStore[docIds[j]];
-						if (!ref.hasOwnProperty('termRefs')) {
+						if (ref.termRefs === undefined) {
 							Object.defineProperties(ref, {
 								termRefs: {enumerable: false, configurable: true, writable: true, value: []}
 							});

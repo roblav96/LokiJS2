@@ -24,11 +24,11 @@ export class FullTextSearch {
 				let field = fields[i];
 				let name = Utils.asString(field.name, TypeError('Field name needs to be a string.'));
 
-				let store = field.hasOwnProperty("store") ?
+				let store = field.store !== undefined ?
 					Utils.asBoolean(field.store, TypeError("Field store flag needs to be a boolean")) : true;
 
 				let tokenizer = null;
-				if (field.hasOwnProperty("tokenizer")) {
+				if (field.tokenizer !== undefined) {
 					if (!(field.tokenizer instanceof Tokenizer)) {
 						throw new TypeError("Field tokenizer needs to be a instance of tokenizer.");
 					}
@@ -47,13 +47,13 @@ export class FullTextSearch {
 	}
 
 	addDocument(doc) {
-		if (!doc.hasOwnProperty('$loki')) {
+		if (doc.$loki === undefined) {
 			throw new Error('Document is not stored in the collection.');
 		}
 
 		let fieldNames = Object.keys(doc);
 		for (let i = 0, fieldName; i < fieldNames.length, fieldName = fieldNames[i]; i++) {
-			if (this._invIdxs.hasOwnProperty(fieldName)) {
+			if (this._invIdxs[fieldName] !== undefined) {
 				this._invIdxs[fieldName].insert(doc[fieldName], doc.$loki);
 			}
 		}
@@ -63,7 +63,7 @@ export class FullTextSearch {
 	}
 
 	removeDocument(doc) {
-		if (!doc.hasOwnProperty('$loki')) {
+		if (doc.$loki === undefined) {
 			throw new Error('Document is not stored in the collection.');
 		}
 
