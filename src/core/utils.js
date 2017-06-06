@@ -22,7 +22,7 @@ function resolveTransformObject(subObj, params, depth) {
 	for (prop in subObj) {
 		if (typeof subObj[prop] === 'string' && subObj[prop].indexOf("[%lktxp]") === 0) {
 			pname = subObj[prop].substring(8);
-			if (params.hasOwnProperty(pname)) {
+			if (params[pname] !== undefined) {
 				subObj[prop] = params[pname];
 			}
 		} else if (typeof subObj[prop] === "object") {

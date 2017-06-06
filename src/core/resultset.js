@@ -266,7 +266,7 @@ function compoundeval(properties, obj1, obj2) {
 function dotSubScan(root, paths, fun, value, poffset) {
 	const pathOffset = poffset || 0;
 	const path = paths[pathOffset];
-	if (root === undefined || root === null || !hasOwnProperty.call(root, path)) {
+	if (root === undefined || root === null || root[path] === undefined) {
 		return false;
 	}
 
@@ -357,10 +357,9 @@ export class Resultset {
 			this.filteredrows = this.collection.prepareFullDocIndex();
 		}
 
-		const rscopy = new Resultset(this.collection);
-		rscopy.filteredrows = this.filteredrows.slice(0, qty);
-		rscopy.filterInitialized = true;
-		return rscopy;
+		this.filteredrows =	this.filteredrows.slice(0, qty);
+		this.filterInitialized = true;
+		return this;
 	}
 
 	/**
@@ -376,10 +375,9 @@ export class Resultset {
 			this.filteredrows = this.collection.prepareFullDocIndex();
 		}
 
-		const rscopy = new Resultset(this.collection);
-		rscopy.filteredrows = this.filteredrows.slice(pos);
-		rscopy.filterInitialized = true;
-		return rscopy;
+		this.filteredrows =	this.filteredrows.slice(pos);
+		this.filterInitialized = true;
+		return this;
 	}
 
 	/**
@@ -422,7 +420,7 @@ export class Resultset {
 
 		// if transform is name, then do lookup first
 		if (typeof transform === 'string') {
-			if (this.collection.transforms.hasOwnProperty(transform)) {
+			if (this.collection.transforms[transform] !== undefined) {
 				transform = this.collection.transforms[transform];
 			}
 		}
@@ -530,7 +528,7 @@ export class Resultset {
 		// if this has no filters applied, just we need to populate filteredrows first
 		if (!this.filterInitialized && this.filteredrows.length === 0) {
 			// if we have a binary index and no other filters applied, we can use that instead of sorting (again)
-			if (this.collection.binaryIndices.hasOwnProperty(propname)) {
+			if (this.collection.binaryIndices[propname] !== undefined) {
 				// make sure index is up-to-date
 				this.collection.ensureIndex(propname);
 				// copy index values into filteredrows
@@ -715,7 +713,7 @@ export class Resultset {
 				obj[p] = queryObject[p];
 				filters.push(obj);
 
-				if (hasOwnProperty.call(queryObject, p)) {
+				if (queryObject[p] !== undefined) {
 					property = p;
 					queryObjectOp = queryObject[p];
 				}
@@ -754,7 +752,7 @@ export class Resultset {
 			value = queryObjectOp;
 		} else if (typeof queryObjectOp === 'object') {
 			for (key in queryObjectOp) {
-				if (hasOwnProperty.call(queryObjectOp, key)) {
+				if (queryObjectOp[key] !== undefined) {
 					operator = key;
 					value = queryObjectOp[key];
 					break;
@@ -1172,7 +1170,6 @@ export class Resultset {
 		rightDataLength = rightData.length;
 
 		//construct a lookup table
-
 		for (let i = 0; i < rightDataLength; i++) {
 			key = rightKeyisFunction ? rightJoinKey(rightData[i]) : rightData[i][rightJoinKey];
 			joinMap[key] = rightData[i];
@@ -1191,7 +1188,7 @@ export class Resultset {
 			result.push(mapFun(leftData[j], joinMap[key] || {}));
 		}
 
-		//return return a new resultset with no filters
+		//return a new resultset with no filters
 		this.collection = new Collection('joinData');
 		this.collection.insert(result);
 		this.filteredrows = [];

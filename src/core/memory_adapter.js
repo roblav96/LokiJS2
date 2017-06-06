@@ -14,11 +14,11 @@ export class LokiMemoryAdapter {
 		this.hashStore = {};
 		this.options = options || {};
 
-		if (!this.options.hasOwnProperty('asyncResponses')) {
+		if (this.options.asyncResponses === undefined) {
 			this.options.asyncResponses = false;
 		}
 
-		if (!this.options.hasOwnProperty('asyncTimeout')) {
+		if (this.options.asyncTimeout === undefined) {
 			this.options.asyncTimeout = 50; // 50 ms default
 		}
 	}
@@ -35,7 +35,7 @@ export class LokiMemoryAdapter {
 		if (this.options.asyncResponses) {
 			return new Promise((resolve, reject) => {
 				setTimeout(() => {
-					if (this.hashStore.hasOwnProperty(dbname)) {
+					if (this.hashStore[dbname] !== undefined) {
 						resolve(this.hashStore[dbname].value);
 					}
 					else {
@@ -45,7 +45,7 @@ export class LokiMemoryAdapter {
 			});
 		}
 		else {
-			if (this.hashStore.hasOwnProperty(dbname)) {
+			if (this.hashStore[dbname] !== undefined) {
 				return Promise.resolve(this.hashStore[dbname].value);
 			}
 			else {
@@ -68,7 +68,7 @@ export class LokiMemoryAdapter {
 		if (this.options.asyncResponses) {
 			return new Promise((resolve, reject) => {
 				setTimeout(() => {
-					saveCount = (this.hashStore.hasOwnProperty(dbname) ? this.hashStore[dbname].savecount : 0);
+					saveCount = (this.hashStore[dbname] !== undefined ? this.hashStore[dbname].savecount : 0);
 
 					this.hashStore[dbname] = {
 						savecount: saveCount + 1,
@@ -80,7 +80,7 @@ export class LokiMemoryAdapter {
 				}, this.options.asyncTimeout);
 			});
 		} else {
-			saveCount = (this.hashStore.hasOwnProperty(dbname) ? this.hashStore[dbname].savecount : 0);
+			saveCount = (this.hashStore[dbname] !== undefined ? this.hashStore[dbname].savecount : 0);
 
 			this.hashStore[dbname] = {
 				savecount: saveCount + 1,
@@ -100,7 +100,7 @@ export class LokiMemoryAdapter {
 	 * @memberof LokiMemoryAdapter
 	 */
 	deleteDatabase(dbname) {
-		if (this.hashStore.hasOwnProperty(dbname)) {
+		if (this.hashStore[dbname] !== undefined) {
 			delete this.hashStore[dbname];
 		}
 

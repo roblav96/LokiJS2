@@ -19,13 +19,17 @@ for (let i = 0; i < DATA.length; i++) {
 		$loki: DATA[i].id,
 		[FIELD_NAME_1]: DATA[i][FIELD_NAME_1]
 	});
-};
+}
 
-suite("Search", function () {
+suite("Full text search queries", function () {
 	for (let i = 0; i < QUERIES.length; i++) {
 		let query = QUERIES[i];
 		benchmark(i + ""/*+ ": " + JSON.stringify(query)*/, function () {
 			fts.search(query.fts);
 		});
 	}
+});
+
+suite("Full text search comparison", function () {
+
 });

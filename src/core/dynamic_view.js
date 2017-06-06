@@ -41,18 +41,18 @@ export class DynamicView extends LokiEventEmitter {
 		this.rebuildPending = false;
 		this.options = options || {};
 
-		if (!this.options.hasOwnProperty('persistent')) {
+		if (this.options.persistent === undefined) {
 			this.options.persistent = false;
 		}
 
 		// 'persistentSortPriority':
 		// 'passive' will defer the sort phase until they call data(). (most efficient overall)
 		// 'active' will sort async whenever next idle. (prioritizes read speeds)
-		if (!this.options.hasOwnProperty('sortPriority')) {
+		if (this.options.sortPriority === undefined) {
 			this.options.sortPriority = 'passive';
 		}
 
-		if (!this.options.hasOwnProperty('minRebuildInterval')) {
+		if (this.options.minRebuildInterval === undefined) {
 			this.options.minRebuildInterval = 1;
 		}
 
@@ -105,7 +105,7 @@ export class DynamicView extends LokiEventEmitter {
 			this.sortDirty = true;
 		}
 
-		if (options.hasOwnProperty('removeWhereFilters')) {
+		if (options.removeWhereFilters !== undefined) {
 			// for each view see if it had any where filters applied... since they don't
 			// serialize those functions lets remove those invalid filters
 			fpl = this.filterPipeline.length;

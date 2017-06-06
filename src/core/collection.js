@@ -129,7 +129,7 @@ export class Collection extends LokiEventEmitter {
 		options = options || {};
 
 		// exact match and unique constraints
-		if (options.hasOwnProperty('unique')) {
+		if (options.unique !== undefined) {
 			if (!Array.isArray(options.unique)) {
 				options.unique = [options.unique];
 			}
@@ -139,7 +139,7 @@ export class Collection extends LokiEventEmitter {
 			});
 		}
 
-		if (options.hasOwnProperty('exact')) {
+		if (options.exact !== undefined) {
 			options.exact.forEach((prop) => {
 				this.constraints.exact[prop] = new ExactIndex(prop);
 			});
@@ -148,36 +148,36 @@ export class Collection extends LokiEventEmitter {
 		// Inverted index
 		this._fullTextSearch = null;
 		if (Loki.FullTextSearch !== undefined) {
-			this._fullTextSearch = options.hasOwnProperty('fullTextSearch')
+			this._fullTextSearch = options.fullTextSearch !== undefined
 				? new (Loki.FullTextSearch.FullTextSearch)(options.fullTextSearch) : null;
 		}
 
 		// if set to true we will optimally keep indices 'fresh' during insert/update/remove ops (never dirty/never needs rebuild)
 		// if you frequently intersperse insert/update/remove ops between find ops this will likely be significantly faster option.
-		this.adaptiveBinaryIndices = options.hasOwnProperty('adaptiveBinaryIndices') ? options.adaptiveBinaryIndices : true;
+		this.adaptiveBinaryIndices = options.adaptiveBinaryIndices !== undefined ? options.adaptiveBinaryIndices : true;
 
 		// is collection transactional
-		this.transactional = options.hasOwnProperty('transactional') ? options.transactional : false;
+		this.transactional = options.transactional !== undefined ? options.transactional : false;
 
 		// options to clone objects when inserting them
-		this.cloneObjects = options.hasOwnProperty('clone') ? options.clone : false;
+		this.cloneObjects = options.clone !== undefined ? options.clone : false;
 
 		// default clone method (if enabled) is parse-stringify
-		this.cloneMethod = options.hasOwnProperty('cloneMethod') ? options.cloneMethod : "parse-stringify";
+		this.cloneMethod = options.cloneMethod !== undefined ? options.cloneMethod : "parse-stringify";
 
 		// option to make event listeners async, default is sync
-		this.asyncListeners = options.hasOwnProperty('asyncListeners') ? options.asyncListeners : false;
+		this.asyncListeners = options.asyncListeners !== undefined ? options.asyncListeners : false;
 
 		// disable track changes
-		this.disableChangesApi = options.hasOwnProperty('disableChangesApi') ? options.disableChangesApi : true;
+		this.disableChangesApi = options.disableChangesApi !== undefined ? options.disableChangesApi : true;
 
 		// option to observe objects and update them automatically, ignored if Object.observe is not supported
-		this.autoupdate = options.hasOwnProperty('autoupdate') ? options.autoupdate : false;
+		this.autoupdate = options.autoupdate !== undefined ? options.autoupdate : false;
 
 		// by default, if you insert a document into a collection with binary indices, if those indexed properties contain
 		// a DateTime we will convert to epoch time format so that (across serializations) its value position will be the
 		// same 'after' serialization as it was 'before'.
-		this.serializableIndices = options.hasOwnProperty('serializableIndices') ? options.serializableIndices : true;
+		this.serializableIndices = options.serializableIndices !== undefined ? options.serializableIndices : true;
 
 		//option to activate a cleaner daemon - clears "aged" documents at set intervals.
 		this.ttl = {
@@ -242,7 +242,7 @@ export class Collection extends LokiEventEmitter {
 			});
 
 			changedObjects.forEach((object) => {
-				if (!hasOwnProperty.call(object, '$loki'))
+				if (object.$loki === undefined)
 					return this.removeAutoUpdateObserver(object);
 				try {
 					this.update(object);
@@ -291,7 +291,7 @@ export class Collection extends LokiEventEmitter {
 				len = obj.length;
 
 				for (idx = 0; idx < len; idx++) {
-					if (!obj[idx].hasOwnProperty('meta')) {
+					if (obj[idx].meta === undefined) {
 						obj[idx].meta = {};
 					}
 
@@ -416,7 +416,7 @@ export class Collection extends LokiEventEmitter {
 	 * @memberof Collection
 	 */
 	addTransform(name, transform) {
-		if (this.transforms.hasOwnProperty(name)) {
+		if (this.transforms[name] !== undefined) {
 			throw new Error("a transform by that name already exists");
 		}
 
@@ -448,7 +448,7 @@ export class Collection extends LokiEventEmitter {
 		let query;
 		query = [];
 		for (k in template) {
-			if (!template.hasOwnProperty(k)) continue;
+			if (template[k] === undefined) continue;
 			query.push((
 				obj = {},
 					obj[k] = template[k],
@@ -519,7 +519,7 @@ export class Collection extends LokiEventEmitter {
 	configureOptions(options) {
 		options = options || {};
 
-		if (options.hasOwnProperty('adaptiveBinaryIndices')) {
+		if (options.adaptiveBinaryIndices !== undefined) {
 			this.adaptiveBinaryIndices = options.adaptiveBinaryIndices;
 
 			// if switching to adaptive binary indices, make sure none are 'dirty'
@@ -550,7 +550,7 @@ export class Collection extends LokiEventEmitter {
 		}
 
 		// if the index is already defined and we are using adaptiveBinaryIndices and we are not forcing a rebuild, return.
-		if (this.adaptiveBinaryIndices === true && this.binaryIndices.hasOwnProperty(property) && !force) {
+		if (this.adaptiveBinaryIndices === true && this.binaryIndices[property] !== undefined && !force) {
 			return;
 		}
 
@@ -614,7 +614,7 @@ export class Collection extends LokiEventEmitter {
 		let key;
 		const bIndices = this.binaryIndices;
 		for (key in bIndices) {
-			if (hasOwnProperty.call(bIndices, key)) {
+			if (bIndices[key] !== undefined) {
 				this.ensureIndex(key, force);
 			}
 		}
@@ -624,7 +624,7 @@ export class Collection extends LokiEventEmitter {
 		let key;
 		const bIndices = this.binaryIndices;
 		for (key in bIndices) {
-			if (hasOwnProperty.call(bIndices, key)) {
+			if (bIndices[key] !== undefined) {
 				bIndices[key].dirty = true;
 			}
 		}
@@ -889,7 +889,7 @@ export class Collection extends LokiEventEmitter {
 		}
 
 		// verify object is a properly formed document
-		if (!hasOwnProperty.call(doc, '$loki')) {
+		if (doc.$loki === undefined) {
 			throw new Error('Trying to update unsynced document. Please save the document first by using insert() or addMany()');
 		}
 		try {
@@ -997,7 +997,7 @@ export class Collection extends LokiEventEmitter {
 			let key;
 			const constrUnique = this.constraints.unique;
 			for (key in constrUnique) {
-				if (hasOwnProperty.call(constrUnique, key)) {
+				if (constrUnique[key] !== undefined) {
 					constrUnique[key].set(obj);
 				}
 			}
@@ -1104,7 +1104,7 @@ export class Collection extends LokiEventEmitter {
 			return;
 		}
 
-		if (!hasOwnProperty.call(doc, '$loki')) {
+		if (doc.$loki === undefined) {
 			throw new Error('Object is not a document stored in the collection');
 		}
 

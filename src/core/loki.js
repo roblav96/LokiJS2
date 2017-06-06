@@ -49,8 +49,8 @@ export class Loki extends LokiEventEmitter {
 		this.throttledSaves = true;
 
 		this.options = {
-			serializationMethod: options && options.hasOwnProperty('serializationMethod') ? options.serializationMethod : 'normal',
-			destructureDelimiter: options && options.hasOwnProperty('destructureDelimiter') ? options.destructureDelimiter : '$<\n'
+			serializationMethod: options && options.serializationMethod !== undefined ? options.serializationMethod : 'normal',
+			destructureDelimiter: options && options.destructureDelimiter !== undefined ? options.destructureDelimiter : '$<\n'
 		};
 
 		// currently keeping persistenceMethod and persistenceAdapter as loki level properties that
@@ -70,7 +70,7 @@ export class Loki extends LokiEventEmitter {
 		this.throttledSavePending = null;
 
 		// enable console output if verbose flag is set (disabled by default)
-		this.verbose = options && options.hasOwnProperty('verbose') ? options.verbose : false;
+		this.verbose = options && options.verbose !== undefined ? options.verbose : false;
 
 		this.events = {
 			'init': [],
@@ -119,7 +119,7 @@ export class Loki extends LokiEventEmitter {
 		// if they do not specify an options.env we want to detect env rather than default to nodejs.
 		// currently keeping two properties for similar thing (options.env and options.persistenceMethod)
 		//   might want to review whether we can consolidate.
-		if (options && options.hasOwnProperty('env')) {
+		if (options && options.env !== undefined) {
 			this.ENV = options.env;
 		} else {
 			this.ENV = getENV();
@@ -179,7 +179,7 @@ export class Loki extends LokiEventEmitter {
 		this.persistenceAdapter = null;
 
 		// process the options
-		if (this.options.hasOwnProperty('persistenceMethod')) {
+		if (this.options.persistenceMethod !== undefined) {
 			// check if the specified persistence method is known
 			if (typeof(persistenceMethods[this.options.persistenceMethod]) === 'function') {
 				this.persistenceMethod = this.options.persistenceMethod;
@@ -189,12 +189,12 @@ export class Loki extends LokiEventEmitter {
 		}
 
 		// ensure defaults exists for options which were not set
-		if (!this.options.hasOwnProperty('serializationMethod')) {
+		if (this.options.serializationMethod === undefined) {
 			this.options.serializationMethod = 'normal';
 		}
 
 		// ensure passed or default option exists
-		if (!this.options.hasOwnProperty('destructureDelimiter')) {
+		if (this.options.destructureDelimiter === undefined) {
 			this.options.destructureDelimiter = '$<\n';
 		}
 
@@ -207,16 +207,16 @@ export class Loki extends LokiEventEmitter {
 		}
 
 		// if user passes adapter, set persistence mode to adapter and retain persistence adapter instance
-		if (this.options.hasOwnProperty('adapter')) {
+		if (this.options.adapter !== undefined) {
 			this.persistenceMethod = 'adapter';
 			this.persistenceAdapter = this.options.adapter;
 		}
 
-		if (this.options.hasOwnProperty('autosaveInterval')) {
+		if (this.options.autosaveInterval !== undefined) {
 			this.autosaveInterval = parseInt(this.options.autosaveInterval, 10);
 		}
 
-		if (this.options.hasOwnProperty('throttledSaves')) {
+		if (this.options.throttledSaves !== undefined) {
 			this.throttledSaves = this.options.throttledSaves;
 		}
 
@@ -259,7 +259,7 @@ export class Loki extends LokiEventEmitter {
 		});
 
 		// since our JSON serializeReplacer is not invoked for reference database adapters, this will let us mimic
-		if (options.hasOwnProperty("removeNonSerializable") && options.removeNonSerializable === true) {
+		if (options.removeNonSerializable !== undefined && options.removeNonSerializable === true) {
 			databaseCopy.autosaveHandle = null;
 			databaseCopy.persistenceAdapter = null;
 
@@ -355,7 +355,7 @@ export class Loki extends LokiEventEmitter {
 				const tmpcol = new Collection(collectionName, {});
 				const curcol = this.collections[i];
 				for (const prop in curcol) {
-					if (curcol.hasOwnProperty(prop) && tmpcol.hasOwnProperty(prop)) {
+					if (curcol[prop] !== undefined && tmpcol[prop] !== undefined) {
 						curcol[prop] = tmpcol[prop];
 					}
 				}
@@ -394,7 +394,7 @@ export class Loki extends LokiEventEmitter {
 	serialize(options) {
 		options = options || {};
 
-		if (!options.hasOwnProperty("serializationMethod")) {
+		if (options.serializationMethod === undefined) {
 			options.serializationMethod = this.options.serializationMethod;
 		}
 
@@ -440,20 +440,20 @@ export class Loki extends LokiEventEmitter {
 
 		options = options || {};
 
-		if (!options.hasOwnProperty("partitioned")) {
+		if (options.partitioned === undefined) {
 			options.partitioned = false;
 		}
 
-		if (!options.hasOwnProperty("delimited")) {
+		if (options.delimited === undefined) {
 			options.delimited = true;
 		}
 
-		if (!options.hasOwnProperty("delimiter")) {
+		if (options.delimiter === undefined) {
 			options.delimiter = this.options.destructureDelimiter;
 		}
 
 		// 'partitioned' along with 'partition' of 0 or greater is a request for single collection serialization
-		if (options.partitioned === true && options.hasOwnProperty("partition") && options.partition >= 0) {
+		if (options.partitioned === true && options.partition !== undefined && options.partition >= 0) {
 			return this.serializeCollection({
 				delimited: options.delimited,
 				delimiter: options.delimiter,
@@ -571,11 +571,11 @@ export class Loki extends LokiEventEmitter {
 
 		options = options || {};
 
-		if (!options.hasOwnProperty("delimited")) {
+		if (options.delimited === undefined) {
 			options.delimited = true;
 		}
 
-		if (!options.hasOwnProperty("collectionIndex")) {
+		if (options.collectionIndex === undefined) {
 			throw new Error("serializeCollection called without 'collectionIndex' option");
 		}
 
@@ -629,15 +629,15 @@ export class Loki extends LokiEventEmitter {
 
 		options = options || {};
 
-		if (!options.hasOwnProperty("partitioned")) {
+		if (options.partitioned === undefined) {
 			options.partitioned = false;
 		}
 
-		if (!options.hasOwnProperty("delimited")) {
+		if (options.delimited === undefined) {
 			options.delimited = true;
 		}
 
-		if (!options.hasOwnProperty("delimiter")) {
+		if (options.delimiter === undefined) {
 			options.delimiter = this.options.destructureDelimiter;
 		}
 
@@ -647,7 +647,7 @@ export class Loki extends LokiEventEmitter {
 		// -or- single partition
 		if (options.partitioned) {
 			// handle single partition
-			if (options.hasOwnProperty('partition')) {
+			if (options.partition !== undefined) {
 				// db only
 				if (options.partition === -1) {
 					cdb = JSON.parse(destructuredSource[0]);
@@ -733,15 +733,15 @@ export class Loki extends LokiEventEmitter {
 
 		options = options || {};
 
-		if (!options.hasOwnProperty("partitioned")) {
+		if (options.partitioned === undefined) {
 			options.partitioned = false;
 		}
 
-		if (!options.hasOwnProperty("delimited")) {
+		if (options.delimited === undefined) {
 			options.delimited = true;
 		}
 
-		if (!options.hasOwnProperty("delimiter")) {
+		if (options.delimiter === undefined) {
 			options.delimiter = this.options.destructureDelimiter;
 		}
 
@@ -809,13 +809,6 @@ export class Loki extends LokiEventEmitter {
 		let collObj;
 
 		this.name = dbObject.name;
-
-		// restore database version
-		// this.databaseVersion = 1.0;
-		// if (dbObject.hasOwnProperty('databaseVersion')) {
-		// 	this.databaseVersion = dbObject.databaseVersion;
-		// }
-
 		this.collections = [];
 
 		function makeLoader(coll) {
@@ -839,7 +832,7 @@ export class Loki extends LokiEventEmitter {
 			coll = dbObject.collections[i];
 			copyColl = this.addCollection(coll.name, {disableChangesApi: coll.disableChangesApi});
 
-			copyColl.adaptiveBinaryIndices = coll.hasOwnProperty('adaptiveBinaryIndices') ? (coll.adaptiveBinaryIndices === true) : false;
+			copyColl.adaptiveBinaryIndices = coll.adaptiveBinaryIndices !== undefined ? (coll.adaptiveBinaryIndices === true) : false;
 			copyColl.transactional = coll.transactional;
 			copyColl.asyncListeners = coll.asyncListeners;
 			copyColl.disableChangesApi = coll.disableChangesApi;
@@ -857,7 +850,7 @@ export class Loki extends LokiEventEmitter {
 			// load each element individually
 			clen = coll.data.length;
 			j = 0;
-			if (options && options.hasOwnProperty(coll.name)) {
+			if (options && options[coll.name] !== undefined) {
 				loader = makeLoader(coll);
 
 				for (j; j < clen; j++) {
@@ -886,7 +879,7 @@ export class Loki extends LokiEventEmitter {
 
 			// regenerate unique indexes
 			copyColl.uniqueNames = [];
-			if (coll.hasOwnProperty("uniqueNames")) {
+			if (coll.uniqueNames !== undefined) {
 				copyColl.uniqueNames = coll.uniqueNames;
 				for (j = 0; j < copyColl.uniqueNames.length; j++) {
 					copyColl.ensureUniqueIndex(copyColl.uniqueNames[j]);
@@ -1024,16 +1017,16 @@ export class Loki extends LokiEventEmitter {
 		}
 
 		options = options || {};
-		if (!options.hasOwnProperty('recursiveWait')) {
+		if (options.recursiveWait === undefined) {
 			options.recursiveWait = true;
 		}
-		if (!options.hasOwnProperty('recursiveWaitLimit')) {
+		if (options.recursiveWaitLimit === undefined) {
 			options.recursiveWaitLimit = false;
 		}
-		if (!options.hasOwnProperty('recursiveWaitLimitDuration')) {
+		if (options.recursiveWaitLimitDuration === undefined) {
 			options.recursiveWaitLimitDuration = 2000;
 		}
-		if (!options.hasOwnProperty('started')) {
+		if (options.started === undefined) {
 			options.started = (new Date()).getTime();
 		}
 

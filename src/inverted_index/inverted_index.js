@@ -251,7 +251,7 @@ export class InvertedIndex {
 	 * Deserialize the inverted index.
 	 * @param {{docStore: *, _fields: *, index: *}} serialized - The serialized inverted index.
 	 * @param {Object.<string, function>|Tokenizer} funcTok[undefined] - the depending functions with labels
-	 * 	or an equivalent tokenizer
+	 *  or an equivalent tokenizer
 	 */
 	loadJSON(serialized, funcTok = undefined) {
 		let dbObject = serialized;
@@ -262,9 +262,7 @@ export class InvertedIndex {
 		this._totalFieldLength = dbObject._totalFieldLength;
 		this._root = dbObject._root;
 
-		let self = this;
-
-		function regenerate(index, parent) {
+		let regenerate = (index, parent) => {
 			// Set parent.
 			if (parent !== null) {
 				Object.defineProperties(index, {
@@ -281,7 +279,7 @@ export class InvertedIndex {
 					let docIds = Object.keys(index.docs);
 					for (let j = 0; j < docIds.length; j++) {
 						// Get document store at specific document/field.
-						let ref = self._docStore[docIds[j]];
+						let ref = this._docStore[docIds[j]];
 						if (ref.termRefs === undefined) {
 							Object.defineProperties(ref, {
 								termRefs: {enumerable: false, configurable: true, writable: true, value: []}
@@ -295,8 +293,7 @@ export class InvertedIndex {
 					regenerate(index[keys[i]], index);
 				}
 			}
-		}
-
+		};
 		regenerate(this._root, null);
 	}
 }
