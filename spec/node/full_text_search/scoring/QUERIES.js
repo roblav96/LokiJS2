@@ -15,7 +15,7 @@ export const QUERIES = [
 	},
 	{
 		fts: new QB()
-			.constantScore().startFilter()
+			.constantScore().beginFilter()
 			.term(FIELD_NAME_1, "sollicitudin")
 			.endFilter().boost(2.45)
 			.build(),
@@ -159,7 +159,7 @@ export const QUERIES = [
 	{
 		fts: new QB()
 			.bool()
-			.startMust().term(FIELD_NAME_1, "a").term(FIELD_NAME_1, "ac").endMust()
+			.beginMust().term(FIELD_NAME_1, "a").term(FIELD_NAME_1, "ac").endMust()
 			.build(),
 		es: {
 			bool: {
@@ -181,8 +181,8 @@ export const QUERIES = [
 	{
 		fts: new QB()
 			.bool()
-			.startMust().term(FIELD_NAME_1, "est").endMust()
-			.startNot().term(FIELD_NAME_1, "ac").endNot()
+			.beginMust().term(FIELD_NAME_1, "est").endMust()
+			.beginNot().term(FIELD_NAME_1, "ac").endNot()
 			.build(),
 		es: {
 			bool: {
@@ -206,8 +206,8 @@ export const QUERIES = [
 	{
 		fts: new QB()
 			.bool()
-			.startMust().term(FIELD_NAME_1, "abc").endMust()
-			.startNot().term(FIELD_NAME_1, "ac").endNot()
+			.beginMust().term(FIELD_NAME_1, "abc").endMust()
+			.beginNot().term(FIELD_NAME_1, "ac").endNot()
 			.build(),
 		es: {
 			bool: {
@@ -232,8 +232,8 @@ export const QUERIES = [
 	{
 		fts: new QB()
 			.bool()
-			.startMust().term(FIELD_NAME_1, "est").endMust()
-			.startShould().term(FIELD_NAME_1, "ac").endShould()
+			.beginMust().term(FIELD_NAME_1, "est").endMust()
+			.beginShould().term(FIELD_NAME_1, "ac").endShould()
 			.build(),
 		es: {
 			bool: {
@@ -258,7 +258,7 @@ export const QUERIES = [
 		fts: new QB()
 			.bool()
 			.minimumShouldMatch(2)
-			.startShould()
+			.beginShould()
 			.term(FIELD_NAME_1, "ac")
 			.term(FIELD_NAME_1, "enim")
 			.term(FIELD_NAME_1, "est")
@@ -291,7 +291,7 @@ export const QUERIES = [
 		fts: new QB()
 			.bool()
 			.minimumShouldMatch(-2)
-			.startShould()
+			.beginShould()
 			.term(FIELD_NAME_1, "ac")
 			.term(FIELD_NAME_1, "enim")
 			.term(FIELD_NAME_1, "est")
@@ -324,7 +324,7 @@ export const QUERIES = [
 		fts: new QB()
 			.bool()
 			.minimumShouldMatch(0.75)
-			.startShould()
+			.beginShould()
 			.term(FIELD_NAME_1, "ac")
 			.term(FIELD_NAME_1, "enim")
 			.term(FIELD_NAME_1, "est")
@@ -369,7 +369,7 @@ export const QUERIES = [
 		fts: new QB()
 			.bool()
 			.minimumShouldMatch(-0.25)
-			.startShould()
+			.beginShould()
 			.term(FIELD_NAME_1, "ac")
 			.term(FIELD_NAME_1, "enim")
 			.term(FIELD_NAME_1, "est")
@@ -413,8 +413,8 @@ export const QUERIES = [
 	{
 		fts: new QB()
 			.bool()
-			.startMust().matchAll().endMust()
-			.startNot().term(FIELD_NAME_1, "ac").endNot()
+			.beginMust().matchAll().endMust()
+			.beginNot().term(FIELD_NAME_1, "ac").endNot()
 			.build(),
 		es: {
 			bool: {
@@ -436,8 +436,8 @@ export const QUERIES = [
 	{
 		fts: new QB()
 			.bool()
-			.startMust().term(FIELD_NAME_1, "ac").endMust()
-			.startShould().constantScore().startFilter().wildcard(FIELD_NAME_1, "a?").endFilter().endShould()
+			.beginMust().term(FIELD_NAME_1, "ac").endMust()
+			.beginShould().constantScore().beginFilter().wildcard(FIELD_NAME_1, "a?").endFilter().endShould()
 			.build(),
 		es: {
 			bool: {

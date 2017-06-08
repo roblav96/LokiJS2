@@ -135,7 +135,7 @@ describe('query builder', () => {
 		let q = new Query.ConstantScoreQuery().boost(8.5).build();
 		expect(q).toEqual({type: "constant_score", boost: 8.5});
 
-		q = new Query.ConstantScoreQuery().startFilter()
+		q = new Query.ConstantScoreQuery().beginFilter()
 			.term("user", "albert")
 			.fuzzy("name", "einsten")
 			.endFilter().build();
@@ -160,20 +160,20 @@ describe('query builder', () => {
 		);
 
 		q = new Query.BoolQuery()
-			.startFilter().boost(2)
+			.beginFilter().boost(2)
 			.term("user", "albert")
 			.fuzzy("name", "einsten")
 			.endFilter()
-			.startMust().boost(3)
+			.beginMust().boost(3)
 			.wildcard("user", "alb?rt")
 			.prefix("user", "alb")
 			.exists("name")
 			.endMust()
-			.startShould().boost(4)
+			.beginShould().boost(4)
 			.terms("quotes", ["infinity", "atom"])
 			.matchAll()
 			.endShould()
-			.startNot().boost(5)
+			.beginNot().boost(5)
 			.match("user", "alb")
 			.constantScore()
 			.bool()
@@ -236,7 +236,7 @@ describe('query builder', () => {
 		expect(() => new Query.QueryBuilder().useBM25(0, 2)).toThrowErrorOfType("TypeError");
 		expect(() => new Query.QueryBuilder().useBM25("0", {})).toThrowErrorOfType("TypeError");
 
-		expect(new Query.QueryBuilder().bool().startMust().term("user", "albert").endMust().build()).toEqual({
+		expect(new Query.QueryBuilder().bool().beginMust().term("user", "albert").endMust().build()).toEqual({
 			query: {
 				type: "bool",
 				must: {

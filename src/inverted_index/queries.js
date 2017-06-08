@@ -478,7 +478,7 @@ class ArrayQuery extends BaseQuery {
  * new QueryBuilder()
  *   .constantScore()
  *     .boost(1.5)
- *     .startFilter()
+ *     .beginFilter()
  *       .term("first_name", "albert")
  *       .term("surname", "einstein")
  *     .endFilter()
@@ -497,7 +497,7 @@ export class ConstantScoreQuery extends BaseQuery {
 	 * Starts an array of queries. Use endFilter() to finish the array.
 	 * @return {ArrayQuery} array query for holding sub queries
 	 */
-	startFilter() {
+	beginFilter() {
 		this._data.filter = {};
 		return new ArrayQuery("endFilter", () => {
 			return this;
@@ -525,18 +525,18 @@ export class ConstantScoreQuery extends BaseQuery {
  * @example
  * new QueryBuilder()
  *   .bool()
- *     .startMust().boost(2)
+ *     .beginMust().boost(2)
  *       .term("first_name", "albert")
  *     .endMust()
- *     .startFilter()
+ *     .beginFilter()
  *       .term("birthplace", "ulm")
  *     .endFilter()
- *     .startShould().minimumShouldMatch(2)
+ *     .beginShould().minimumShouldMatch(2)
  *       .fuzzy("surname", "einstin")
  *       .wildcard("name", "geni?s")
  *       .term("quotes", "infinity")
  *     .endShould()
- *     .startNot()
+ *     .beginNot()
  *       .terms("research_field", ["biology", "geography"])
  *     .endNot()
  * .build();
@@ -557,7 +557,7 @@ export class BoolQuery extends BaseQuery {
 	 * Starts an array of queries for must clause. Use endMust() to finish the array.
 	 * @return {ArrayQuery} array query for holding sub queries
 	 */
-	startMust() {
+	beginMust() {
 		this._data.must = {};
 		return new ArrayQuery("endMust", () => {
 			return this;
@@ -568,7 +568,7 @@ export class BoolQuery extends BaseQuery {
 	 * Starts an array of queries for filter clause. Use endFilter() to finish the array.
 	 * @return {ArrayQuery} array query for holding sub queries
 	 */
-	startFilter() {
+	beginFilter() {
 		this._data.filter = {};
 		return new ArrayQuery("endFilter", () => {
 			return this;
@@ -579,7 +579,7 @@ export class BoolQuery extends BaseQuery {
 	 * Starts an array of queries for should clause. Use endShould() to finish the array.
 	 * @return {ArrayQuery} array query for holding sub queries
 	 */
-	startShould() {
+	beginShould() {
 		this._data.should = {};
 		return new ArrayQuery("endShould", () => {
 			return this;
@@ -590,7 +590,7 @@ export class BoolQuery extends BaseQuery {
 	 * Starts an array of queries for not clause. Use endNot() to finish the array.
 	 * @return {ArrayQuery} array query for holding sub queries
 	 */
-	startNot() {
+	beginNot() {
 		this._data.not = {};
 		return new ArrayQuery("endNot", () => {
 			return this;

@@ -171,10 +171,10 @@ export class IndexSearcher {
 						tmpQuery = tmpQuery.minimumShouldMatch(query.minimum_should_match);
 					}
 					// Build a should query.
-					tmpQuery = tmpQuery.startShould();
+					tmpQuery = tmpQuery.beginShould();
 				} else {
 					// Build a must query.
-					tmpQuery = tmpQuery.startMust();
+					tmpQuery = tmpQuery.beginMust();
 				}
 				tmpQuery = tmpQuery.boost(boost);
 
