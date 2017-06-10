@@ -299,19 +299,14 @@ function dotSubScan(root, paths, fun, value, poffset) {
  *      .find({ 'doors' : 4 })
  *      .where(function(obj) { return obj.name === 'Toyota' })
  *      .data();
- *
- * @constructor Resultset
- * @param {Collection} collection - The collection which this Resultset will query against.
- * @param {Object=} options - Object containing one or more options.
- * @param {string} options.queryObj - Optional mongo-style query object to initialize resultset with.
- * @param {function} options.queryFunc - Optional javascript filter function to initialize resultset with.
- * @param {bool} options.firstOnly - Optional boolean used by collection.findOne().
  */
 export class Resultset {
-
-	constructor(collection, options) {
-		options = options || {};
-
+	/**
+	 * Constructor.
+	 * @param {Collection} collection - the collection which this Resultset will query against
+	 * @returns {Resultset}
+	 */
+	constructor(collection) {
 		// retain reference to collection we are querying against
 		this.collection = collection;
 		this.filteredrows = [];
@@ -1002,15 +997,13 @@ export class Resultset {
 	 * @returns {array} Array of documents in the resultset
 	 * @memberof Resultset
 	 */
-	data(options) {
+	data(options = {}) {
 		let result = [];
 		let data = this.collection.data;
 		let obj;
 		let len;
 		let i;
 		let method;
-
-		options = options || {};
 
 		// if user opts to strip meta, then force clones and use 'shallow' if 'force' options are not present
 		if (options.removeMeta && !options.forceClones) {

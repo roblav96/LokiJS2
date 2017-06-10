@@ -19,10 +19,10 @@ import {Loki} from './loki';
  */
 export class LokiPartitioningAdapter {
 
-	constructor(adapter, options) {
+	constructor(adapter, options = {}) {
 		this.mode = "reference";
 		this.adapter = null;
-		this.options = options || {};
+		this.options = options;
 		this.dbref = null;
 		this.dbname = "";
 		this.pageIterator = {};

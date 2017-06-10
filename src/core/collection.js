@@ -90,7 +90,7 @@ function deepProperty(obj, property, isDeep) {
  */
 export class Collection extends LokiEventEmitter {
 
-	constructor(name, options) {
+	constructor(name, options = {}) {
 		super();
 		// the name of the collection
 
@@ -126,8 +126,6 @@ export class Collection extends LokiEventEmitter {
 		this.cachedData = null;
 
 		/* OPTIONS */
-		options = options || {};
-
 		// exact match and unique constraints
 		if (options.unique !== undefined) {
 			if (!Array.isArray(options.unique)) {

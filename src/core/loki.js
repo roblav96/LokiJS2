@@ -66,8 +66,8 @@ export class Loki extends LokiEventEmitter {
 		this.persistenceAdapter = null;
 
 		// flags used to throttle saves
-		this.throttledSaveRunning = null;
-		this.throttledSavePending = null;
+		this._throttledSaveRunning = null;
+		this._throttledSavePending = null;
 
 		// enable console output if verbose flag is set (disabled by default)
 		this.verbose = options && options.verbose !== undefined ? options.verbose : false;
@@ -157,7 +157,7 @@ export class Loki extends LokiEventEmitter {
 	 * @returns {Promise} a Promise that resolves after initialization and (if enabled) autoloading the database
 	 * @memberof Loki
 	 */
-	initializePersistence(options) {
+	initializePersistence(options = {}) {
 		const defaultPersistence = {
 			'NODEJS': 'fs',
 			'BROWSER': 'localStorage',
@@ -171,7 +171,7 @@ export class Loki extends LokiEventEmitter {
 			'memory': LokiMemoryAdapter
 		};
 
-		this.options = options || {};
+		this.options = options;
 
 		this.persistenceMethod = null;
 		// retain reference to optional persistence adapter 'instance'
@@ -245,13 +245,11 @@ export class Loki extends LokiEventEmitter {
 	 * @param {bool} options.removeNonSerializable - nulls properties not safe for serialization.
 	 * @memberof Loki
 	 */
-	copy(options) {
+	copy(options = {}) {
 		// in case running in an environment without accurate environment detection, pass 'NA'
 		const databaseCopy = new Loki(this.filename, {env: "NA"});
 		let clen;
 		let idx;
-
-		options = options || {};
 
 		// currently inverting and letting loadJSONObject do most of the work
 		databaseCopy.loadJSONObject(this, {
@@ -391,9 +389,7 @@ export class Loki extends LokiEventEmitter {
 	 * @returns {string} Stringified representation of the loki database.
 	 * @memberof Loki
 	 */
-	serialize(options) {
-		options = options || {};
-
+	serialize(options = {}) {
 		if (options.serializationMethod === undefined) {
 			options.serializationMethod = this.options.serializationMethod;
 		}
@@ -411,8 +407,8 @@ export class Loki extends LokiEventEmitter {
 	}
 
 	// alias of serialize
-	toJson() {
-		return this.serialize;
+	toJson(...args) {
+		return this.serialize(...args);
 	}
 
 	/**
@@ -427,18 +423,16 @@ export class Loki extends LokiEventEmitter {
 	 * @param {bool=} options.delimited - (default: true) whether subitems are delimited or subarrays
 	 * @param {string=} options.delimiter - override default delimiter
 	 *
-	 * @returns {string|array} A custom, restructured aggregation of independent serializations.
+	 * @returns {string|Array} A custom, restructured aggregation of independent serializations.
 	 * @memberof Loki
 	 */
-	serializeDestructured(options) {
+	serializeDestructured(options = {}) {
 		let idx;
 		let sidx;
 		let result;
 		let resultlen;
 		const reconstruct = [];
 		let dbcopy;
-
-		options = options || {};
 
 		if (options.partitioned === undefined) {
 			options.partitioned = false;
@@ -547,10 +541,6 @@ export class Loki extends LokiEventEmitter {
 				return reconstruct;
 			}
 		}
-
-		reconstruct.push("");
-
-		return reconstruct.join(delim);
 	}
 
 	/**
@@ -564,12 +554,10 @@ export class Loki extends LokiEventEmitter {
 	 * @returns {string|array} A custom, restructured aggregation of independent serializations for a single collection.
 	 * @memberof Loki
 	 */
-	serializeCollection(options) {
+	serializeCollection(options = {}) {
 		let doccount;
 		let docidx;
 		let resultlines = [];
-
-		options = options || {};
 
 		if (options.delimited === undefined) {
 			options.delimited = true;
@@ -615,7 +603,7 @@ export class Loki extends LokiEventEmitter {
 	 * @returns {object|array} An object representation of the deserialized database, not yet applied to 'this' db or document array
 	 * @memberof Loki
 	 */
-	deserializeDestructured(destructuredSource, options) {
+	deserializeDestructured(destructuredSource, options = {}) {
 		let workarray = [];
 		let len;
 		let cdb;
@@ -626,8 +614,6 @@ export class Loki extends LokiEventEmitter {
 		let done = false;
 		let currLine;
 		let currObject;
-
-		options = options || {};
 
 		if (options.partitioned === undefined) {
 			options.partitioned = false;
@@ -726,12 +712,10 @@ export class Loki extends LokiEventEmitter {
 	 * @returns {array} an array of documents to attach to collection.data.
 	 * @memberof Loki
 	 */
-	deserializeCollection(destructuredSource, options) {
+	deserializeCollection(destructuredSource, options = {}) {
 		let workarray = [];
 		let idx;
 		let len;
-
-		options = options || {};
 
 		if (options.partitioned === undefined) {
 			options.partitioned = false;
@@ -1009,14 +993,13 @@ export class Loki extends LokiEventEmitter {
 	 * @returns {Promise} a Promise that resolves when save queue is drained, it is passed a sucess parameter value
 	 * @memberof Loki
 	 */
-	throttledSaveDrain(options) {
+	throttledSaveDrain(options = {}) {
 		const now = (new Date()).getTime();
 
 		if (!this.throttledSaves) {
 			return Promise.resolve();
 		}
 
-		options = options || {};
 		if (options.recursiveWait === undefined) {
 			options.recursiveWait = true;
 		}
@@ -1031,12 +1014,12 @@ export class Loki extends LokiEventEmitter {
 		}
 
 		// if save is pending
-		if (this.throttledSaves && this.throttledSaveRunning !== null) {
+		if (this.throttledSaves && this._throttledSaveRunning !== null) {
 			// if we want to wait until we are in a state where there are no pending saves at all
 			if (options.recursiveWait) {
 				// queue the following meta callback for when it completes
-				return Promise.resolve(Promise.all([this.throttledSaveRunning, this.throttledSavePending])).then(() => {
-					if (this.throttledSaveRunning !== null || this.throttledSavePending !== null) {
+				return Promise.resolve(Promise.all([this._throttledSaveRunning, this._throttledSavePending])).then(() => {
+					if (this._throttledSaveRunning !== null || this._throttledSavePending !== null) {
 						if (options.recursiveWaitLimit && (now - options.started > options.recursiveWaitLimitDuration)) {
 							return Promise.reject();
 						}
@@ -1048,7 +1031,7 @@ export class Loki extends LokiEventEmitter {
 			}
 			// just notify when current queue is depleted
 			else {
-				return Promise.resolve(this.throttledSaveRunning);
+				return Promise.resolve(this._throttledSaveRunning);
 			}
 		}
 		// no save pending, just callback
@@ -1064,7 +1047,7 @@ export class Loki extends LokiEventEmitter {
 	 * @returns {Promise} a Promise that resolves after the database is loaded
 	 * @memberof Loki
 	 */
-	loadDatabaseInternal(options) {
+	loadDatabaseInternal(options = {}) {
 		// the persistenceAdapter should be present if all is ok, but check to be sure.
 		if (this.persistenceAdapter === null) {
 			return Promise.reject(new Error('persistenceAdapter not configured'));
@@ -1073,12 +1056,12 @@ export class Loki extends LokiEventEmitter {
 		return Promise.resolve(this.persistenceAdapter.loadDatabase(this.filename))
 			.then((dbString) => {
 				if (typeof (dbString) === 'string') {
-					this.loadJSON(dbString, options || {});
+					this.loadJSON(dbString, options);
 					this.emit('load', this);
 				} else {
 					// if adapter has returned an js object (other than null or error) attempt to load from JSON object
 					if (typeof (dbString) === "object" && dbString !== null && !(dbString instanceof Error)) {
-						this.loadJSONObject(dbString, options || {});
+						this.loadJSONObject(dbString, options);
 						this.emit('load', this);
 					} else {
 						if (dbString instanceof Error)
@@ -1112,11 +1095,11 @@ export class Loki extends LokiEventEmitter {
 		// try to drain any pending saves in the queue to lock it for loading
 		return this.throttledSaveDrain(options).then(() => {
 			// pause/throttle saving until loading is done
-			this.throttledSaveRunning = this.loadDatabaseInternal(options).then(() => {
+			this._throttledSaveRunning = this.loadDatabaseInternal(options).then(() => {
 				// now that we are finished loading, if no saves were throttled, disable flag
-				this.throttledSaveRunning = null;
+				this._throttledSaveRunning = null;
 			});
-			return this.throttledSaveRunning;
+			return this._throttledSaveRunning;
 		}, () => {
 			throw new Error("Unable to pause save throttling long enough to read database");
 		});
@@ -1162,21 +1145,21 @@ export class Loki extends LokiEventEmitter {
 		// if the db save is currently running, a new promise for a next db save is created
 		// all calls to save db will get this new promise which will be processed right after
 		// the current db save is finished
-		if (this.throttledSaveRunning !== null && this.throttledSavePending === null) {
-			this.throttledSavePending = Promise.resolve(this.throttledSaveRunning).then(() => {
-				this.throttledSaveRunning = null;
-				this.throttledSavePending = null;
+		if (this._throttledSaveRunning !== null && this._throttledSavePending === null) {
+			this._throttledSavePending = Promise.resolve(this._throttledSaveRunning).then(() => {
+				this._throttledSaveRunning = null;
+				this._throttledSavePending = null;
 				return this.saveDatabase();
 			});
 		}
-		if (this.throttledSavePending !== null) {
-			return this.throttledSavePending;
+		if (this._throttledSavePending !== null) {
+			return this._throttledSavePending;
 		}
-		this.throttledSaveRunning = this.saveDatabaseInternal().then(() => {
-			this.throttledSaveRunning = null;
+		this._throttledSaveRunning = this.saveDatabaseInternal().then(() => {
+			this._throttledSaveRunning = null;
 		});
 
-		return this.throttledSaveRunning;
+		return this._throttledSaveRunning;
 	}
 
 	// alias
