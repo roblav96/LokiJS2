@@ -86,18 +86,18 @@ export class InvertedIndex {
 				if (branch[c] === undefined) {
 					let child = {};
 					Object.defineProperties(child, {
-						parent: {enumerable: false, configurable: true, writable: true, value: branch}
+						pa: {enumerable: false, configurable: true, writable: true, value: branch}
 					});
 					branch[c] = child;
 				}
 				branch = branch[c];
 			}
 			// Add term info to index leaf.
-			if (branch.docs === undefined) {
-				branch.docs = {};
+			if (branch.dc === undefined) {
+				branch.dc = {};
 				branch.df = 0;
 			}
-			branch.docs[docId] = tf;
+			branch.dc[docId] = tf;
 			branch.df += 1;
 
 			// Store index leaf for deletion.
@@ -127,13 +127,13 @@ export class InvertedIndex {
 		for (let j = 0; j < termRefs.length; j++) {
 			let index = termRefs[j];
 			index.df -= 1;
-			delete index.docs[docId];
+			delete index.dc[docId];
 
 			// Check if no document is left for current tree.
 			if (index.df === 0) {
 				// Delete unused meta data of branch.
 				delete index.df;
-				delete index.docs;
+				delete index.dc;
 
 				// Check for sub branches.
 				if (Object.keys(index).length !== 0) {
@@ -144,15 +144,15 @@ export class InvertedIndex {
 				let keys = [];
 				do {
 					// Go tree upwards.
-					let parent = index.parent;
+					let parent = index.pa;
 					// Delete parent reference for preventing memory leak (cycle reference)
-					delete index.parent;
+					delete index.pa;
 
 					// Iterate over all children.
 					keys = Object.keys(parent);
 					for (let k = 0; k < keys.length; k++) {
 						let key = keys[k];
-						if (key === 'df' || key === 'docs') {
+						if (key.length !== 1) {
 							continue;
 						}
 						// Remove previous child form parent.
@@ -162,7 +162,7 @@ export class InvertedIndex {
 						}
 					}
 					index = parent;
-				} while (index.parent !== undefined && keys.length === 1);
+				} while (index.pa !== undefined && keys.length === 1);
 			}
 		}
 	}
@@ -196,7 +196,7 @@ export class InvertedIndex {
 		let termIndices = [];
 		let keys = Object.keys(root);
 		for (let i = 0; i < keys.length; i++) {
-			if (keys[i] !== 'docs' && keys[i] !== 'df') {
+			if (keys[i].length === 1) {
 				termIndices.push({index: root[keys[i]], term: keys[i]});
 			}
 		}
@@ -222,7 +222,7 @@ export class InvertedIndex {
 
 			let keys = Object.keys(root);
 			for (let i = 0; i < keys.length; i++) {
-				if (keys[i] !== 'docs' && keys[i] !== 'df') {
+				if (keys[i].length === 1) {
 					stack.push(root[keys[i]]);
 					treeStack.push(treeTermn + keys[i]);
 				}
@@ -266,7 +266,7 @@ export class InvertedIndex {
 			// Set parent.
 			if (parent !== null) {
 				Object.defineProperties(index, {
-					parent: {enumerable: false, configurable: true, writable: false, value: parent}
+					pa: {enumerable: false, configurable: true, writable: false, value: parent}
 				});
 			}
 
@@ -274,9 +274,9 @@ export class InvertedIndex {
 			let keys = Object.keys(index);
 			for (let i = 0; i < keys.length; i++) {
 				// Found term, save in document store.
-				if (keys[i] === 'docs') {
+				if (keys[i] === 'dc') {
 					// Get documents of term.
-					let docIds = Object.keys(index.docs);
+					let docIds = Object.keys(index.dc);
 					for (let j = 0; j < docIds.length; j++) {
 						// Get document store at specific document/field.
 						let ref = this._docStore[docIds[j]];
@@ -288,7 +288,7 @@ export class InvertedIndex {
 						// Set reference to term index.
 						ref.termRefs.push(index);
 					}
-				} else if (keys[i] !== 'df') {
+				} else if (keys[i].length === 1) {
 					// Iterate over subtree.
 					regenerate(index[keys[i]], index);
 				}

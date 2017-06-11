@@ -9,12 +9,12 @@ export class Scorer {
 	}
 
 	prepare(fieldName, boost, termIdx, doScoring, docResults = {}, term = null) {
-		if (termIdx === null || termIdx.docs === undefined) {
+		if (termIdx === null || termIdx.dc === undefined) {
 			return null;
 		}
 
 		let idf = this._idf(fieldName, termIdx.df);
-		let docIds = Object.keys(termIdx.docs);
+		let docIds = Object.keys(termIdx.dc);
 		for (let j = 0; j < docIds.length; j++) {
 			let docId = docIds[j];
 			if (docResults[docId] === undefined) {
@@ -22,7 +22,7 @@ export class Scorer {
 			}
 
 			if (doScoring) {
-				let tf = termIdx.docs[docId];
+				let tf = termIdx.dc[docId];
 				docResults[docId].push({
 					type: 'BM25',
 					tf,

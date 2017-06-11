@@ -365,7 +365,7 @@ class FuzzySearch {
 				// Iterate over all subtrees.
 				let keys = Object.keys(root);
 				for (let i = 0; i < keys.length; i++) {
-					if (keys[i] !== 'docs' && keys[i] !== 'df') {
+					if (keys[i].length === 1) {
 						stack.push(root[keys[i]]);
 						treeStack.push(treeTerms + keys[i]);
 					}
