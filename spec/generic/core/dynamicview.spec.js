@@ -63,7 +63,7 @@ describe('dynamicviews', () => {
 			const dv = items.addDynamicView();
 
 			const obj = dv.toJSON();
-			expect(obj.collection).toEqual(null);
+			expect(obj._collection).toEqual(undefined);
 		});
 	});
 
@@ -96,10 +96,10 @@ describe('dynamicviews', () => {
 			dv.applyFind({'owner': 'odin'});
 			dv.applyWhere(obj => obj.maker === 'elves');
 
-			expect(items.DynamicViews.length).toEqual(1);
+			expect(items._dynamicViews.length).toEqual(1);
 
 			items.removeDynamicView('ownr');
-			expect(items.DynamicViews.length).toEqual(0);
+			expect(items._dynamicViews.length).toEqual(0);
 		});
 	});
 

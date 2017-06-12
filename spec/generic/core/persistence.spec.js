@@ -248,6 +248,9 @@ describe('testing adapter functionality', () => {
 			a: 1,
 			b: 2
 		});
+		let dv = coll2.addDynamicView("test");
+		dv.applyFind({"a": 1});
+		dv.data();
 
 		const p1 = ddb.saveDatabase().then(() => {
 			expect(memAdapter.hashStore.hasOwnProperty("test.db")).toEqual(true);
@@ -255,7 +258,6 @@ describe('testing adapter functionality', () => {
 		});
 
 		const cdb = new loki("test.db");
-
 		cdb.initializePersistence({adapter: memAdapter});
 
 		const p2 = cdb.loadDatabase().then(() => {
@@ -263,6 +265,7 @@ describe('testing adapter functionality', () => {
 			expect(cdb.getCollection("testcoll").findOne({name: "test2"}).val).toEqual(101);
 			expect(cdb.collections[0].data.length).toEqual(3);
 			expect(cdb.collections[1].data.length).toEqual(1);
+			expect(cdb.getCollection("another").getDynamicView("test").data()).toEqual(coll2.find({"a": 1}));
 		});
 
 		Promise.all([p1, p2]).then(done, done.fail);

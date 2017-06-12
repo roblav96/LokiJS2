@@ -6,6 +6,7 @@ import {DynamicView} from './dynamic_view';
 import {clone, cloneObjectArray} from './clone';
 import {ltHelper, gtHelper, aeqHelper} from './helper';
 import {Loki} from './loki';
+import {copyProperties} from './utils';
 
 /*
  'isDeepProperty' is not defined              no-undef
@@ -188,7 +189,7 @@ export class Collection extends LokiEventEmitter {
 		// currentMaxId - change manually at your own peril!
 		this.maxId = 0;
 
-		this.DynamicViews = [];
+		this._dynamicViews = [];
 
 		// events
 		this.events = {
@@ -391,6 +392,117 @@ export class Collection extends LokiEventEmitter {
 		 */
 		this.stages = {};
 		this.commitLog = [];
+	}
+
+	toJSON() {
+		return {
+			name: this.name,
+			_dynamicViews: this._dynamicViews,
+			uniqueNames: this.uniqueNames,
+			transforms: this.transforms,
+			binaryIndices: this.binaryIndices,
+			data: this.data,
+			idIndex: this.idIndex,
+			maxId: this.maxId,
+			dirty: this.dirty,
+			adaptiveBinaryIndices: this.adaptiveBinaryIndices,
+			transactional: this.transactional,
+			asyncListeners: this.asyncListeners,
+			disableChangesApi: this.disableChangesApi,
+			cloneObjects: this.cloneObjects,
+			cloneMethod: this.cloneMethod,
+			autoupdate: this.autoupdate,
+			changes: this.changes,
+		};
+	}
+
+	static fromJSONObject(obj, options, forceRebuild) {
+		let coll = new Collection(obj.name, {disableChangesApi: obj.disableChangesApi});
+
+		coll.adaptiveBinaryIndices = obj.adaptiveBinaryIndices !== undefined ? (obj.adaptiveBinaryIndices === true) : false;
+		coll.transactional = obj.transactional;
+		coll.asyncListeners = obj.asyncListeners;
+		coll.disableChangesApi = obj.disableChangesApi;
+		coll.cloneObjects = obj.cloneObjects;
+		coll.cloneMethod = obj.cloneMethod || "parse-stringify";
+		coll.autoupdate = obj.autoupdate;
+		coll.changes = obj.changes;
+
+		coll.dirty = (options.retainDirtyFlags === true) ? obj.dirty : false;
+
+		function makeLoader(coll) {
+			const collOptions = options[coll.name];
+			let inflater;
+
+			if (collOptions.proto) {
+				inflater = collOptions.inflate || copyProperties;
+
+				return (data) => {
+					const collObj = new (collOptions.proto)();
+					inflater(data, collObj);
+					return collObj;
+				};
+			}
+
+			return collOptions.inflate;
+		}
+
+		// load each element individually
+		let clen = obj.data.length;
+		let j = 0;
+		if (options && options[obj.name] !== undefined) {
+			let loader = makeLoader(obj);
+
+			for (j; j < clen; j++) {
+				let collObj = loader(obj.data[j]);
+				coll.data[j] = collObj;
+				coll.addAutoUpdateObserver(coll);
+			}
+		} else {
+
+			for (j; j < clen; j++) {
+				coll.data[j] = obj.data[j];
+				coll.addAutoUpdateObserver(coll.data[j]);
+			}
+		}
+
+		coll.maxId = (typeof obj.maxId === 'undefined') ? 0 : obj.maxId;
+		coll.idIndex = obj.idIndex;
+		if (obj.binaryIndices !== undefined) {
+			coll.binaryIndices = obj.binaryIndices;
+		}
+		if (obj.transforms !== undefined) {
+			coll.transforms = obj.transforms;
+		}
+
+		coll.ensureId();
+
+		// regenerate unique indexes
+		coll.uniqueNames = [];
+		if (obj.uniqueNames !== undefined) {
+			coll.uniqueNames = obj.uniqueNames;
+			for (j = 0; j < coll.uniqueNames.length; j++) {
+				coll.ensureUniqueIndex(coll.uniqueNames[j]);
+			}
+		}
+
+		// in case they are loading a database created before we added dynamic views, handle undefined
+		if (obj._dynamicViews === undefined)
+			return coll;
+
+		// reinflate DynamicViews and attached Resultsets
+		for (let idx = 0; idx < obj._dynamicViews.length; idx++) {
+			coll._dynamicViews.push(DynamicView.fromJSONObject(coll, obj._dynamicViews[idx]));
+		}
+
+		// Upgrade Logic for binary index refactoring at version 1.5
+		if (forceRebuild) {
+			// rebuild all indices
+			coll.ensureAllIndexes(true);
+			coll.dirty = true;
+		}
+
+		return coll;
 	}
 
 	addAutoUpdateObserver(object) {
@@ -672,7 +784,7 @@ export class Collection extends LokiEventEmitter {
 	 **/
 	addDynamicView(name, options) {
 		const dv = new DynamicView(this, name, options);
-		this.DynamicViews.push(dv);
+		this._dynamicViews.push(dv);
 
 		return dv;
 	}
@@ -683,9 +795,9 @@ export class Collection extends LokiEventEmitter {
 	 * @memberof Collection
 	 **/
 	removeDynamicView(name) {
-		for (let idx = 0; idx < this.DynamicViews.length; idx++) {
-			if (this.DynamicViews[idx].name === name) {
-				this.DynamicViews.splice(idx, 1);
+		for (let idx = 0; idx < this._dynamicViews.length; idx++) {
+			if (this._dynamicViews[idx].name === name) {
+				this._dynamicViews.splice(idx, 1);
 			}
 		}
 	}
@@ -697,9 +809,9 @@ export class Collection extends LokiEventEmitter {
 	 * @memberof Collection
 	 **/
 	getDynamicView(name) {
-		for (let idx = 0; idx < this.DynamicViews.length; idx++) {
-			if (this.DynamicViews[idx].name === name) {
-				return this.DynamicViews[idx];
+		for (let idx = 0; idx < this._dynamicViews.length; idx++) {
+			if (this._dynamicViews[idx].name === name) {
+				return this._dynamicViews[idx];
 			}
 		}
 
@@ -836,7 +948,7 @@ export class Collection extends LokiEventEmitter {
 		this.cachedBinaryIndex = null;
 		this.cachedData = null;
 		this.maxId = 0;
-		this.DynamicViews = [];
+		this._dynamicViews = [];
 		this.dirty = true;
 
 		// if removing indices entirely
@@ -927,8 +1039,8 @@ export class Collection extends LokiEventEmitter {
 
 			// now that we can efficiently determine the data[] position of newly added document,
 			// submit it for all registered DynamicViews to evaluate for inclusion/exclusion
-			for (let idx = 0; idx < this.DynamicViews.length; idx++) {
-				this.DynamicViews[idx].evaluateDocument(position, false);
+			for (let idx = 0; idx < this._dynamicViews.length; idx++) {
+				this._dynamicViews[idx].evaluateDocument(position, false);
 			}
 
 			let key;
@@ -1010,9 +1122,9 @@ export class Collection extends LokiEventEmitter {
 
 			// now that we can efficiently determine the data[] position of newly added document,
 			// submit it for all registered DynamicViews to evaluate for inclusion/exclusion
-			const dvlen = this.DynamicViews.length;
+			const dvlen = this._dynamicViews.length;
 			for (let i = 0; i < dvlen; i++) {
-				this.DynamicViews[i].evaluateDocument(addedPos, true);
+				this._dynamicViews[i].evaluateDocument(addedPos, true);
 			}
 
 			if (this.adaptiveBinaryIndices) {
@@ -1120,8 +1232,8 @@ export class Collection extends LokiEventEmitter {
 			});
 			// now that we can efficiently determine the data[] position of newly added document,
 			// submit it for all registered DynamicViews to remove
-			for (let idx = 0; idx < this.DynamicViews.length; idx++) {
-				this.DynamicViews[idx].removeDocument(position);
+			for (let idx = 0; idx < this._dynamicViews.length; idx++) {
+				this._dynamicViews[idx].removeDocument(position);
 			}
 
 			if (this.adaptiveBinaryIndices) {
@@ -1742,8 +1854,8 @@ export class Collection extends LokiEventEmitter {
 			this.cachedBinaryIndex = this.binaryIndices;
 
 			// propagate startTransaction to dynamic views
-			for (let idx = 0; idx < this.DynamicViews.length; idx++) {
-				this.DynamicViews[idx].startTransaction();
+			for (let idx = 0; idx < this._dynamicViews.length; idx++) {
+				this._dynamicViews[idx].startTransaction();
 			}
 		}
 	}
@@ -1756,8 +1868,8 @@ export class Collection extends LokiEventEmitter {
 			this.cachedBinaryIndex = null;
 
 			// propagate commit to dynamic views
-			for (let idx = 0; idx < this.DynamicViews.length; idx++) {
-				this.DynamicViews[idx].commit();
+			for (let idx = 0; idx < this._dynamicViews.length; idx++) {
+				this._dynamicViews[idx].commit();
 			}
 		}
 	}
@@ -1772,8 +1884,8 @@ export class Collection extends LokiEventEmitter {
 			}
 
 			// propagate rollback to dynamic views
-			for (let idx = 0; idx < this.DynamicViews.length; idx++) {
-				this.DynamicViews[idx].rollback();
+			for (let idx = 0; idx < this._dynamicViews.length; idx++) {
+				this._dynamicViews[idx].rollback();
 			}
 		}
 	}
