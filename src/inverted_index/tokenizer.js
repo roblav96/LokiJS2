@@ -203,16 +203,15 @@ export class Tokenizer {
 	 * 	or an equivalent tokenizer
 	 * @private
 	 */
-	static fromJSON(serialized, funcTok) {
-		let tokenizer = new Tokenizer();
-
+	static fromJSONObject(serialized, funcTok) {
+		let tkz = new Tokenizer();
 		if (funcTok !== undefined && funcTok instanceof Tokenizer) {
 			if (serialized.splitter !== undefined) {
 				let splitter = funcTok.getSplitter();
 				if (serialized.splitter !== splitter[0]) {
 					throw Error("Splitter function not found.");
 				}
-				tokenizer.setSplitter(splitter[0], splitter[1]);
+				tkz.setSplitter(splitter[0], splitter[1]);
 			}
 
 			for (let i = 0; i < serialized.tokenizers.length; i++) {
@@ -220,23 +219,23 @@ export class Tokenizer {
 					throw Error("Tokenizer function not found.");
 				}
 				let labelFunc = funcTok.get(serialized.tokenizers[i]);
-				tokenizer.add(labelFunc[0], labelFunc[1]);
+				tkz.add(labelFunc[0], labelFunc[1]);
 			}
 		} else {
 			if (serialized.splitter !== undefined) {
 				if (funcTok.splitters[serialized.splitter] === undefined) {
 					throw Error("Splitter function not found.");
 				}
-				tokenizer.setSplitter(serialized.splitter, funcTok.splitters[serialized.splitter]);
+				tkz.setSplitter(serialized.splitter, funcTok.splitters[serialized.splitter]);
 			}
 			for (let i = 0; i < serialized.tokenizers.length; i++) {
 				if (funcTok.tokenizers[serialized.tokenizers[i]] === undefined) {
 					throw Error("Tokenizer function not found.");
 				}
-				tokenizer.add(serialized.tokenizers[i], funcTok.tokenizers[serialized.tokenizers[i]]);
+				tkz.add(serialized.tokenizers[i], funcTok.tokenizers[serialized.tokenizers[i]]);
 			}
 		}
-		return tokenizer;
+		return tkz;
 	}
 
 	/**

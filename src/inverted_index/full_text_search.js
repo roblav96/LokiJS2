@@ -94,13 +94,15 @@ export class FullTextSearch {
 		return serialized;
 	}
 
-	loadJSON(serialized, tokenizers) {
+	static fromJSONObject(serialized, tokenizers) {
+		let fts = new FuzzySearch();
 		let db = JSON.parse(serialized);
 		let fieldNames = Object.keys(db);
 		for (let i = 0, fieldName; i < fieldNames.length, fieldName = fieldNames[i]; i++) {
-			this._invIdxs[fieldName] = new InvertedIndex();
-			this._invIdxs[fieldName].loadJSON(db[fieldName], tokenizers[fieldName]);
+			fts._invIdxs[fieldName] = new InvertedIndex();
+			fts._invIdxs[fieldName].loadJSON(db[fieldName], tokenizers[fieldName]);
 		}
+		return fts;
 	}
 
 	setDirty() {

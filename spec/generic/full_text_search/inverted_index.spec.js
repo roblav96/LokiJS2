@@ -78,8 +78,7 @@ describe('inverted index', () => {
 		ii2.insert(field3, 3);
 		ii2.insert(field4, 4);
 
-		let ii3 = new InvertedIndex();
-		ii3.loadJSON(JSON.parse(JSON.stringify(ii2)));
+		let ii3 = InvertedIndex.fromJSONObject(JSON.parse(JSON.stringify(ii2)));
 
 		expect(JSON.stringify(ii3)).toEqual(JSON.stringify(ii2));
 		ii2.remove(4);
@@ -102,7 +101,7 @@ describe('inverted index', () => {
 		expect(JSON.stringify(ii3)).toEqual(JSON.stringify(ii1));
 		expect(JSON.stringify(ii3)).toEqual(JSON.stringify(ii2));
 
-		ii2.loadJSON(JSON.parse(JSON.stringify(ii1)));
+		ii2 = InvertedIndex.fromJSONObject(JSON.parse(JSON.stringify(ii1)));
 		expect(JSON.stringify(ii2)).toEqual(JSON.stringify(ii1));
 
 		ii1.insert(field5, 5);

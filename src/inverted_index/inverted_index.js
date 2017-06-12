@@ -253,14 +253,13 @@ export class InvertedIndex {
 	 * @param {Object.<string, function>|Tokenizer} funcTok[undefined] - the depending functions with labels
 	 *  or an equivalent tokenizer
 	 */
-	loadJSON(serialized, funcTok = undefined) {
+	static fromJSONObject(serialized, funcTok = undefined) {
 		let dbObject = serialized;
-
-		this._tokenizer = Tokenizer.fromJSON(dbObject._tokenizer, funcTok);
-		this._docCount = dbObject._docCount;
-		this._docStore = dbObject._docStore;
-		this._totalFieldLength = dbObject._totalFieldLength;
-		this._root = dbObject._root;
+		let invIdx = new InvertedIndex(true, Tokenizer.fromJSONObject(dbObject._tokenizer, funcTok));
+		invIdx._docCount = dbObject._docCount;
+		invIdx._docStore = dbObject._docStore;
+		invIdx._totalFieldLength = dbObject._totalFieldLength;
+		invIdx._root = dbObject._root;
 
 		let regenerate = (index, parent) => {
 			// Set parent.
@@ -279,7 +278,7 @@ export class InvertedIndex {
 					let docIds = Object.keys(index.dc);
 					for (let j = 0; j < docIds.length; j++) {
 						// Get document store at specific document/field.
-						let ref = this._docStore[docIds[j]];
+						let ref = invIdx._docStore[docIds[j]];
 						if (ref.termRefs === undefined) {
 							Object.defineProperties(ref, {
 								termRefs: {enumerable: false, configurable: true, writable: true, value: []}
@@ -294,6 +293,8 @@ export class InvertedIndex {
 				}
 			}
 		};
-		regenerate(this._root, null);
+		regenerate(invIdx._root, null);
+
+		return invIdx;
 	}
 }

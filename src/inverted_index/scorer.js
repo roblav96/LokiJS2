@@ -50,7 +50,6 @@ export class Scorer {
 	}
 
 	finalScore(query, docResults = {}) {
-
 		let result = {};
 		let k1 = query.scoring.k1;
 		let b = query.scoring.b;
