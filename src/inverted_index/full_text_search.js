@@ -22,10 +22,14 @@ export class FullTextSearch {
 		if (Array.isArray(fields)) {
 			for (let i = 0; i < fields.length; i++) {
 				let field = fields[i];
-				let name = Utils.asString(field.name, TypeError('Field name needs to be a string.'));
+				let name = Utils.asString(field.name, {
+					error: TypeError('Field name needs to be a string.')
+				});
 
-				let store = field.store !== undefined ?
-					Utils.asBoolean(field.store, TypeError("Field store flag needs to be a boolean")) : true;
+				let store = Utils.asBoolean(field.store, {
+					error: TypeError("Field store flag needs to be a boolean"),
+					defaultValue: true
+				});
 
 				let tokenizer = null;
 				if (field.tokenizer !== undefined) {

@@ -171,7 +171,7 @@ export class DynamicView extends LokiEventEmitter {
 			filterPipeline: this.filterPipeline,
 			sortCriteria: this.sortCriteria,
 			sortDirty: this.sortDirty,
-		}
+		};
 	}
 
 	static fromJSONObject(collection, obj) {

@@ -24,9 +24,7 @@ export class BaseQuery {
 	 * @return {BaseQuery} object itself for cascading
 	 */
 	boost(value) {
-		if (!Utils.isNumber(value) || value < 0) {
-			throw TypeError("Boost must be a positive number.");
-		}
+		value = Utils.asNumber(value, {check: (x) => x >= 0, error: TypeError("Boost must be a positive number.")});
 		this._data.boost = value;
 		return this;
 	}
@@ -182,8 +180,11 @@ export class FuzzyQuery extends BaseQuery {
 	 * @return {FuzzyQuery} - object itself for cascading
 	 */
 	fuzziness(fuzziness) {
-		if ((!Utils.isString(fuzziness) || fuzziness !== "AUTO") && (!Utils.isNumber(fuzziness) || fuzziness < 0)) {
-			throw TypeError("Fuzziness must be a positive number or AUTO.");
+		if (fuzziness !== "AUTO") {
+			fuzziness = Utils.asNumber(fuzziness, {
+				error: TypeError("Fuzziness must be a positive number or AUTO."),
+				check: (x) => x >= 0
+			});
 		}
 		this._data.fuzziness = fuzziness;
 		return this;
@@ -195,9 +196,10 @@ export class FuzzyQuery extends BaseQuery {
 	 * @return {FuzzyQuery}  object itself for cascading
 	 */
 	prefixLength(prefixLength) {
-		if (!Utils.isNumber(prefixLength) || prefixLength < 0) {
-			throw TypeError("Prefix length must be a positive number.");
-		}
+		prefixLength = Utils.asNumber(prefixLength, {
+			check: (x) => x >= 0,
+			error: TypeError("Prefix length must be a positive number.")
+		});
 		this._data.prefix_length = prefixLength;
 		return this;
 	}
@@ -311,9 +313,9 @@ export class MatchQuery extends BaseQuery {
 	 * @return {MatchQuery} object itself for cascading
 	 */
 	minimumShouldMatch(minShouldMatch) {
-		if (!Utils.isNumber(minShouldMatch)) {
-			throw TypeError("Minimum should match must be a number or a string.");
-		}
+		minShouldMatch = Utils.asNumber(minShouldMatch, {
+			error: TypeError("Minimum should match must be a number or a string.")
+		});
 		if (this._data.operator !== undefined && this._data.operator === "and") {
 			throw SyntaxError("Match query with \"and\" operator does not support minimum should match.");
 		}
@@ -350,8 +352,11 @@ export class MatchQuery extends BaseQuery {
 	 * @return {MatchQuery} - object itself for cascading
 	 */
 	fuzziness(fuzziness) {
-		if (!(Utils.isString(fuzziness) && fuzziness === "AUTO") && !(Utils.isNumber(fuzziness) && fuzziness >= 0)) {
-			throw TypeError("Fuzziness must be a positive number or AUTO.");
+		if (fuzziness !== "AUTO") {
+			fuzziness = Utils.asNumber(fuzziness, {
+				error: TypeError("Fuzziness must be a positive number or AUTO."),
+				check: (x) => x >= 0
+			});
 		}
 		this._data.fuzziness = fuzziness;
 		return this;
@@ -363,9 +368,10 @@ export class MatchQuery extends BaseQuery {
 	 * @return {MatchQuery} - object itself for cascading
 	 */
 	prefixLength(prefixLength) {
-		if (!Utils.isNumber(prefixLength) || prefixLength < 0) {
-			throw TypeError("Prefix length must be a positive number.");
-		}
+		prefixLength = Utils.asNumber(prefixLength, {
+			check: (x) => x >= 0,
+			error: TypeError("Prefix length must be a positive number.")
+		});
 		this._data.prefix_length = prefixLength;
 		return this;
 	}

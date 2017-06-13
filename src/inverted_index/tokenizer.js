@@ -162,7 +162,6 @@ export class Tokenizer {
 	 * Tokenizes a string into tokens.
 	 * @param {string} str - the string
 	 * @return {string[]} the tokens
-	 * @private
 	 */
 	tokenize(str) {
 		let tokens = this._splitter(str);

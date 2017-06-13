@@ -20,9 +20,9 @@ describe('fuzzy query', () => {
 		q = new QB().fuzzy(1, 1);
 		expect(() => q.fuzziness("AUTO")).not.toThrowErrorOfType("TypeError");
 		expect(() => q.fuzziness(-3)).toThrowErrorOfType("TypeError");
-		expect(() => q.fuzziness("3")).toThrowErrorOfType("TypeError");
-		expect(() => q.prefixLength(-1)).toThrowErrorOfType("TypeError");
-		expect(() => q.prefixLength("1")).toThrowErrorOfType("TypeError");
+		expect(() => q.fuzziness("3")).not.toThrowErrorOfType("TypeError");
+    expect(() => q.prefixLength(-1)).toThrowErrorOfType("TypeError");
+		expect(() => q.prefixLength("1")).not.toThrowErrorOfType("TypeError");
 		expect(() => new QB().fuzzy("user", undefined)).toThrowErrorOfType("TypeError");
 		expect(() => new QB().fuzzy(null, "albrt")).toThrowErrorOfType("TypeError");
 	});
