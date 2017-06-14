@@ -9,27 +9,27 @@ tkz.add("stop-word", (token) => (token !== "habitasse" && token !== "morbi") ? t
 
 const FIELD_NAME_1 = "msg";
 let fts = new FullTextSearch([{
-	name: FIELD_NAME_1,
-	tokenizer: tkz
+  name: FIELD_NAME_1,
+  tokenizer: tkz
 }]);
 
 // Add documents.
 for (let i = 0; i < DATA.length; i++) {
-	fts.addDocument({
-		$loki: DATA[i].id,
-		[FIELD_NAME_1]: DATA[i][FIELD_NAME_1]
-	});
+  fts.addDocument({
+    $loki: DATA[i].id,
+    [FIELD_NAME_1]: DATA[i][FIELD_NAME_1]
+  });
 }
 
 suite("Full text search queries", function () {
-	for (let i = 0; i < QUERIES.length; i++) {
-		let query = QUERIES[i];
-		benchmark(i + ""/*+ ": " + JSON.stringify(query)*/, function () {
-			fts.search(query.fts);
-		});
-	}
+  for (let i = 0; i < QUERIES.length; i++) {
+    let query = QUERIES[i];
+    benchmark(i + ""/*+ ": " + JSON.stringify(query)*/, function () {
+      fts.search(query.fts);
+    });
+  }
 });
 
 suite("Full text search comparison", function () {
-
+  isNaN("123.123");
 });

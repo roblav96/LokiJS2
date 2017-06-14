@@ -1,9 +1,9 @@
 function localStorageAvailable() {
-	try {
-		return (window && window.localStorage !== undefined && window.localStorage !== null);
-	} catch (e) {
-		return false;
-	}
+  try {
+    return (window && window.localStorage !== undefined && window.localStorage !== null);
+  } catch (e) {
+    return false;
+  }
 }
 /*
  'localStorageAvailable' is not defined
@@ -21,13 +21,13 @@ export class LokiLocalStorageAdapter {
 	 * @returns {Promise} a Promise that resolves after the database was loaded
 	 * @memberof LokiLocalStorageAdapter
 	 */
-	loadDatabase(dbname) {
-		if (localStorageAvailable()) {
-			return Promise.resolve(localStorage.getItem(dbname));
-		}
+  loadDatabase(dbname) {
+    if (localStorageAvailable()) {
+      return Promise.resolve(localStorage.getItem(dbname));
+    }
 
-		return Promise.reject(new Error('localStorage is not available'));
-	}
+    return Promise.reject(new Error('localStorage is not available'));
+  }
 
 	/**
 	 * saveDatabase() - save data to localstorage, will throw an error if the file can't be saved
@@ -36,15 +36,15 @@ export class LokiLocalStorageAdapter {
 	 * @returns {Promise} a Promise that resolves after the database was saved
 	 * @memberof LokiLocalStorageAdapter
 	 */
-	saveDatabase(dbname, dbstring) {
-		if (localStorageAvailable()) {
-			localStorage.setItem(dbname, dbstring);
+  saveDatabase(dbname, dbstring) {
+    if (localStorageAvailable()) {
+      localStorage.setItem(dbname, dbstring);
 
-			return Promise.resolve();
-		}
+      return Promise.resolve();
+    }
 
-		return Promise.reject(new Error('localStorage is not available'));
-	}
+    return Promise.reject(new Error('localStorage is not available'));
+  }
 
 	/**
 	 * deleteDatabase() - delete the database from localstorage, will throw an error if it
@@ -53,14 +53,14 @@ export class LokiLocalStorageAdapter {
 	 * @returns {Promise} a Promise that resolves after the database was deleted
 	 * @memberof LokiLocalStorageAdapter
 	 */
-	deleteDatabase(dbname) {
-		if (localStorageAvailable()) {
-			localStorage.removeItem(dbname);
+  deleteDatabase(dbname) {
+    if (localStorageAvailable()) {
+      localStorage.removeItem(dbname);
 
-			return Promise.resolve();
-		}
+      return Promise.resolve();
+    }
 
-		return Promise.reject(new Error('localStorage is not available'));
-	}
+    return Promise.reject(new Error('localStorage is not available'));
+  }
 
 }

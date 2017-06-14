@@ -38,34 +38,34 @@ const ITERATIONS = 64000;
  * @param {string} secret - the secret to use for encryption
  */
 function encrypt(input, secret) {
-	if (!secret) {
-		return new Error('A \'secret\' is required to encrypt');
-	}
+  if (!secret) {
+    return new Error('A \'secret\' is required to encrypt');
+  }
 
 
-	const salt = cryptoLib.randomBytes(KEY_LENGTH / 8);
-	const iv = cryptoLib.randomBytes(16);
+  const salt = cryptoLib.randomBytes(KEY_LENGTH / 8);
+  const iv = cryptoLib.randomBytes(16);
 
-	try {
-		const key = cryptoLib.pbkdf2Sync(secret, salt, ITERATIONS, KEY_LENGTH / 8, 'sha1');
-		const cipher = cryptoLib.createCipheriv(CIPHER, key, iv);
+  try {
+    const key = cryptoLib.pbkdf2Sync(secret, salt, ITERATIONS, KEY_LENGTH / 8, 'sha1');
+    const cipher = cryptoLib.createCipheriv(CIPHER, key, iv);
 
-		let encryptedValue = cipher.update(input, 'utf8', 'base64');
-		encryptedValue += cipher.final('base64');
+    let encryptedValue = cipher.update(input, 'utf8', 'base64');
+    encryptedValue += cipher.final('base64');
 
-		const result = {
-			cipher: CIPHER,
-			keyDerivation: KEY_DERIVATION,
-			keyLength: KEY_LENGTH,
-			iterations: ITERATIONS,
-			iv: iv.toString('base64'),
-			salt: salt.toString('base64'),
-			value: encryptedValue
-		};
-		return result;
-	} catch (err) {
-		return new Error('Unable to encrypt value due to: ' + err);
-	}
+    const result = {
+      cipher: CIPHER,
+      keyDerivation: KEY_DERIVATION,
+      keyLength: KEY_LENGTH,
+      iterations: ITERATIONS,
+      iv: iv.toString('base64'),
+      salt: salt.toString('base64'),
+      value: encryptedValue
+    };
+    return result;
+  } catch (err) {
+    return new Error('Unable to encrypt value due to: ' + err);
+  }
 }
 
 /**
@@ -76,42 +76,42 @@ function encrypt(input, secret) {
  */
 function decrypt(input, secret) {
 	// Ensure we have something to decrypt
-	if (!input) {
-		return new Error('You must provide a value to decrypt');
-	}
+  if (!input) {
+    return new Error('You must provide a value to decrypt');
+  }
 	// Ensure we have the secret used to encrypt this value
-	if (!secret) {
-		return new Error('A \'secret\' is required to decrypt');
-	}
+  if (!secret) {
+    return new Error('A \'secret\' is required to decrypt');
+  }
 
 	// turn string into an object
-	try {
-		input = JSON.parse(input);
-	} catch (err) {
-		return new Error('Unable to parse string input as JSON');
-	}
+  try {
+    input = JSON.parse(input);
+  } catch (err) {
+    return new Error('Unable to parse string input as JSON');
+  }
 
 	// Ensure our input is a valid object with 'iv', 'salt', and 'value'
-	if (!input.iv || !input.salt || !input.value) {
-		return new Error('Input must be a valid object with \'iv\', \'salt\', and \'value\' properties');
-	}
+  if (!input.iv || !input.salt || !input.value) {
+    return new Error('Input must be a valid object with \'iv\', \'salt\', and \'value\' properties');
+  }
 
-	const salt = new Buffer(input.salt, 'base64');
-	const iv = new Buffer(input.iv, 'base64');
-	const keyLength = input.keyLength;
-	const iterations = input.iterations;
+  const salt = new Buffer(input.salt, 'base64');
+  const iv = new Buffer(input.iv, 'base64');
+  const keyLength = input.keyLength;
+  const iterations = input.iterations;
 
-	try {
-		const key = cryptoLib.pbkdf2Sync(secret, salt, iterations, keyLength / 8, 'sha1');
-		const decipher = cryptoLib.createDecipheriv(CIPHER, key, iv);
+  try {
+    const key = cryptoLib.pbkdf2Sync(secret, salt, iterations, keyLength / 8, 'sha1');
+    const decipher = cryptoLib.createDecipheriv(CIPHER, key, iv);
 
-		let decryptedValue = decipher.update(input.value, 'base64', 'utf8');
-		decryptedValue += decipher.final('utf8');
+    let decryptedValue = decipher.update(input.value, 'base64', 'utf8');
+    decryptedValue += decipher.final('utf8');
 
-		return decryptedValue;
-	} catch (err) {
-		return new Error('Unable to decrypt value due to: ' + err);
-	}
+    return decryptedValue;
+  } catch (err) {
+    return new Error('Unable to decrypt value due to: ' + err);
+  }
 }
 
 /**
@@ -124,9 +124,9 @@ export class lokiCryptedFileAdapter {
 	 *
 	 * @param {string} secret - the secret to be used
 	 */
-	setSecret(secret) {
-		this.secret = secret;
-	}
+  setSecret(secret) {
+    this.secret = secret;
+  }
 
 	/**
 	 * loadDatabase() - Retrieves a serialized db string from the catalog.
@@ -143,19 +143,19 @@ export class lokiCryptedFileAdapter {
 	 * @param {string} dbname - the name of the database to retrieve.
 	 * @returns {Promise} a Promise that resolves after the database was loaded
 	 */
-	loadDatabase(dbname) {
-		const secret = this.secret;
+  loadDatabase(dbname) {
+    const secret = this.secret;
 
-		return new Promise((resolve, reject) => {
-			fs.readFile(dbname, 'utf8', (err, data) => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve(decrypt(data, secret));
-				}
-			});
-		});
-	}
+    return new Promise((resolve, reject) => {
+      fs.readFile(dbname, 'utf8', (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(decrypt(data, secret));
+        }
+      });
+    });
+  }
 
 	/**
 	 *
@@ -180,23 +180,23 @@ export class lokiCryptedFileAdapter {
 	 * @param {string} dbstring - the serialized db string to save.
 	 * @returns {Promise} a Promise that resolves after the database was persisted
 	 */
-	saveDatabase(dbname, dbstring) {
-		const encrypted = encrypt(dbstring, this.secret);
+  saveDatabase(dbname, dbstring) {
+    const encrypted = encrypt(dbstring, this.secret);
 
-		if (!isError(encrypted)) {
-			return new Promise((resolve, reject) => {
-				fs.writeFile(dbname,
+    if (!isError(encrypted)) {
+      return new Promise((resolve, reject) => {
+        fs.writeFile(dbname,
 					JSON.stringify(encrypted, null, '  '),
 					'utf8', (err) => {
-						if (err) {
-							reject(err);
-						} else {
-							resolve();
-						}
-					});
-			});
-		} else { // Error !
-			return Promise.reject(encrypted);
-		}
-	}
+  if (err) {
+    reject(err);
+  } else {
+    resolve();
+  }
+});
+      });
+    } else { // Error !
+      return Promise.reject(encrypted);
+    }
+  }
 }

@@ -11,12 +11,12 @@
  */
 export class LokiEventEmitter {
 
-	constructor() {
+  constructor() {
 		/**
 		 * @prop {hashmap} events - a hashmap, with each property being an array of callbacks
 		 * @memberof LokiEventEmitter
 		 */
-		this.events = {};
+    this.events = {};
 
 		/**
 		 * @prop {boolean} asyncListeners - boolean determines whether or not the callbacks associated with each event
@@ -24,8 +24,8 @@ export class LokiEventEmitter {
 		 * Default is false, which means events are synchronous
 		 * @memberof LokiEventEmitter
 		 */
-		this.asyncListeners = false;
-	}
+    this.asyncListeners = false;
+  }
 
 	/**
 	 * on(eventName, listener) - adds a listener to the queue of callbacks associated to an event
@@ -34,23 +34,23 @@ export class LokiEventEmitter {
 	 * @returns {int} the index of the callback in the array of listeners for a particular event
 	 * @memberof LokiEventEmitter
 	 */
-	on(eventName, listener) {
-		let event;
+  on(eventName, listener) {
+    let event;
 
-		if (Array.isArray(eventName)) {
-			eventName.forEach((currentEventName) => {
-				this.on(currentEventName, listener);
-			});
-			return listener;
-		}
+    if (Array.isArray(eventName)) {
+      eventName.forEach((currentEventName) => {
+        this.on(currentEventName, listener);
+      });
+      return listener;
+    }
 
-		event = this.events[eventName];
-		if (!event) {
-			event = this.events[eventName] = [];
-		}
-		event.push(listener);
-		return listener;
-	}
+    event = this.events[eventName];
+    if (!event) {
+      event = this.events[eventName] = [];
+    }
+    event.push(listener);
+    return listener;
+  }
 
 	/**
 	 * emit(eventName, data) - emits a particular event
@@ -60,20 +60,20 @@ export class LokiEventEmitter {
 	 * @param {object=} data - optional object passed with the event
 	 * @memberof LokiEventEmitter
 	 */
-	emit(eventName, data) {
-		if (eventName && this.events[eventName]) {
-			this.events[eventName].forEach((listener) => {
-				if (this.asyncListeners) {
-					setTimeout(() => {
-						listener(data);
-					}, 1);
-				} else {
-					listener(data);
-				}
+  emit(eventName, data) {
+    if (eventName && this.events[eventName]) {
+      this.events[eventName].forEach((listener) => {
+        if (this.asyncListeners) {
+          setTimeout(() => {
+            listener(data);
+          }, 1);
+        } else {
+          listener(data);
+        }
 
-			});
-		}
-	}
+      });
+    }
+  }
 
 	/**
 	 * Alias of LokiEventEmitter.prototype.on
@@ -83,9 +83,9 @@ export class LokiEventEmitter {
 	 * @returns {int} the index of the callback in the array of listeners for a particular event
 	 * @memberof LokiEventEmitter
 	 */
-	addListener(eventName, listener) {
-		return this.on(eventName, listener);
-	}
+  addListener(eventName, listener) {
+    return this.on(eventName, listener);
+  }
 
 	/**
 	 * removeListener() - removes the listener at position 'index' from the event 'eventName'
@@ -93,16 +93,16 @@ export class LokiEventEmitter {
 	 * @param {function} listener - the listener callback function to remove from emitter
 	 * @memberof LokiEventEmitter
 	 */
-	removeListener(eventName, listener) {
-		if (Array.isArray(eventName)) {
-			eventName.forEach((currentEventName) => {
-				this.removeListener(currentEventName, listen);
-			});
-		}
+  removeListener(eventName, listener) {
+    if (Array.isArray(eventName)) {
+      eventName.forEach((currentEventName) => {
+        this.removeListener(currentEventName, listen);
+      });
+    }
 
-		if (this.events[eventName]) {
-			const listeners = this.events[eventName];
-			listeners.splice(listeners.indexOf(listener), 1);
-		}
-	}
+    if (this.events[eventName]) {
+      const listeners = this.events[eventName];
+      listeners.splice(listeners.indexOf(listener), 1);
+    }
+  }
 }

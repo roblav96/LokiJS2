@@ -9,10 +9,10 @@ import * as Utils from './utils.js';
  * @param {string} type - the type name of the query
  */
 export class BaseQuery {
-	constructor(type, data = {}) {
-		this._data = data;
-		this._data.type = Utils.asString(type);
-	}
+  constructor(type, data = {}) {
+    this._data = data;
+    this._data.type = Utils.asString(type);
+  }
 
 	/**
 	 * Boosts the query result.
@@ -23,19 +23,19 @@ export class BaseQuery {
 	 * @param {number} value - the positive boost
 	 * @return {BaseQuery} object itself for cascading
 	 */
-	boost(value) {
-		value = Utils.asNumber(value, {check: (x) => x >= 0, error: TypeError("Boost must be a positive number.")});
-		this._data.boost = value;
-		return this;
-	}
+  boost(value) {
+    value = Utils.asNumber(value, {check: (x) => x >= 0, error: TypeError("Boost must be a positive number.")});
+    this._data.boost = value;
+    return this;
+  }
 
 	/**
 	 * Build the final query.
 	 * @return {Object} - the final query
 	 */
-	build() {
-		return this._data;
-	}
+  build() {
+    return this._data;
+  }
 }
 
 /**
@@ -56,11 +56,11 @@ export class BaseQuery {
  * @extends BaseQuery
  */
 export class TermQuery extends BaseQuery {
-	constructor(field, term, data = {}) {
-		super("term", data);
-		this._data.field = Utils.asString(field);
-		this._data.value = Utils.asString(term);
-	}
+  constructor(field, term, data = {}) {
+    super("term", data);
+    this._data.field = Utils.asString(field);
+    this._data.value = Utils.asString(term);
+  }
 }
 
 /**
@@ -81,11 +81,11 @@ export class TermQuery extends BaseQuery {
  * @extends BaseQuery
  */
 export class TermsQuery extends BaseQuery {
-	constructor(field, terms, data = {}) {
-		super("terms", data);
-		this._data.field = Utils.asString(field);
-		this._data.value = Utils.asArrayOfString(terms);
-	}
+  constructor(field, terms, data = {}) {
+    super("terms", data);
+    this._data.field = Utils.asString(field);
+    this._data.value = Utils.asArrayOfString(terms);
+  }
 }
 
 /**
@@ -117,21 +117,21 @@ export class TermsQuery extends BaseQuery {
  * @extends BaseQuery
  */
 export class WildcardQuery extends BaseQuery {
-	constructor(field, wildcard, data = {}) {
-		super("wildcard", data);
-		this._data.field = Utils.asString(field);
-		this._data.value = Utils.asString(wildcard);
-	}
+  constructor(field, wildcard, data = {}) {
+    super("wildcard", data);
+    this._data.field = Utils.asString(field);
+    this._data.value = Utils.asString(wildcard);
+  }
 
 	/**
 	 * This flag enables scoring for wildcard results, similar to {@link TermQuery}.
 	 * @param {boolean} enable - flag to enable or disable scoring
 	 * @return {WildcardQuery}
 	 */
-	enableScoring(enable) {
-		this._data.enable_scoring = Utils.asBoolean(enable);
-		return this;
-	}
+  enableScoring(enable) {
+    this._data.enable_scoring = Utils.asBoolean(enable);
+    return this;
+  }
 }
 
 /**
@@ -162,11 +162,11 @@ export class WildcardQuery extends BaseQuery {
  * @extends BaseQuery
  */
 export class FuzzyQuery extends BaseQuery {
-	constructor(field, fuzzy, data = {}) {
-		super("fuzzy", data);
-		this._data.field = Utils.asString(field);
-		this._data.value = Utils.asString(fuzzy);
-	}
+  constructor(field, fuzzy, data = {}) {
+    super("fuzzy", data);
+    this._data.field = Utils.asString(field);
+    this._data.value = Utils.asString(fuzzy);
+  }
 
 	/**
 	 * Sets the maximal allowed fuzziness.
@@ -179,30 +179,30 @@ export class FuzzyQuery extends BaseQuery {
 	 *
 	 * @return {FuzzyQuery} - object itself for cascading
 	 */
-	fuzziness(fuzziness) {
-		if (fuzziness !== "AUTO") {
-			fuzziness = Utils.asNumber(fuzziness, {
-				error: TypeError("Fuzziness must be a positive number or AUTO."),
-				check: (x) => x >= 0
-			});
-		}
-		this._data.fuzziness = fuzziness;
-		return this;
-	}
+  fuzziness(fuzziness) {
+    if (fuzziness !== "AUTO") {
+      fuzziness = Utils.asNumber(fuzziness, {
+        error: TypeError("Fuzziness must be a positive number or AUTO."),
+        check: (x) => x >= 0
+      });
+    }
+    this._data.fuzziness = fuzziness;
+    return this;
+  }
 
 	/**
 	 * Sets the initial word length.
 	 * @param {number} prefixLength - the positive prefix length
 	 * @return {FuzzyQuery}  object itself for cascading
 	 */
-	prefixLength(prefixLength) {
-		prefixLength = Utils.asNumber(prefixLength, {
-			check: (x) => x >= 0,
-			error: TypeError("Prefix length must be a positive number.")
-		});
-		this._data.prefix_length = prefixLength;
-		return this;
-	}
+  prefixLength(prefixLength) {
+    prefixLength = Utils.asNumber(prefixLength, {
+      check: (x) => x >= 0,
+      error: TypeError("Prefix length must be a positive number.")
+    });
+    this._data.prefix_length = prefixLength;
+    return this;
+  }
 }
 
 /**
@@ -225,21 +225,21 @@ export class FuzzyQuery extends BaseQuery {
  * @extends BaseQuery
  */
 export class PrefixQuery extends BaseQuery {
-	constructor(field, prefix, data = {}) {
-		super("prefix", data);
-		this._data.field = Utils.asString(field);
-		this._data.value = Utils.asString(prefix);
-	}
+  constructor(field, prefix, data = {}) {
+    super("prefix", data);
+    this._data.field = Utils.asString(field);
+    this._data.value = Utils.asString(prefix);
+  }
 
 	/**
 	 * This flag enables scoring for wildcard results, similar to {@link TermQuery}.
 	 * @param {boolean} enable - flag to enable or disable scoring
 	 * @return {PrefixQuery}
 	 */
-	enableScoring(enable) {
-		this._data.enable_scoring = Utils.asBoolean(enable);
-		return this;
-	}
+  enableScoring(enable) {
+    this._data.enable_scoring = Utils.asBoolean(enable);
+    return this;
+  }
 }
 
 /**
@@ -258,10 +258,10 @@ export class PrefixQuery extends BaseQuery {
  * @extends BaseQuery
  */
 export class ExistsQuery extends BaseQuery {
-	constructor(field, data = {}) {
-		super("exists", data);
-		this._data.field = Utils.asString(field);
-	}
+  constructor(field, data = {}) {
+    super("exists", data);
+    this._data.field = Utils.asString(field);
+  }
 }
 
 /**
@@ -294,11 +294,11 @@ export class ExistsQuery extends BaseQuery {
  * @extends BaseQuery
  */
 export class MatchQuery extends BaseQuery {
-	constructor(field, query, data = {}) {
-		super("match", data);
-		this._data.field = Utils.asString(field);
-		this._data.value = Utils.asString(query);
-	}
+  constructor(field, query, data = {}) {
+    super("match", data);
+    this._data.field = Utils.asString(field);
+    this._data.value = Utils.asString(query);
+  }
 
 	/**
 	 * Controls the amount of minimum matching sub queries before a document will be considered.
@@ -312,33 +312,33 @@ export class MatchQuery extends BaseQuery {
 	 *     The number computed from the percentage is rounded down and used as the minimum.
 	 * @return {MatchQuery} object itself for cascading
 	 */
-	minimumShouldMatch(minShouldMatch) {
-		minShouldMatch = Utils.asNumber(minShouldMatch, {
-			error: TypeError("Minimum should match must be a number or a string.")
-		});
-		if (this._data.operator !== undefined && this._data.operator === "and") {
-			throw SyntaxError("Match query with \"and\" operator does not support minimum should match.");
-		}
-		this._data.minimum_should_match = minShouldMatch;
-		return this;
-	}
+  minimumShouldMatch(minShouldMatch) {
+    minShouldMatch = Utils.asNumber(minShouldMatch, {
+      error: TypeError("Minimum should match must be a number or a string.")
+    });
+    if (this._data.operator !== undefined && this._data.operator === "and") {
+      throw SyntaxError("Match query with \"and\" operator does not support minimum should match.");
+    }
+    this._data.minimum_should_match = minShouldMatch;
+    return this;
+  }
 
 	/**
 	 * Sets the boolean operator.
 	 * @param {string} op - the operator (_or_/_and_)
 	 * @return {MatchQuery} object itself for cascading
 	 */
-	operator(op) {
-		op = Utils.asString(op);
-		if (op !== 'and' && op !== 'or') {
-			throw SyntaxError("Unknown operator.");
-		}
-		this._data.operator = op;
-		if (this._data.minimum_should_match !== undefined && this._data.operator === "and") {
-			throw SyntaxError("Match query with \"and\" operator does not support minimum should match.");
-		}
-		return this;
-	}
+  operator(op) {
+    op = Utils.asString(op);
+    if (op !== 'and' && op !== 'or') {
+      throw SyntaxError("Unknown operator.");
+    }
+    this._data.operator = op;
+    if (this._data.minimum_should_match !== undefined && this._data.operator === "and") {
+      throw SyntaxError("Match query with \"and\" operator does not support minimum should match.");
+    }
+    return this;
+  }
 
 	/**
 	 * Sets the maximal allowed fuzziness.
@@ -351,30 +351,30 @@ export class MatchQuery extends BaseQuery {
 	 *
 	 * @return {MatchQuery} - object itself for cascading
 	 */
-	fuzziness(fuzziness) {
-		if (fuzziness !== "AUTO") {
-			fuzziness = Utils.asNumber(fuzziness, {
-				error: TypeError("Fuzziness must be a positive number or AUTO."),
-				check: (x) => x >= 0
-			});
-		}
-		this._data.fuzziness = fuzziness;
-		return this;
-	}
+  fuzziness(fuzziness) {
+    if (fuzziness !== "AUTO") {
+      fuzziness = Utils.asNumber(fuzziness, {
+        error: TypeError("Fuzziness must be a positive number or AUTO."),
+        check: (x) => x >= 0
+      });
+    }
+    this._data.fuzziness = fuzziness;
+    return this;
+  }
 
 	/**
 	 * Sets the starting word length which should not be considered for fuzziness.
 	 * @param {number} prefixLength - the positive prefix length
 	 * @return {MatchQuery} - object itself for cascading
 	 */
-	prefixLength(prefixLength) {
-		prefixLength = Utils.asNumber(prefixLength, {
-			check: (x) => x >= 0,
-			error: TypeError("Prefix length must be a positive number.")
-		});
-		this._data.prefix_length = prefixLength;
-		return this;
-	}
+  prefixLength(prefixLength) {
+    prefixLength = Utils.asNumber(prefixLength, {
+      check: (x) => x >= 0,
+      error: TypeError("Prefix length must be a positive number.")
+    });
+    this._data.prefix_length = prefixLength;
+    return this;
+  }
 }
 
 /**
@@ -397,9 +397,9 @@ export class MatchQuery extends BaseQuery {
  * @extends BaseQuery
  */
 export class MatchAllQuery extends BaseQuery {
-	constructor(data = {}) {
-		super("match_all", data);
-	}
+  constructor(data = {}) {
+    super("match_all", data);
+  }
 }
 
 /**
@@ -407,71 +407,71 @@ export class MatchAllQuery extends BaseQuery {
  * @private
  */
 class ArrayQuery extends BaseQuery {
-	constructor(callbackName, callback, data = {}) {
-		super("array", data);
-		this._data.values = [];
-		this._callbackName = callbackName;
-		this[callbackName] = callback;
+  constructor(callbackName, callback, data = {}) {
+    super("array", data);
+    this._data.values = [];
+    this._callbackName = callbackName;
+    this[callbackName] = callback;
 
-		this._prepare = (queryType, ...args) => {
-			let data = {};
-			let query = new queryType(...args, data);
-			this._data.values.push(data);
-			query.bool = this.bool;
-			query.constantScore = this.constantScore;
-			query.term = this.term;
-			query.terms = this.terms;
-			query.wildcard = this.wildcard;
-			query.fuzzy = this.fuzzy;
-			query.match = this.match;
-			query.matchAll = this.matchAll;
-			query.prefix = this.prefix;
-			query.exists = this.exists;
-			query._prepare = this._prepare;
-			query[this._callbackName] = this[this._callbackName];
-			return query;
-		};
-	}
+    this._prepare = (queryType, ...args) => {
+      let data = {};
+      let query = new queryType(...args, data);
+      this._data.values.push(data);
+      query.bool = this.bool;
+      query.constantScore = this.constantScore;
+      query.term = this.term;
+      query.terms = this.terms;
+      query.wildcard = this.wildcard;
+      query.fuzzy = this.fuzzy;
+      query.match = this.match;
+      query.matchAll = this.matchAll;
+      query.prefix = this.prefix;
+      query.exists = this.exists;
+      query._prepare = this._prepare;
+      query[this._callbackName] = this[this._callbackName];
+      return query;
+    };
+  }
 
-	bool() {
-		return this._prepare(BoolQuery);
-	}
+  bool() {
+    return this._prepare(BoolQuery);
+  }
 
-	constantScore() {
-		return this._prepare(ConstantScoreQuery);
-	}
+  constantScore() {
+    return this._prepare(ConstantScoreQuery);
+  }
 
-	term(field, term) {
-		return this._prepare(TermQuery, field, term);
-	}
+  term(field, term) {
+    return this._prepare(TermQuery, field, term);
+  }
 
-	terms(field, terms) {
-		return this._prepare(TermsQuery, field, terms);
-	}
+  terms(field, terms) {
+    return this._prepare(TermsQuery, field, terms);
+  }
 
-	wildcard(field, wildcard) {
-		return this._prepare(WildcardQuery, field, wildcard);
-	}
+  wildcard(field, wildcard) {
+    return this._prepare(WildcardQuery, field, wildcard);
+  }
 
-	fuzzy(field, fuzzy) {
-		return this._prepare(FuzzyQuery, field, fuzzy);
-	}
+  fuzzy(field, fuzzy) {
+    return this._prepare(FuzzyQuery, field, fuzzy);
+  }
 
-	match(field, query) {
-		return this._prepare(MatchQuery, field, query);
-	}
+  match(field, query) {
+    return this._prepare(MatchQuery, field, query);
+  }
 
-	matchAll() {
-		return this._prepare(MatchAllQuery);
-	}
+  matchAll() {
+    return this._prepare(MatchAllQuery);
+  }
 
-	prefix(field, prefix) {
-		return this._prepare(PrefixQuery, field, prefix);
-	}
+  prefix(field, prefix) {
+    return this._prepare(PrefixQuery, field, prefix);
+  }
 
-	exists(field) {
-		return this._prepare(ExistsQuery, field);
-	}
+  exists(field) {
+    return this._prepare(ExistsQuery, field);
+  }
 }
 
 /**
@@ -495,20 +495,20 @@ class ArrayQuery extends BaseQuery {
  * @extends BaseQuery
  */
 export class ConstantScoreQuery extends BaseQuery {
-	constructor(data = {}) {
-		super("constant_score", data);
-	}
+  constructor(data = {}) {
+    super("constant_score", data);
+  }
 
 	/**
 	 * Starts an array of queries. Use endFilter() to finish the array.
 	 * @return {ArrayQuery} array query for holding sub queries
 	 */
-	beginFilter() {
-		this._data.filter = {};
-		return new ArrayQuery("endFilter", () => {
-			return this;
-		}, this._data.filter);
-	}
+  beginFilter() {
+    this._data.filter = {};
+    return new ArrayQuery("endFilter", () => {
+      return this;
+    }, this._data.filter);
+  }
 }
 
 /**
@@ -555,53 +555,53 @@ export class ConstantScoreQuery extends BaseQuery {
  * @extends BaseQuery
  */
 export class BoolQuery extends BaseQuery {
-	constructor(data = {}) {
-		super("bool", data);
-	}
+  constructor(data = {}) {
+    super("bool", data);
+  }
 
 	/**
 	 * Starts an array of queries for must clause. Use endMust() to finish the array.
 	 * @return {ArrayQuery} array query for holding sub queries
 	 */
-	beginMust() {
-		this._data.must = {};
-		return new ArrayQuery("endMust", () => {
-			return this;
-		}, this._data.must);
-	}
+  beginMust() {
+    this._data.must = {};
+    return new ArrayQuery("endMust", () => {
+      return this;
+    }, this._data.must);
+  }
 
 	/**
 	 * Starts an array of queries for filter clause. Use endFilter() to finish the array.
 	 * @return {ArrayQuery} array query for holding sub queries
 	 */
-	beginFilter() {
-		this._data.filter = {};
-		return new ArrayQuery("endFilter", () => {
-			return this;
-		}, this._data.filter);
-	}
+  beginFilter() {
+    this._data.filter = {};
+    return new ArrayQuery("endFilter", () => {
+      return this;
+    }, this._data.filter);
+  }
 
 	/**
 	 * Starts an array of queries for should clause. Use endShould() to finish the array.
 	 * @return {ArrayQuery} array query for holding sub queries
 	 */
-	beginShould() {
-		this._data.should = {};
-		return new ArrayQuery("endShould", () => {
-			return this;
-		}, this._data.should);
-	}
+  beginShould() {
+    this._data.should = {};
+    return new ArrayQuery("endShould", () => {
+      return this;
+    }, this._data.should);
+  }
 
 	/**
 	 * Starts an array of queries for not clause. Use endNot() to finish the array.
 	 * @return {ArrayQuery} array query for holding sub queries
 	 */
-	beginNot() {
-		this._data.not = {};
-		return new ArrayQuery("endNot", () => {
-			return this;
-		}, this._data.not);
-	}
+  beginNot() {
+    this._data.not = {};
+    return new ArrayQuery("endNot", () => {
+      return this;
+    }, this._data.not);
+  }
 
 	/**
 	 * Controls the amount of minimum matching sub queries before a document will be considered.
@@ -615,13 +615,13 @@ export class BoolQuery extends BaseQuery {
 	 *     The number computed from the percentage is rounded down and used as the minimum.
 	 * @return {BoolQuery} object itself for cascading
 	 */
-	minimumShouldMatch(minShouldMatch) {
-		if (!Utils.isNumber(minShouldMatch)) {
-			throw TypeError("Minimum should match must be a number or a string.");
-		}
-		this._data.minimum_should_match = minShouldMatch;
-		return this;
-	}
+  minimumShouldMatch(minShouldMatch) {
+    if (!Utils.isNumber(minShouldMatch)) {
+      throw TypeError("Minimum should match must be a number or a string.");
+    }
+    this._data.minimum_should_match = minShouldMatch;
+    return this;
+  }
 }
 
 /**
@@ -644,20 +644,20 @@ export class BoolQuery extends BaseQuery {
  * // are scored and ranked using BM25 with k1=1.5 and b=0.5
  */
 export class QueryBuilder {
-	constructor() {
-		this._data = {query: {}};
-		this.useBM25();
-	}
+  constructor() {
+    this._data = {query: {}};
+    this.useBM25();
+  }
 
 	/**
 	 * The query performs a final scoring over all scored sub queries and rank documents by there relevant.
 	 * @param {boolean} enable - flag to enable or disable final scoring
 	 * @return {QueryBuilder}
 	 */
-	enableFinalScoring(enable) {
-		this._data.final_scoring = Utils.asBoolean(enable);
-		return this;
-	}
+  enableFinalScoring(enable) {
+    this._data.final_scoring = Utils.asBoolean(enable);
+    return this;
+  }
 
 	/**
 	 * Use [Okapi BM25]{@link https://en.wikipedia.org/wiki/Okapi_BM25} as scoring model (default).
@@ -671,67 +671,67 @@ export class QueryBuilder {
 	 * 														A value of 0.0 disables normalization completely, and a value of 1.0 normalizes fully.
 	 * @return {QueryBuilder}
 	 */
-	useBM25(k1 = 1.2, b = 0.75) {
-		if (!Utils.isNumber(k1) || k1 < 0) {
-			throw TypeError("BM25s k1 must be a positive number.");
-		}
-		if (!Utils.isNumber(b) || b < 0 || b > 1) {
-			throw TypeError("BM25s b must be a number between 0 and 1 inclusive.");
-		}
+  useBM25(k1 = 1.2, b = 0.75) {
+    if (!Utils.isNumber(k1) || k1 < 0) {
+      throw TypeError("BM25s k1 must be a positive number.");
+    }
+    if (!Utils.isNumber(b) || b < 0 || b > 1) {
+      throw TypeError("BM25s b must be a number between 0 and 1 inclusive.");
+    }
 
-		this._data.scoring = {
-			type: "BM25",
-			k1,
-			b
-		};
-		return this;
-	}
+    this._data.scoring = {
+      type: "BM25",
+      k1,
+      b
+    };
+    return this;
+  }
 
-	bool() {
-		return this._prepare(BoolQuery);
-	}
+  bool() {
+    return this._prepare(BoolQuery);
+  }
 
-	constantScore() {
-		return this._prepare(ConstantScoreQuery);
-	}
+  constantScore() {
+    return this._prepare(ConstantScoreQuery);
+  }
 
-	term(field, term) {
-		return this._prepare(TermQuery, field, term);
-	}
+  term(field, term) {
+    return this._prepare(TermQuery, field, term);
+  }
 
-	terms(field, terms) {
-		return this._prepare(TermsQuery, field, terms);
-	}
+  terms(field, terms) {
+    return this._prepare(TermsQuery, field, terms);
+  }
 
-	wildcard(field, wildcard) {
-		return this._prepare(WildcardQuery, field, wildcard);
-	}
+  wildcard(field, wildcard) {
+    return this._prepare(WildcardQuery, field, wildcard);
+  }
 
-	fuzzy(field, fuzzy) {
-		return this._prepare(FuzzyQuery, field, fuzzy);
-	}
+  fuzzy(field, fuzzy) {
+    return this._prepare(FuzzyQuery, field, fuzzy);
+  }
 
-	match(field, query) {
-		return this._prepare(MatchQuery, field, query);
-	}
+  match(field, query) {
+    return this._prepare(MatchQuery, field, query);
+  }
 
-	matchAll() {
-		return this._prepare(MatchAllQuery);
-	}
+  matchAll() {
+    return this._prepare(MatchAllQuery);
+  }
 
-	prefix(field, prefix) {
-		return this._prepare(PrefixQuery, field, prefix);
-	}
+  prefix(field, prefix) {
+    return this._prepare(PrefixQuery, field, prefix);
+  }
 
-	exists(field) {
-		return this._prepare(ExistsQuery, field);
-	}
+  exists(field) {
+    return this._prepare(ExistsQuery, field);
+  }
 
-	_prepare(queryType, ...args) {
-		this._child = new queryType(...args, this._data.query);
-		this._child.build = () => {
-			return this._data;
-		};
-		return this._child;
-	}
+  _prepare(queryType, ...args) {
+    this._child = new queryType(...args, this._data.query);
+    this._child.build = () => {
+      return this._data;
+    };
+    return this._child;
+  }
 }

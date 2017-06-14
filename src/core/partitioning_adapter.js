@@ -19,39 +19,39 @@ import {Loki} from './loki';
  */
 export class LokiPartitioningAdapter {
 
-	constructor(adapter, options = {}) {
-		this.mode = "reference";
-		this.adapter = null;
-		this.options = options;
-		this.dbref = null;
-		this.dbname = "";
-		this.pageIterator = {};
+  constructor(adapter, options = {}) {
+    this.mode = "reference";
+    this.adapter = null;
+    this.options = options;
+    this.dbref = null;
+    this.dbname = "";
+    this.pageIterator = {};
 
 		// verify user passed an appropriate adapter
-		if (adapter) {
-			if (adapter.mode === "reference") {
-				throw new Error("LokiPartitioningAdapter cannot be instantiated with a reference mode adapter");
-			} else {
-				this.adapter = adapter;
-			}
-		} else {
-			throw new Error("LokiPartitioningAdapter requires a (non-reference mode) adapter on construction");
-		}
+    if (adapter) {
+      if (adapter.mode === "reference") {
+        throw new Error("LokiPartitioningAdapter cannot be instantiated with a reference mode adapter");
+      } else {
+        this.adapter = adapter;
+      }
+    } else {
+      throw new Error("LokiPartitioningAdapter requires a (non-reference mode) adapter on construction");
+    }
 
 		// set collection paging defaults
-		if (this.options.paging === undefined) {
-			this.options.paging = false;
-		}
+    if (this.options.paging === undefined) {
+      this.options.paging = false;
+    }
 
 		// default to page size of 25 megs (can be up to your largest serialized object size larger than this)
-		if (this.options.pageSize === undefined) {
-			this.options.pageSize = 25 * 1024 * 1024;
-		}
+    if (this.options.pageSize === undefined) {
+      this.options.pageSize = 25 * 1024 * 1024;
+    }
 
-		if (this.options.delimiter === undefined) {
-			this.options.delimiter = '$<\n';
-		}
-	}
+    if (this.options.delimiter === undefined) {
+      this.options.delimiter = '$<\n';
+    }
+  }
 
 	/**
 	 * Loads a database which was partitioned into several key/value saves.
@@ -61,35 +61,35 @@ export class LokiPartitioningAdapter {
 	 * @returns {Promise} a Promise that resolves after the database was loaded
 	 * @memberof LokiMemoryAdapter
 	 */
-	loadDatabase(dbname) {
-		this.dbname = dbname;
-		this.dbref = new Loki(dbname);
+  loadDatabase(dbname) {
+    this.dbname = dbname;
+    this.dbref = new Loki(dbname);
 
 		// load the db container (without data)
-		return this.adapter.loadDatabase(dbname).then((result) => {
-			if (typeof result !== "string") {
-				throw new Error("LokiPartitioningAdapter received an unexpected response from inner adapter loadDatabase()");
-			}
+    return this.adapter.loadDatabase(dbname).then((result) => {
+      if (typeof result !== "string") {
+        throw new Error("LokiPartitioningAdapter received an unexpected response from inner adapter loadDatabase()");
+      }
 
 			// I will want to use loki destructuring helper methods so i will inflate into typed instance
-			let db = JSON.parse(result);
-			this.dbref.loadJSONObject(db);
-			db = null;
+      let db = JSON.parse(result);
+      this.dbref.loadJSONObject(db);
+      db = null;
 
-			const clen = this.dbref.collections.length;
+      const clen = this.dbref.collections.length;
 
-			if (this.dbref.collections.length === 0) {
-				return this.dbref;
-			}
+      if (this.dbref.collections.length === 0) {
+        return this.dbref;
+      }
 
-			this.pageIterator = {
-				collection: 0,
-				pageIndex: 0
-			};
+      this.pageIterator = {
+        collection: 0,
+        pageIndex: 0
+      };
 
-			return this.loadNextPartition(0).then(() => this.dbref);
-		});
-	}
+      return this.loadNextPartition(0).then(() => this.dbref);
+    });
+  }
 
 	/**
 	 * Used to sequentially load each collection partition, one at a time.
@@ -97,74 +97,74 @@ export class LokiPartitioningAdapter {
 	 * @param {int} partition - ordinal collection position to load next
 	 * @returns {Promise} a Promise that resolves after the next partition is loaded
 	 */
-	loadNextPartition(partition) {
-		const keyname = this.dbname + "." + partition;
+  loadNextPartition(partition) {
+    const keyname = this.dbname + "." + partition;
 
-		if (this.options.paging === true) {
-			this.pageIterator.pageIndex = 0;
-			return this.loadNextPage();
-		}
+    if (this.options.paging === true) {
+      this.pageIterator.pageIndex = 0;
+      return this.loadNextPage();
+    }
 
-		return this.adapter.loadDatabase(keyname).then((result) => {
-			const data = this.dbref.deserializeCollection(result, {
-				delimited: true,
-				collectionIndex: partition
-			});
-			this.dbref.collections[partition].data = data;
+    return this.adapter.loadDatabase(keyname).then((result) => {
+      const data = this.dbref.deserializeCollection(result, {
+        delimited: true,
+        collectionIndex: partition
+      });
+      this.dbref.collections[partition].data = data;
 
-			if (++partition < this.dbref.collections.length) {
-				return this.loadNextPartition(partition);
-			}
-		});
-	}
+      if (++partition < this.dbref.collections.length) {
+        return this.loadNextPartition(partition);
+      }
+    });
+  }
 
 	/**
 	 * Used to sequentially load the next page of collection partition, one at a time.
 	 *
 	 * @returns {Promise} a Promise that resolves after the next page is loaded
 	 */
-	loadNextPage() {
+  loadNextPage() {
 		// calculate name for next saved page in sequence
-		const keyname = this.dbname + "." + this.pageIterator.collection + "." + this.pageIterator.pageIndex;
+    const keyname = this.dbname + "." + this.pageIterator.collection + "." + this.pageIterator.pageIndex;
 
 		// load whatever page is next in sequence
-		return this.adapter.loadDatabase(keyname).then((result) => {
-			let data = result.split(this.options.delimiter);
-			result = ""; // free up memory now that we have split it into array
-			let dlen = data.length;
-			let idx;
+    return this.adapter.loadDatabase(keyname).then((result) => {
+      let data = result.split(this.options.delimiter);
+      result = ""; // free up memory now that we have split it into array
+      let dlen = data.length;
+      let idx;
 
 			// detect if last page by presence of final empty string element and remove it if so
-			const isLastPage = (data[dlen - 1] === "");
-			if (isLastPage) {
-				data.pop();
-				dlen = data.length;
+      const isLastPage = (data[dlen - 1] === "");
+      if (isLastPage) {
+        data.pop();
+        dlen = data.length;
 				// empty collections are just a delimiter meaning two blank items
-				if (data[dlen - 1] === "" && dlen === 1) {
-					data.pop();
-					dlen = data.length;
-				}
-			}
+        if (data[dlen - 1] === "" && dlen === 1) {
+          data.pop();
+          dlen = data.length;
+        }
+      }
 
 			// convert stringified array elements to object instances and push to collection data
-			for (idx = 0; idx < dlen; idx++) {
-				this.dbref.collections[this.pageIterator.collection].data.push(JSON.parse(data[idx]));
-				data[idx] = null;
-			}
-			data = [];
+      for (idx = 0; idx < dlen; idx++) {
+        this.dbref.collections[this.pageIterator.collection].data.push(JSON.parse(data[idx]));
+        data[idx] = null;
+      }
+      data = [];
 
 			// if last page, we are done with this partition
-			if (isLastPage) {
+      if (isLastPage) {
 				// if there are more partitions, kick off next partition load
-				if (++this.pageIterator.collection < this.dbref.collections.length) {
-					return this.loadNextPartition(this.pageIterator.collection);
-				}
-			} else {
-				this.pageIterator.pageIndex++;
-				return this.loadNextPage();
-			}
-		});
-	}
+        if (++this.pageIterator.collection < this.dbref.collections.length) {
+          return this.loadNextPartition(this.pageIterator.collection);
+        }
+      } else {
+        this.pageIterator.pageIndex++;
+        return this.loadNextPage();
+      }
+    });
+  }
 
 	/**
 	 * Saves a database by partioning into separate key/value saves.
@@ -176,117 +176,117 @@ export class LokiPartitioningAdapter {
 	 *
 	 * @memberof LokiPartitioningAdapter
 	 */
-	exportDatabase(dbname, dbref) {
-		let idx;
-		const clen = dbref.collections.length;
+  exportDatabase(dbname, dbref) {
+    let idx;
+    const clen = dbref.collections.length;
 
-		this.dbref = dbref;
-		this.dbname = dbname;
+    this.dbref = dbref;
+    this.dbname = dbname;
 
 		// queue up dirty partitions to be saved
-		this.dirtyPartitions = [-1];
-		for (idx = 0; idx < clen; idx++) {
-			if (dbref.collections[idx].dirty) {
-				this.dirtyPartitions.push(idx);
-			}
-		}
+    this.dirtyPartitions = [-1];
+    for (idx = 0; idx < clen; idx++) {
+      if (dbref.collections[idx].dirty) {
+        this.dirtyPartitions.push(idx);
+      }
+    }
 
-		return this.saveNextPartition();
-	}
+    return this.saveNextPartition();
+  }
 
 	/**
 	 * Helper method used internally to save each dirty collection, one at a time.
 	 *
 	 * @returns {Promise} a Promise that resolves after the next partition is saved
 	 */
-	saveNextPartition() {
-		const partition = this.dirtyPartitions.shift();
-		const keyname = this.dbname + ((partition === -1) ? "" : ("." + partition));
+  saveNextPartition() {
+    const partition = this.dirtyPartitions.shift();
+    const keyname = this.dbname + ((partition === -1) ? "" : ("." + partition));
 
 		// if we are doing paging and this is collection partition
-		if (this.options.paging && partition !== -1) {
-			this.pageIterator = {
-				collection: partition,
-				docIndex: 0,
-				pageIndex: 0
-			};
+    if (this.options.paging && partition !== -1) {
+      this.pageIterator = {
+        collection: partition,
+        docIndex: 0,
+        pageIndex: 0
+      };
 
 			// since saveNextPage recursively calls itself until done, our callback means this whole paged partition is finished
-			return this.saveNextPage().then(() => {
-				if (this.dirtyPartitions.length !== 0) {
-					return this.saveNextPartition();
-				}
-			});
-		}
+      return this.saveNextPage().then(() => {
+        if (this.dirtyPartitions.length !== 0) {
+          return this.saveNextPartition();
+        }
+      });
+    }
 
 		// otherwise this is 'non-paged' partioning...
-		const result = this.dbref.serializeDestructured({
-			partitioned: true,
-			delimited: true,
-			partition
-		});
+    const result = this.dbref.serializeDestructured({
+      partitioned: true,
+      delimited: true,
+      partition
+    });
 
-		return this.adapter.saveDatabase(keyname, result).then(() => {
-			if (this.dirtyPartitions.length !== 0) {
-				return this.saveNextPartition();
-			}
-		});
-	}
+    return this.adapter.saveDatabase(keyname, result).then(() => {
+      if (this.dirtyPartitions.length !== 0) {
+        return this.saveNextPartition();
+      }
+    });
+  }
 
 	/**
 	 * Helper method used internally to generate and save the next page of the current (dirty) partition.
 	 *
 	 * @returns {Promise} a Promise that resolves after the next partition is saved
 	 */
-	saveNextPage() {
-		const coll = this.dbref.collections[this.pageIterator.collection];
-		const keyname = this.dbname + "." + this.pageIterator.collection + "." + this.pageIterator.pageIndex;
-		let pageLen = 0;
-		const cdlen = coll.data.length;
-		const delimlen = this.options.delimiter.length;
-		let serializedObject = "";
-		let pageBuilder = "";
-		let doneWithPartition = false;
-		let doneWithPage = false;
+  saveNextPage() {
+    const coll = this.dbref.collections[this.pageIterator.collection];
+    const keyname = this.dbname + "." + this.pageIterator.collection + "." + this.pageIterator.pageIndex;
+    let pageLen = 0;
+    const cdlen = coll.data.length;
+    const delimlen = this.options.delimiter.length;
+    let serializedObject = "";
+    let pageBuilder = "";
+    let doneWithPartition = false;
+    let doneWithPage = false;
 
-		const pageSaveCallback = () => {
-			pageBuilder = "";
+    const pageSaveCallback = () => {
+      pageBuilder = "";
 
 			// update meta properties then continue process by invoking callback
-			if (!doneWithPartition) {
-				this.pageIterator.pageIndex++;
-				return this.saveNextPage();
-			}
-		};
+      if (!doneWithPartition) {
+        this.pageIterator.pageIndex++;
+        return this.saveNextPage();
+      }
+    };
 
-		if (coll.data.length === 0) {
-			doneWithPartition = true;
-		}
+    if (coll.data.length === 0) {
+      doneWithPartition = true;
+    }
 
-		while (true) {
-			if (!doneWithPartition) {
+    while (true) {
+      if (!doneWithPartition) {
 				// serialize object
-				serializedObject = JSON.stringify(coll.data[this.pageIterator.docIndex]);
-				pageBuilder += serializedObject;
-				pageLen += serializedObject.length;
+        serializedObject = JSON.stringify(coll.data[this.pageIterator.docIndex]);
+        pageBuilder += serializedObject;
+        pageLen += serializedObject.length;
 
 				// if no more documents in collection to add, we are done with partition
-				if (++this.pageIterator.docIndex >= cdlen) doneWithPartition = true;
-			}
+        if (++this.pageIterator.docIndex >= cdlen) doneWithPartition = true;
+      }
 			// if our current page is bigger than defined pageSize, we are done with page
-			if (pageLen >= this.options.pageSize) doneWithPage = true;
+      if (pageLen >= this.options.pageSize) doneWithPage = true;
 
 			// if not done with current page, need delimiter before next item
 			// if done with partition we also want a delmiter to indicate 'end of pages' final empty row
-			if (!doneWithPage || doneWithPartition) {
-				pageBuilder += this.options.delimiter;
-				pageLen += delimlen;
-			}
+      if (!doneWithPage || doneWithPartition) {
+        pageBuilder += this.options.delimiter;
+        pageLen += delimlen;
+      }
 
 			// if we are done with page save it and pass off to next recursive call or callback
-			if (doneWithPartition || doneWithPage) {
-				return this.adapter.saveDatabase(keyname, pageBuilder).then(pageSaveCallback);
-			}
-		}
-	}
+      if (doneWithPartition || doneWithPage) {
+        return this.adapter.saveDatabase(keyname, pageBuilder).then(pageSaveCallback);
+      }
+    }
+  }
 }

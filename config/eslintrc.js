@@ -10,14 +10,14 @@ module.exports = {
     },
     "rules": {
         "indent": [
-            "error",
-            "tab"
+            2,
+            2,
+            {"SwitchCase": 1}
         ],/*,
         "quotes": [
             "error",
             "double"
         ],*/
-			"indent": [2, "tab", {"SwitchCase": 1}],
         "semi": [
             "error",
             "always"

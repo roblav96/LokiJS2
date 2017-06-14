@@ -13,36 +13,36 @@
  *
  */
 export class LokiNativescriptAdapter {
-	constructor() {
-		this.fs = require("file-system");
-	}
+  constructor() {
+    this.fs = require("file-system");
+  }
 
-	loadDatabase(dbname) {
-		const documents = this.fs.knownFolders.documents();
-		const myFile = documents.getFile(dbname);
+  loadDatabase(dbname) {
+    const documents = this.fs.knownFolders.documents();
+    const myFile = documents.getFile(dbname);
 
 		//Read from filesystem
-		return myFile.readText().then((content) => {
+    return myFile.readText().then((content) => {
 			//The file is empty or missing
-			if (content === "") {
-				throw new Error("DB file does not exist");
-			} else {
-				return content;
-			}
-		});
-	}
+      if (content === "") {
+        throw new Error("DB file does not exist");
+      } else {
+        return content;
+      }
+    });
+  }
 
-	saveDatabase(dbname, serialized) {
-		const documents = this.fs.knownFolders.documents();
-		const myFile = documents.getFile(dbname);
+  saveDatabase(dbname, serialized) {
+    const documents = this.fs.knownFolders.documents();
+    const myFile = documents.getFile(dbname);
 
-		return myFile.writeText(serialized);
-	}
+    return myFile.writeText(serialized);
+  }
 
-	deleteDatabase(dbname) {
-		const documents = this.fs.knownFolders.documents();
-		const file = documents.getFile(dbname);
+  deleteDatabase(dbname) {
+    const documents = this.fs.knownFolders.documents();
+    const file = documents.getFile(dbname);
 
-		return file.remove();
-	}
+    return file.remove();
+  }
 }

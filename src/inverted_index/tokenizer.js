@@ -7,11 +7,11 @@ import * as Utils from './utils.js';
  * @private
  */
 function defaultSplitter(str) {
-	let tokens = str.split(/[^\w]+/);
-	for (let i = 0; i < tokens.length; i++) {
-		tokens[i] = tokens[i].toLowerCase();
-	}
-	return tokens;
+  let tokens = str.split(/[^\w]+/);
+  for (let i = 0; i < tokens.length; i++) {
+    tokens[i] = tokens[i].toLowerCase();
+  }
+  return tokens;
 }
 
 /**
@@ -30,12 +30,12 @@ export class Tokenizer {
 	 * Initializes the tokenizer with a splitter, which splits a string at non-alphanumeric characters.
 	 * The queue is empty.
 	 */
-	constructor() {
-		this._splitter = null;
-		this._queue = [];
-		this._symbol = Symbol('label');
-		this.reset();
-	}
+  constructor() {
+    this._splitter = null;
+    this._queue = [];
+    this._symbol = Symbol('label');
+    this.reset();
+  }
 
 	/**
 	 * Sets a function with defined label as the splitter function.
@@ -44,41 +44,41 @@ export class Tokenizer {
 	 * @param {string} label - the label
 	 * @param {function} func - the function
 	 */
-	setSplitter(label, func) {
-		label = Utils.asString(label);
-		if (!Utils.isFunction(func)) {
-			throw TypeError("Splitter must be a function.");
-		}
-		if (label === "") {
-			throw Error("Label cannot be empty.");
-		}
-		func[this._symbol] = label;
-		this._splitter = func;
-	}
+  setSplitter(label, func) {
+    label = Utils.asString(label);
+    if (!Utils.isFunction(func)) {
+      throw TypeError("Splitter must be a function.");
+    }
+    if (label === "") {
+      throw Error("Label cannot be empty.");
+    }
+    func[this._symbol] = label;
+    this._splitter = func;
+  }
 
 	/**
 	 * Gets the splitter.
 	 * @return {Array.<string, function>} - tuple with label and function
 	 */
-	getSplitter() {
-		return [this._splitter[this._symbol], this._splitter];
-	}
+  getSplitter() {
+    return [this._splitter[this._symbol], this._splitter];
+  }
 
 	/**
 	 * Resets the splitter to default.
 	 */
-	resetSplitter() {
-		this._splitter = defaultSplitter;
-	}
+  resetSplitter() {
+    this._splitter = defaultSplitter;
+  }
 
 	/**
 	 * Checks if a function is inside the queue.
 	 * @param {string|function} labelFunc - an existing label or function
 	 * @returns {boolean} true if exists, otherwise false
 	 */
-	has(labelFunc) {
-		return this._getPosition(labelFunc) !== -1;
-	}
+  has(labelFunc) {
+    return this._getPosition(labelFunc) !== -1;
+  }
 
 	/**
 	 * Gets a function from the queue.
@@ -87,13 +87,13 @@ export class Tokenizer {
 	 * @param {string|function} labelFunc - an existing label or function
 	 * @return {Array.<string, function>} - tuple with label and function
 	 */
-	get(labelFunc) {
-		let pos = this._getPosition(labelFunc);
-		if (pos === -1) {
-			throw Error('Cannot find existing function.');
-		}
-		return [this._queue[pos][this._symbol], this._queue[pos]];
-	}
+  get(labelFunc) {
+    let pos = this._getPosition(labelFunc);
+    if (pos === -1) {
+      throw Error('Cannot find existing function.');
+    }
+    return [this._queue[pos][this._symbol], this._queue[pos]];
+  }
 
 	/**
 	 * Adds a function with defined label to the end of the queue.
@@ -102,9 +102,9 @@ export class Tokenizer {
 	 * @param {string} label - the label
 	 * @param {function} func - the function
 	 */
-	add(label, func) {
-		this._addFunction(label, func, this._queue.length);
-	}
+  add(label, func) {
+    this._addFunction(label, func, this._queue.length);
+  }
 
 	/**
 	 * Adds a function with defined label before an existing function to the queue.
@@ -114,13 +114,13 @@ export class Tokenizer {
 	 * @param {string} label - the label
 	 * @param {function} func - the function
 	 */
-	addBefore(labelFunc, label, func) {
-		let pos = this._getPosition(labelFunc);
-		if (pos === -1) {
-			throw Error('Cannot find existing function.');
-		}
-		this._addFunction(label, func, pos);
-	}
+  addBefore(labelFunc, label, func) {
+    let pos = this._getPosition(labelFunc);
+    if (pos === -1) {
+      throw Error('Cannot find existing function.');
+    }
+    this._addFunction(label, func, pos);
+  }
 
 	/**
 	 * Adds a function with defined label after an existing function to the queue.
@@ -130,70 +130,70 @@ export class Tokenizer {
 	 * @param {string} label - the label
 	 * @param {function} func - the function
 	 */
-	addAfter(labelFunc, label, func) {
-		let pos = this._getPosition(labelFunc);
-		if (pos === -1) {
-			throw Error('Cannot find existing function.');
-		}
-		this._addFunction(label, func, pos + 1);
-	}
+  addAfter(labelFunc, label, func) {
+    let pos = this._getPosition(labelFunc);
+    if (pos === -1) {
+      throw Error('Cannot find existing function.');
+    }
+    this._addFunction(label, func, pos + 1);
+  }
 
 	/**
 	 * Removes a function from the queue.
 	 * @param {string|function} labelFunc - an existing label or function
 	 */
-	remove(labelFunc) {
-		let pos = this._getPosition(labelFunc);
-		if (pos === -1) {
-			throw Error('Cannot find existing function.');
-		}
-		this._queue.splice(pos, 1);
-	}
+  remove(labelFunc) {
+    let pos = this._getPosition(labelFunc);
+    if (pos === -1) {
+      throw Error('Cannot find existing function.');
+    }
+    this._queue.splice(pos, 1);
+  }
 
 	/**
 	 * Resets the splitter and tokenize queue to default.
 	 */
-	reset() {
-		this._splitter = defaultSplitter;
-		this._queue = [];
-	}
+  reset() {
+    this._splitter = defaultSplitter;
+    this._queue = [];
+  }
 
 	/**
 	 * Tokenizes a string into tokens.
 	 * @param {string} str - the string
 	 * @return {string[]} the tokens
 	 */
-	tokenize(str) {
-		let tokens = this._splitter(str);
+  tokenize(str) {
+    let tokens = this._splitter(str);
 		// Apply each token over the queue functions.
-		for (let i = 0; i < this._queue.length; i++) {
-			let newTokens = [];
-			for (let j = 0; j < tokens.length; j++) {
-				let token = this._queue[i](tokens[j]);
-				if (token) {
-					newTokens.push(token);
-				}
-			}
-			tokens = newTokens;
-		}
-		return tokens;
-	}
+    for (let i = 0; i < this._queue.length; i++) {
+      let newTokens = [];
+      for (let j = 0; j < tokens.length; j++) {
+        let token = this._queue[i](tokens[j]);
+        if (token) {
+          newTokens.push(token);
+        }
+      }
+      tokens = newTokens;
+    }
+    return tokens;
+  }
 
 	/**
 	 * Serializes the tokenizer by returning the labels of the used functions.
 	 * @returns {{splitter: string?, tokenizers: string[]}} - the serialization
 	 * @private
 	 */
-	toJSON() {
-		let serialized = {tokenizers: []};
-		if (this._splitter !== defaultSplitter) {
-			serialized.splitter = this._splitter[this._symbol];
-		}
-		for (let i = 0; i < this._queue.length; i++) {
-			serialized.tokenizers.push(this._queue[i][this._symbol]);
-		}
-		return serialized;
-	}
+  toJSON() {
+    let serialized = {tokenizers: []};
+    if (this._splitter !== defaultSplitter) {
+      serialized.splitter = this._splitter[this._symbol];
+    }
+    for (let i = 0; i < this._queue.length; i++) {
+      serialized.tokenizers.push(this._queue[i][this._symbol]);
+    }
+    return serialized;
+  }
 
 	/**
 	 * Deserializes the tokenizer by reassign the correct function to each label.
@@ -202,40 +202,40 @@ export class Tokenizer {
 	 * 	or an equivalent tokenizer
 	 * @private
 	 */
-	static fromJSONObject(serialized, funcTok) {
-		let tkz = new Tokenizer();
-		if (funcTok !== undefined && funcTok instanceof Tokenizer) {
-			if (serialized.splitter !== undefined) {
-				let splitter = funcTok.getSplitter();
-				if (serialized.splitter !== splitter[0]) {
-					throw Error("Splitter function not found.");
-				}
-				tkz.setSplitter(splitter[0], splitter[1]);
-			}
+  static fromJSONObject(serialized, funcTok) {
+    let tkz = new Tokenizer();
+    if (funcTok !== undefined && funcTok instanceof Tokenizer) {
+      if (serialized.splitter !== undefined) {
+        let splitter = funcTok.getSplitter();
+        if (serialized.splitter !== splitter[0]) {
+          throw Error("Splitter function not found.");
+        }
+        tkz.setSplitter(splitter[0], splitter[1]);
+      }
 
-			for (let i = 0; i < serialized.tokenizers.length; i++) {
-				if (!funcTok.has(serialized.tokenizers[i])) {
-					throw Error("Tokenizer function not found.");
-				}
-				let labelFunc = funcTok.get(serialized.tokenizers[i]);
-				tkz.add(labelFunc[0], labelFunc[1]);
-			}
-		} else {
-			if (serialized.splitter !== undefined) {
-				if (funcTok.splitters[serialized.splitter] === undefined) {
-					throw Error("Splitter function not found.");
-				}
-				tkz.setSplitter(serialized.splitter, funcTok.splitters[serialized.splitter]);
-			}
-			for (let i = 0; i < serialized.tokenizers.length; i++) {
-				if (funcTok.tokenizers[serialized.tokenizers[i]] === undefined) {
-					throw Error("Tokenizer function not found.");
-				}
-				tkz.add(serialized.tokenizers[i], funcTok.tokenizers[serialized.tokenizers[i]]);
-			}
-		}
-		return tkz;
-	}
+      for (let i = 0; i < serialized.tokenizers.length; i++) {
+        if (!funcTok.has(serialized.tokenizers[i])) {
+          throw Error("Tokenizer function not found.");
+        }
+        let labelFunc = funcTok.get(serialized.tokenizers[i]);
+        tkz.add(labelFunc[0], labelFunc[1]);
+      }
+    } else {
+      if (serialized.splitter !== undefined) {
+        if (funcTok.splitters[serialized.splitter] === undefined) {
+          throw Error("Splitter function not found.");
+        }
+        tkz.setSplitter(serialized.splitter, funcTok.splitters[serialized.splitter]);
+      }
+      for (let i = 0; i < serialized.tokenizers.length; i++) {
+        if (funcTok.tokenizers[serialized.tokenizers[i]] === undefined) {
+          throw Error("Tokenizer function not found.");
+        }
+        tkz.add(serialized.tokenizers[i], funcTok.tokenizers[serialized.tokenizers[i]]);
+      }
+    }
+    return tkz;
+  }
 
 	/**
 	 * Returns the position of a function inside the queue.
@@ -243,21 +243,21 @@ export class Tokenizer {
 	 * @return {number} the position
 	 * @private
 	 */
-	_getPosition(labelFunc) {
-		if (Utils.isFunction(labelFunc)) {
-			return this._queue.indexOf(labelFunc);
-		} else if (Utils.isConvertibleToString(labelFunc)) {
-			labelFunc = String(labelFunc);
-			for (let i = 0; i < this._queue.length; i++) {
-				if (this._queue[i][this._symbol] === labelFunc) {
-					return i;
-				}
-			}
-		} else {
-			throw TypeError("Type of labelFunc must be string or function.");
-		}
-		return -1;
-	}
+  _getPosition(labelFunc) {
+    if (Utils.isFunction(labelFunc)) {
+      return this._queue.indexOf(labelFunc);
+    } else if (Utils.isConvertibleToString(labelFunc)) {
+      labelFunc = String(labelFunc);
+      for (let i = 0; i < this._queue.length; i++) {
+        if (this._queue[i][this._symbol] === labelFunc) {
+          return i;
+        }
+      }
+    } else {
+      throw TypeError("Type of labelFunc must be string or function.");
+    }
+    return -1;
+  }
 
 	/**
 	 * Adds a function with defined label at a specific position to the queue.
@@ -266,15 +266,15 @@ export class Tokenizer {
 	 * @param {number} pos - the position
 	 * @private
 	 */
-	_addFunction(label, func, pos) {
-		label = Utils.asString(label);
-		if (!Utils.isFunction(func)) {
-			throw TypeError("Type of func must be function.");
-		}
-		if (label === "") {
-			throw Error("Label cannot be empty.");
-		}
-		func[this._symbol] = label;
-		this._queue.splice(pos, 0, func);
-	}
+  _addFunction(label, func, pos) {
+    label = Utils.asString(label);
+    if (!Utils.isFunction(func)) {
+      throw TypeError("Type of func must be function.");
+    }
+    if (label === "") {
+      throw Error("Label cannot be empty.");
+    }
+    func[this._symbol] = label;
+    this._queue.splice(pos, 0, func);
+  }
 }

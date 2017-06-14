@@ -12,104 +12,104 @@ export class FullTextSearch {
 	 *	rebuild on deserialization
 	 *@param {Tokenizer=Tokenizer} fields.tokenizer - the tokenizer of the field
 	 */
-	constructor(fields) {
-		if (fields === undefined) {
-			throw new SyntaxError('Fields needs to be defined!');
-		}
+  constructor(fields) {
+    if (fields === undefined) {
+      throw new SyntaxError('Fields needs to be defined!');
+    }
 
-		this._invIdxs = {};
+    this._invIdxs = {};
 		// Get field names and tokenizers.
-		if (Array.isArray(fields)) {
-			for (let i = 0; i < fields.length; i++) {
-				let field = fields[i];
-				let name = Utils.asString(field.name, {
-					error: TypeError('Field name needs to be a string.')
-				});
+    if (Array.isArray(fields)) {
+      for (let i = 0; i < fields.length; i++) {
+        let field = fields[i];
+        let name = Utils.asString(field.name, {
+          error: TypeError('Field name needs to be a string.')
+        });
 
-				let store = Utils.asBoolean(field.store, {
-					error: TypeError("Field store flag needs to be a boolean"),
-					defaultValue: true
-				});
+        let store = Utils.asBoolean(field.store, {
+          error: TypeError("Field store flag needs to be a boolean"),
+          defaultValue: true
+        });
 
-				let tokenizer = null;
-				if (field.tokenizer !== undefined) {
-					if (!(field.tokenizer instanceof Tokenizer)) {
-						throw new TypeError("Field tokenizer needs to be a instance of tokenizer.");
-					}
-					tokenizer = field.tokenizer;
-				} else {
-					tokenizer = new Tokenizer();
-				}
-				this._invIdxs[name] = new InvertedIndex(store, tokenizer);
-			}
-		} else {
-			throw new TypeError('fields needs to be an array with field name and a tokenizer (optional).');
-		}
+        let tokenizer = null;
+        if (field.tokenizer !== undefined) {
+          if (!(field.tokenizer instanceof Tokenizer)) {
+            throw new TypeError("Field tokenizer needs to be a instance of tokenizer.");
+          }
+          tokenizer = field.tokenizer;
+        } else {
+          tokenizer = new Tokenizer();
+        }
+        this._invIdxs[name] = new InvertedIndex(store, tokenizer);
+      }
+    } else {
+      throw new TypeError('fields needs to be an array with field name and a tokenizer (optional).');
+    }
 
-		this._docs = new Set();
-		this._idxSearcher = new IndexSearcher(this._invIdxs, this._docs);
-	}
+    this._docs = new Set();
+    this._idxSearcher = new IndexSearcher(this._invIdxs, this._docs);
+  }
 
-	addDocument(doc) {
-		if (doc.$loki === undefined) {
-			throw new Error('Document is not stored in the collection.');
-		}
+  addDocument(doc) {
+    if (doc.$loki === undefined) {
+      throw new Error('Document is not stored in the collection.');
+    }
 
-		let fieldNames = Object.keys(doc);
-		for (let i = 0, fieldName; i < fieldNames.length, fieldName = fieldNames[i]; i++) {
-			if (this._invIdxs[fieldName] !== undefined) {
-				this._invIdxs[fieldName].insert(doc[fieldName], doc.$loki);
-			}
-		}
+    let fieldNames = Object.keys(doc);
+    for (let i = 0, fieldName; i < fieldNames.length, fieldName = fieldNames[i]; i++) {
+      if (this._invIdxs[fieldName] !== undefined) {
+        this._invIdxs[fieldName].insert(doc[fieldName], doc.$loki);
+      }
+    }
 
-		this._docs.add(doc.$loki);
-		this.setDirty();
-	}
+    this._docs.add(doc.$loki);
+    this.setDirty();
+  }
 
-	removeDocument(doc) {
-		if (doc.$loki === undefined) {
-			throw new Error('Document is not stored in the collection.');
-		}
+  removeDocument(doc) {
+    if (doc.$loki === undefined) {
+      throw new Error('Document is not stored in the collection.');
+    }
 
-		let fieldNames = Object.keys(this._invIdxs);
-		for (let i = 0; i < fieldNames.length; i++) {
-			this._invIdxs[fieldNames[i]].remove(doc.$loki);
-		}
+    let fieldNames = Object.keys(this._invIdxs);
+    for (let i = 0; i < fieldNames.length; i++) {
+      this._invIdxs[fieldNames[i]].remove(doc.$loki);
+    }
 
-		this._docs.delete(doc.$loki);
-		this.setDirty();
-	}
+    this._docs.delete(doc.$loki);
+    this.setDirty();
+  }
 
-	updateDocument(doc) {
-		this.removeDocument(doc);
-		this.addDocument(doc);
-	}
+  updateDocument(doc) {
+    this.removeDocument(doc);
+    this.addDocument(doc);
+  }
 
-	search(query) {
-		return this._idxSearcher.search(query);
-	}
+  search(query) {
+    return this._idxSearcher.search(query);
+  }
 
-	toJSON() {
-		let serialized = {};
-		let fieldNames = Object.keys(this._invIdxs);
-		for (let i = 0, fieldName; i < fieldNames.length, fieldName = fieldNames[i]; i++) {
-			serialized[fieldName] = this._invIdxs[fieldName].toJSON();
-		}
-		return serialized;
-	}
+  toJSON() {
+    let serialized = {};
+    let fieldNames = Object.keys(this._invIdxs);
+    for (let i = 0, fieldName; i < fieldNames.length, fieldName = fieldNames[i]; i++) {
+      serialized[fieldName] = this._invIdxs[fieldName].toJSON();
+    }
+    return serialized;
+  }
 
-	static fromJSONObject(serialized, tokenizers) {
-		let fts = new FuzzySearch();
-		let db = JSON.parse(serialized);
-		let fieldNames = Object.keys(db);
-		for (let i = 0, fieldName; i < fieldNames.length, fieldName = fieldNames[i]; i++) {
-			fts._invIdxs[fieldName] = new InvertedIndex();
-			fts._invIdxs[fieldName].loadJSON(db[fieldName], tokenizers[fieldName]);
-		}
-		return fts;
-	}
+  static fromJSONObject(serialized, tokenizers) {
+    let fts = new FuzzySearch();
+    let db = JSON.parse(serialized);
+    let fieldNames = Object.keys(db);
+    for (let i = 0, fieldName; i < fieldNames.length, fieldName = fieldNames[i]; i++) {
+      fts._invIdxs[fieldName] = new InvertedIndex();
+      fts._invIdxs[fieldName].loadJSON(db[fieldName], tokenizers[fieldName]);
+    }
+    return fts;
+  }
 
-	setDirty() {
-		this._idxSearcher.setDirty();
-	}
+  setDirty() {
+    this._idxSearcher.setDirty();
+  }
 }
