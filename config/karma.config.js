@@ -24,7 +24,7 @@ module.exports = function (config) {
 			type: 'html',
 			dir: '../reports/coverage/'
 		},
-		
+
 		browsers: ['Chrome'],
 		// Launcher for travis.
 		customLaunchers: {
@@ -38,7 +38,8 @@ module.exports = function (config) {
 			externals: {
 				"fs": "fs"
 			},
-			watch: true
+			watch: true,
+      devtool: 'inline-source-map',
 		},
 		webpackServer: {
 			noInfo: true
@@ -51,7 +52,7 @@ module.exports = function (config) {
 			'karma-webpack'
 		],
 	};
-	
+
 	if(process.env.TRAVIS){
     configuration.browsers = ['Chrome_travis_ci'];
   }

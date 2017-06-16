@@ -9,6 +9,7 @@
 	<script>
 		var db = new Loki();
 		var options = {
+		  indicies: ["id"],
 			asyncListeners: false,
 			disableChangesApi: true,
 			fullTextSearch: [
@@ -37,7 +38,7 @@
 		console.log(res);
 
 		var ll = db.serialize({serializationMethod: "destructured"})
-		var rl  =db.serialize()
+		var rl = db.serialize()
 
 	</script>
 </head>

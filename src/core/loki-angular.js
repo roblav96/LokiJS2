@@ -342,11 +342,11 @@
             const coll3 = db.getCollection(collName);
             coll3.insert(thevalue);
             db.save(() => {
-            const found = coll3.find({
-            name: thevalue.name
-          });
-            resolve(angular.fromJson(found));
-          });
+              const found = coll3.find({
+                name: thevalue.name
+              });
+              resolve(angular.fromJson(found));
+            });
 
           }
 					// _getem('delete_doc', dbName, collName, "", "", doc)

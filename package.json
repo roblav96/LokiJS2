@@ -7,8 +7,8 @@
   "scripts": {
     "build": "webpack -p || true",
     "dev": "webpack || true",
-    "lint": "eslint ./src/**/*.js ./bench/**/*.bench.js ./spec/**/*.spec.js -c config/eslintrc.js || true",
-    "lint:fix": "eslint --fix ./src/**/*.js ./bench/**/*.bench.js ./spec/**/*.spec.js -c config/eslintrc.js || true",
+    "lint": "eslint './src/**/*.js' './bench/**/*.bench.js' './spec/**/*.spec.js' -c config/eslintrc.js || true",
+    "lint:fix": "eslint --fix './src/**/*.js' './bench/**/*.bench.js' './spec/**/*.spec.js' -c config/eslintrc.js || true",
     "test": "npm-run-all test:web test:node",
     "test:web": "cross-env NODE_ENV=test karma start config/karma.config.js --single-run || true",
     "test:node": "jasmine || true",

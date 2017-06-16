@@ -3,8 +3,113 @@
     <title></title>
     <meta content="">
     <style></style>
-    <script src="lokijs.inv.js"></script>
-		<script src="https://lodash.com/vendor/cdn.jsdelivr.net/lodash/4.17.4/lodash.min.js"></script>
+    <script src="loki.js"></script>
+		<script src="loki.FullTextSearch.js"></script>
   </head>
   <body></body>
+  <script>
+		/**
+		 * Default function to check value.
+		 * @returns {boolean} - always returns true.
+		 */
+		function trueCheck() {
+			return true;
+		}
+
+		/**
+		 * Checks if the variable is a function.
+		 * @param {*} x - the variable
+		 * @return {boolean} true if function, otherwise false
+		 * @protected
+		 */
+		function isFunction(x) {
+			return Object.prototype.toString.call(x) === "[object Function]";
+		}
+
+		/**
+		 * Checks if the variable is an object.
+		 * @param {*} x - the variable
+		 * @return {boolean} true if object, otherwise false
+		 * @protected
+		 */
+		function isObject(x) {
+			return Object.prototype.toString.call(x) === "[object Object]";
+		}
+
+		/**
+		 * Checks if the variable is a number.
+		 * @param {*} x - the variable
+		 * @return {boolean} true if number, otherwise false
+		 * @protected
+		 */
+		function isNumber(x) {
+			return Object.prototype.toString.call(x) === "[object Number]";
+		}
+
+		/**
+		 * Checks if the variable is a boolean.
+		 * @param {*} x - the variable
+		 * @return {boolean} true if boolean, otherwise false
+		 * @protected
+		 */
+		function isBoolean(x) {
+			return Object.prototype.toString.call(x) === "[object Boolean]";
+		}
+
+		function isUndefined(x) {
+			return x === undefined;
+		}
+
+		/**
+		 * Checks if the variable is a string.
+		 * @param {*} x - the variable
+		 * @return {boolean} true if string, otherwise false
+		 * @protected
+		 */
+		function isString(x) {
+			return Object.prototype.toString.call(x) === "[object String]";
+		}
+
+		/**
+		 * Checks if the variable is convertible to a string.
+		 * @param {*} x - the variable
+		 * @return {boolean} true if convertible, otherwise false
+		 */
+		function isConvertibleToString(x) {
+			return isString(x) || isNumber(x) || isObject(x) && Object.prototype.toString !== x.toString && isString(x.toString());
+		}
+
+		function asBoolean(x, options = {
+												 error: TypeError("Value is not convertible to boolean"),
+												 check: trueCheck,
+												 defaultValue: undefined}) {
+			// First check for undefined variable to return default value (if any).
+			if (isUndefined(x)) {
+				if (!isUndefined(options.defaultValue)) {
+					return options.defaultValue;
+				}
+				throw error;
+			}
+			if (isNumber(x)) {
+				x = Boolean(x);
+			} else if (isString(x)) {
+				if (x === "true") {
+					x = true;
+				} else if (x === "false") {
+					x = false;
+				}
+			}
+			if (isBoolean(x) && options.check(x)) {
+				return x;
+			}
+			throw error;
+		}
+
+		const loki = new Loki("test");
+		const coll = loki.addCollection("user", {indices: ["id"]});
+		coll.insert({id: 2, "name": "carlos", "nick": "carl"});
+		coll.insert({id: 3, "name": "norman", "nick": "norm"});
+		coll.insert({id: 4, "name": "frank", "nick": "franky"});
+		coll.insert({id: 5, "name": "otto", "nick": "old boy"});
+	</script>
 </html>

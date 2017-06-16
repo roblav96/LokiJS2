@@ -3,92 +3,92 @@ import {Loki as loki} from '../../../src/core/loki';
 
 describe('autoupdate', () => {
 
-	it('auto updates inserted documents', done => {
+  it('auto updates inserted documents', (done) => {
 
-		if (typeof Object.observe !== 'function') {
-			done();
-			return;
-		}
+    if (typeof Object.observe !== 'function') {
+      done();
+      return;
+    }
 
-		const coll = new loki.Collection('test', {
-			unique: ['name'],
-			autoupdate: true
-		});
+    const coll = new loki.Collection('test', {
+      unique: ['name'],
+      autoupdate: true
+    });
 
-		coll.insert({
-			name: 'Jack'
-		});
+    coll.insert({
+      name: 'Jack'
+    });
 
-		const doc = coll.insert({
-			name: 'Peter'
-		});
+    const doc = coll.insert({
+      name: 'Peter'
+    });
 
-		function change1() {
-			coll.on('update', target => {
-				expect(target).toBe(doc);
+    function change1() {
+      coll.on('update', (target) => {
+        expect(target).toBe(doc);
 
-				change2();
-			});
-			doc.name = 'John';
-		}
+        change2();
+      });
+      doc.name = 'John';
+    }
 
-		function change2() {
-			coll.on('error', err => {
-				expect(err).toEqual(new Error('Duplicate key for property name: ' + doc.name));
-				done();
-			});
-			doc.name = 'Jack';
-		}
+    function change2() {
+      coll.on('error', (err) => {
+        expect(err).toEqual(new Error('Duplicate key for property name: ' + doc.name));
+        done();
+      });
+      doc.name = 'Jack';
+    }
 
-		change1();
-	});
+    change1();
+  });
 
-	it('auto updates documents loaded from storage', done => {
+  it('auto updates documents loaded from storage', (done) => {
 
-		if (typeof Object.observe !== 'function') {
-			done();
-			return;
-		}
+    if (typeof Object.observe !== 'function') {
+      done();
+      return;
+    }
 
-		const db1 = new loki('autoupdate1.json'), db2 = new loki('autoupdate2.json');
+    const db1 = new loki('autoupdate1.json'), db2 = new loki('autoupdate2.json');
 
-		let coll = db1.addCollection('test', {
-			unique: ['name'],
-			autoupdate: true
-		});
+    let coll = db1.addCollection('test', {
+      unique: ['name'],
+      autoupdate: true
+    });
 
-		const originalDocs = coll.insert([{
-			name: 'Jack'
-		}, {
-			name: 'Peter'
-		}]);
+    const originalDocs = coll.insert([{
+      name: 'Jack'
+    }, {
+      name: 'Peter'
+    }]);
 
-		db2.loadJSON(db1.serialize());
+    db2.loadJSON(db1.serialize());
 
-		coll = db2.getCollection('test');
+    coll = db2.getCollection('test');
 
-		const doc = coll.by('name', 'Peter');
+    const doc = coll.by('name', 'Peter');
 
-		expect(coll.autoupdate).toBe(true);
-		expect(doc).toEqual(originalDocs[1]);
+    expect(coll.autoupdate).toBe(true);
+    expect(doc).toEqual(originalDocs[1]);
 
-		function change1() {
-			coll.on('update', target => {
-				expect(target).toBe(doc);
+    function change1() {
+      coll.on('update', (target) => {
+        expect(target).toBe(doc);
 
-				change2();
-			});
-			doc.name = 'John';
-		}
+        change2();
+      });
+      doc.name = 'John';
+    }
 
-		function change2() {
-			coll.on('error', err => {
-				expect(err).toEqual(new Error('Duplicate key for property name: ' + doc.name));
-				done();
-			});
-			doc.name = 'Jack';
-		}
+    function change2() {
+      coll.on('error', (err) => {
+        expect(err).toEqual(new Error('Duplicate key for property name: ' + doc.name));
+        done();
+      });
+      doc.name = 'Jack';
+    }
 
-		change1();
-	});
+    change1();
+  });
 });
