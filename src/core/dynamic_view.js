@@ -735,5 +735,4 @@ export class DynamicView extends LokiEventEmitter {
       throw err;
     }
   }
-
 }

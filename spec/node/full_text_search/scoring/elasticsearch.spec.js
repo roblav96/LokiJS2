@@ -1,4 +1,4 @@
-/* global describe, it, expect */
+/* global describe, it, expect, beforeEach */
 import {DATA} from './MOCK_DATA';
 import {QUERIES} from './QUERIES';
 import {FullTextSearch} from '../../../../src/inverted_index/full_text_search';
