@@ -1,7 +1,6 @@
 import {InvertedIndex} from './inverted_index';
 import {IndexSearcher} from './index_searcher';
 import {Tokenizer} from './tokenizer';
-import * as Utils from './utils.js';
 
 export class FullTextSearch {
 	/**
@@ -22,20 +21,12 @@ export class FullTextSearch {
     if (Array.isArray(fields)) {
       for (let i = 0; i < fields.length; i++) {
         let field = fields[i];
-        let name = Utils.asString(field.name, {
-          error: TypeError('Field name needs to be a string.')
-        });
+        let name = field.name;
 
-        let store = Utils.asBoolean(field.store, {
-          error: TypeError("Field store flag needs to be a boolean"),
-          defaultValue: true
-        });
+        let store = field.store !== undefined ? field.store : true;
 
         let tokenizer = null;
         if (field.tokenizer !== undefined) {
-          if (!(field.tokenizer instanceof Tokenizer)) {
-            throw new TypeError("Field tokenizer needs to be a instance of tokenizer.");
-          }
           tokenizer = field.tokenizer;
         } else {
           tokenizer = new Tokenizer();

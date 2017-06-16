@@ -1,6 +1,6 @@
 /* global describe, it, expect */
 import {FullTextSearch} from '../../../../src/inverted_index/full_text_search';
-import {QueryBuilder} from '../../../../src/inverted_index/queries';
+import {QueryBuilder as QB, WildcardQuery} from '../../../../src/inverted_index/queries';
 import {Tokenizer} from '../../../../src/inverted_index/tokenizer';
 
 describe('wildcard query', () => {
@@ -15,6 +15,11 @@ describe('wildcard query', () => {
     expect(res).toEqual({});
   };
 
+  it('Wild card query: QB', () => {
+    let q = new WildcardQuery("user", "alb?rt").boost(4.5).build();
+    expect(q).toEqual({type: "wildcard", field: "user", value: "alb?rt", boost: 4.5});
+  });
+
   it('Tests Wildcard queries with an asterisk.', (done) => {
     let docs = ["metal", "metals", "mXtals", "mXtXls"];
     let fts = new FullTextSearch([{name: "body"}]);
@@ -25,15 +30,15 @@ describe('wildcard query', () => {
       });
     }
     let query = null;
-    query = new QueryBuilder().wildcard("body", "metal*").build();
+    query = new QB().wildcard("body", "metal*").build();
     assertMatches(fts, query, [0, 1]);
-    query = new QueryBuilder().wildcard("body", "metals*").build();
+    query = new QB().wildcard("body", "metals*").build();
     assertMatches(fts, query, [1]);
-    query = new QueryBuilder().wildcard("body", "mx*").build();
+    query = new QB().wildcard("body", "mx*").build();
     assertMatches(fts, query, [2, 3]);
-    query = new QueryBuilder().wildcard("body", "mX*").build();
+    query = new QB().wildcard("body", "mX*").build();
     assertMatches(fts, query);
-    query = new QueryBuilder().wildcard("body", "m*").build();
+    query = new QB().wildcard("body", "m*").build();
     assertMatches(fts, query, [0, 1, 2, 3]);
 
     done();
@@ -49,17 +54,17 @@ describe('wildcard query', () => {
       });
     }
     let query = null;
-    query = new QueryBuilder().wildcard("body", "m?tal").build();
+    query = new QB().wildcard("body", "m?tal").build();
     assertMatches(fts, query, [0]);
-    query = new QueryBuilder().wildcard("body", "metal?").build();
+    query = new QB().wildcard("body", "metal?").build();
     assertMatches(fts, query, [1]);
-    query = new QueryBuilder().wildcard("body", "metals?").build();
+    query = new QB().wildcard("body", "metals?").build();
     assertMatches(fts, query);
-    query = new QueryBuilder().wildcard("body", "m?t?ls").build();
+    query = new QB().wildcard("body", "m?t?ls").build();
     assertMatches(fts, query, [1, 2, 3]);
-    query = new QueryBuilder().wildcard("body", "M?t?ls").build();
+    query = new QB().wildcard("body", "M?t?ls").build();
     assertMatches(fts, query);
-    query = new QueryBuilder().wildcard("body", "meta??").build();
+    query = new QB().wildcard("body", "meta??").build();
     assertMatches(fts, query, [1]);
 
     done();
@@ -80,17 +85,17 @@ describe('wildcard query', () => {
       });
     }
     let query = null;
-		//query = new QueryBuilder().wildcard("body", "foo*bar").build();
+		//query = new QB().wildcard("body", "foo*bar").build();
 		//assertMatches(fts, query, 4); // * not implemented
-    query = new QueryBuilder().wildcard("body", "foo\\*bar").build();
+    query = new QB().wildcard("body", "foo\\*bar").build();
     assertMatches(fts, query, [0]);
-    query = new QueryBuilder().wildcard("body", "foo??bar").build();
+    query = new QB().wildcard("body", "foo??bar").build();
     assertMatches(fts, query, [1, 2]);
-    query = new QueryBuilder().wildcard("body", "foo\\?\\?bar").build();
+    query = new QB().wildcard("body", "foo\\?\\?bar").build();
     assertMatches(fts, query, [1]);
-    query = new QueryBuilder().wildcard("body", "foo\\\\").build();
+    query = new QB().wildcard("body", "foo\\\\").build();
     assertMatches(fts, query, [4]);
-    query = new QueryBuilder().wildcard("body", "foo\\\\*").build();
+    query = new QB().wildcard("body", "foo\\\\*").build();
     assertMatches(fts, query, [4, 5]);
 
     done();

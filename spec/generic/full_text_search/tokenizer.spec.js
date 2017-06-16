@@ -26,9 +26,6 @@ describe('tokenizer', () => {
     let tkz = new Tokenizer();
 
     expect(tkz.getSplitter()).toBeArray();
-    expect(() => tkz.setSplitter(1, splitter)).not.toThrowErrorOfType('TypeError');
-    expect(() => tkz.setSplitter(null, splitter)).toThrowErrorOfType('TypeError');
-    expect(() => tkz.setSplitter("MySplitter", 1)).toThrowErrorOfType('TypeError');
     expect(() => tkz.setSplitter("", splitter)).toThrowErrorOfType('Error');
     tkz.setSplitter("MySplitter", splitter);
     expect(tkz.getSplitter()).toBeArray();
@@ -39,8 +36,6 @@ describe('tokenizer', () => {
   it('add, get', (done) => {
     let tkz = new Tokenizer();
 
-    expect(() => tkz.add(1, f1)).not.toThrowErrorOfType('TypeError');
-    expect(() => tkz.add(null, f1)).toThrowErrorOfType('TypeError');
     expect(() => tkz.add("f1", 1)).toThrowErrorOfType('TypeError');
     expect(() => tkz.add("", f1)).toThrowErrorOfType('Error');
     tkz.add("f1", f1);
@@ -85,7 +80,6 @@ describe('tokenizer', () => {
     tkz.setSplitter("MySplitter", splitter);
 
     expect(() => tkz.remove(1)).toThrowErrorOfType('Error');
-    expect(() => tkz.remove(null)).toThrowErrorOfType('TypeError');
     expect(() => tkz.remove(f4)).toThrowErrorOfType('Error');
     expect(() => tkz.remove("f4")).toThrowErrorOfType('Error');
     tkz.resetSplitter();

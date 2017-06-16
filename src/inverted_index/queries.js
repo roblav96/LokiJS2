@@ -1,38 +1,42 @@
 /**
  * Query builder
  */
-import * as Utils from './utils.js';
+//import * as Utils from './utils.js';
 
 /**
  * The base query class to enable boost to a query type.
- *
- * @param {string} type - the type name of the query
  */
 export class BaseQuery {
+  /**
+   * @param {string} type - the type name of the query
+   * @param data
+   */
   constructor(type, data = {}) {
     this._data = data;
-    this._data.type = Utils.asString(type);
+    this._data.type = type;
   }
 
-	/**
-	 * Boosts the query result.
-	 *
-	 * See also [Lucene#BoostQuery]{@link https://lucene.apache.org/core/6_4_0/core/org/apache/lucene/search/BoostQuery.html}
-	 * and [Elasticsearch#boost]{@link https://www.elastic.co/guide/en/elasticsearch/reference/5.2/mapping-boost.html}.
-	 *
-	 * @param {number} value - the positive boost
-	 * @return {BaseQuery} object itself for cascading
-	 */
+  /**
+   * Boosts the query result.
+   *
+   * See also [Lucene#BoostQuery]{@link https://lucene.apache.org/core/6_4_0/core/org/apache/lucene/search/BoostQuery.html}
+   * and [Elasticsearch#boost]{@link https://www.elastic.co/guide/en/elasticsearch/reference/5.2/mapping-boost.html}.
+   *
+   * @param {number} value - the positive boost
+   * @return {BaseQuery} object itself for cascading
+   */
   boost(value) {
-    value = Utils.asNumber(value, {check: (x) => x >= 0, error: TypeError("Boost must be a positive number.")});
+    if (value < 0) {
+      throw TypeError("Boost must be a positive number.");
+    }
     this._data.boost = value;
     return this;
   }
 
-	/**
-	 * Build the final query.
-	 * @return {Object} - the final query
-	 */
+  /**
+   * Build the final query.
+   * @return {Object} - the final query
+   */
   build() {
     return this._data;
   }
@@ -51,15 +55,18 @@ export class BaseQuery {
  * // The resulting documents:
  * // contains the term infinity
  *
- * @param {string} field - the field name of the document
- * @param {string} term - the term
  * @extends BaseQuery
  */
 export class TermQuery extends BaseQuery {
+  /**
+   * @param {string} field - the field name of the document
+   * @param {string} term - the term
+   * @param data
+   */
   constructor(field, term, data = {}) {
     super("term", data);
-    this._data.field = Utils.asString(field);
-    this._data.value = Utils.asString(term);
+    this._data.field = field;
+    this._data.value = term;
   }
 }
 
@@ -76,15 +83,18 @@ export class TermQuery extends BaseQuery {
  * // The resulting documents:
  * // contains the terms infinity, atom or energy
  *
- * @param {string} field - the field name of the document
- * @param {string[]} terms - the terms
  * @extends BaseQuery
  */
 export class TermsQuery extends BaseQuery {
+  /**
+   * @param {string} field - the field name of the document
+   * @param {string[]} terms - the terms
+   * @param data
+   */
   constructor(field, terms, data = {}) {
     super("terms", data);
-    this._data.field = Utils.asString(field);
-    this._data.value = Utils.asArrayOfString(terms);
+    this._data.field = field;
+    this._data.value = terms;
   }
 }
 
@@ -112,24 +122,27 @@ export class TermsQuery extends BaseQuery {
  * // The resulting documents:
  * // contains the wildcard surname e?nste?n\? (like Einstein? or Eynsteyn? but not Einsteine or Ensten?)
  *
- * @param {string} field - the field name of the document
- * @param {string} wildcard - the wildcard term
  * @extends BaseQuery
  */
 export class WildcardQuery extends BaseQuery {
+  /**
+   * @param {string} field - the field name of the document
+   * @param {string} wildcard - the wildcard term
+   * @param data
+   */
   constructor(field, wildcard, data = {}) {
     super("wildcard", data);
-    this._data.field = Utils.asString(field);
-    this._data.value = Utils.asString(wildcard);
+    this._data.field = field;
+    this._data.value = wildcard;
   }
 
-	/**
-	 * This flag enables scoring for wildcard results, similar to {@link TermQuery}.
-	 * @param {boolean} enable - flag to enable or disable scoring
-	 * @return {WildcardQuery}
-	 */
+  /**
+   * This flag enables scoring for wildcard results, similar to {@link TermQuery}.
+   * @param {boolean} enable - flag to enable or disable scoring
+   * @return {WildcardQuery}
+   */
   enableScoring(enable) {
-    this._data.enable_scoring = Utils.asBoolean(enable);
+    this._data.enable_scoring = enable;
     return this;
   }
 }
@@ -157,49 +170,48 @@ export class WildcardQuery extends BaseQuery {
  * // The resulting documents:
  * // contains the fuzzy surname einstn (like Einstein or Einst but not Eisstein or Insten)
  *
- * @param {string} field - the field name of the document
- * @param {string} fuzzy - the fuzzy term
  * @extends BaseQuery
  */
 export class FuzzyQuery extends BaseQuery {
+  /**
+   * @param {string} field - the field name of the document
+   * @param {string} fuzzy - the fuzzy term
+   * @param data
+   */
   constructor(field, fuzzy, data = {}) {
     super("fuzzy", data);
-    this._data.field = Utils.asString(field);
-    this._data.value = Utils.asString(fuzzy);
+    this._data.field = field;
+    this._data.value = fuzzy;
   }
 
-	/**
-	 * Sets the maximal allowed fuzziness.
-	 * @param {number|string} fuzziness - the edit distance as number or AUTO
-	 *
-	 * AUTO generates an edit distance based on the length of the term:
-	 * * 0..2 -> must match exactly
-	 * * 3..5 -> one edit allowed
-	 * * >5 two edits allowed
-	 *
-	 * @return {FuzzyQuery} - object itself for cascading
-	 */
+  /**
+   * Sets the maximal allowed fuzziness.
+   * @param {number|string} fuzziness - the edit distance as number or AUTO
+   *
+   * AUTO generates an edit distance based on the length of the term:
+   * * 0..2 -> must match exactly
+   * * 3..5 -> one edit allowed
+   * * >5 two edits allowed
+   *
+   * @return {FuzzyQuery} - object itself for cascading
+   */
   fuzziness(fuzziness) {
-    if (fuzziness !== "AUTO") {
-      fuzziness = Utils.asNumber(fuzziness, {
-        error: TypeError("Fuzziness must be a positive number or AUTO."),
-        check: (x) => x >= 0
-      });
+    if (fuzziness !== "AUTO" && fuzziness < 0) {
+      throw TypeError("Fuzziness must be a positive number or AUTO.");
     }
     this._data.fuzziness = fuzziness;
     return this;
   }
 
-	/**
-	 * Sets the initial word length.
-	 * @param {number} prefixLength - the positive prefix length
-	 * @return {FuzzyQuery}  object itself for cascading
-	 */
+  /**
+   * Sets the initial word length.
+   * @param {number} prefixLength - the positive prefix length
+   * @return {FuzzyQuery}  object itself for cascading
+   */
   prefixLength(prefixLength) {
-    prefixLength = Utils.asNumber(prefixLength, {
-      check: (x) => x >= 0,
-      error: TypeError("Prefix length must be a positive number.")
-    });
+    if (prefixLength < 0) {
+      throw TypeError("Prefix length must be a positive number.");
+    }
     this._data.prefix_length = prefixLength;
     return this;
   }
@@ -220,24 +232,27 @@ export class FuzzyQuery extends BaseQuery {
  * // The resulting documents:
  * // contains the term prefix alb as surname
  *
- * @param {string} field - the field name of the document
- * @param {string} prefix - the prefix of a term
  * @extends BaseQuery
  */
 export class PrefixQuery extends BaseQuery {
+  /**
+   * @param {string} field - the field name of the document
+   * @param {string} prefix - the prefix of a term
+   * @param data
+   */
   constructor(field, prefix, data = {}) {
     super("prefix", data);
-    this._data.field = Utils.asString(field);
-    this._data.value = Utils.asString(prefix);
+    this._data.field = field;
+    this._data.value = prefix;
   }
 
-	/**
-	 * This flag enables scoring for wildcard results, similar to {@link TermQuery}.
-	 * @param {boolean} enable - flag to enable or disable scoring
-	 * @return {PrefixQuery}
-	 */
+  /**
+   * This flag enables scoring for wildcard results, similar to {@link TermQuery}.
+   * @param {boolean} enable - flag to enable or disable scoring
+   * @return {PrefixQuery}
+   */
   enableScoring(enable) {
-    this._data.enable_scoring = Utils.asBoolean(enable);
+    this._data.enable_scoring = enable;
     return this;
   }
 }
@@ -254,13 +269,16 @@ export class PrefixQuery extends BaseQuery {
  * // The resulting documents:
  * // has the field "name"
  *
- * @param {string} field - the field name of the document
  * @extends BaseQuery
  */
 export class ExistsQuery extends BaseQuery {
+  /**
+   * @param {string} field - the field name of the document
+   * @param data
+   */
   constructor(field, data = {}) {
     super("exists", data);
-    this._data.field = Utils.asString(field);
+    this._data.field = field;
   }
 }
 
@@ -289,33 +307,33 @@ export class ExistsQuery extends BaseQuery {
  * // The resulting documents:
  * // contains the fuzzy name albrt einsten (like Albert Einstein) with a boost of 2.5
  *
- * @param {string} field - the field name of the document
- * @param {string} query - the query text
  * @extends BaseQuery
  */
 export class MatchQuery extends BaseQuery {
+  /**
+   * @param {string} field - the field name of the document
+   * @param {string} query - the query text
+   * @param data
+   */
   constructor(field, query, data = {}) {
     super("match", data);
-    this._data.field = Utils.asString(field);
-    this._data.value = Utils.asString(query);
+    this._data.field = field;
+    this._data.value = query;
   }
 
-	/**
-	 * Controls the amount of minimum matching sub queries before a document will be considered.
-	 * @param {number} minShouldMatch - number of minimum matching sub queries
-	 *   minShouldMatch >= 1: Indicates a fixed value regardless of the number of sub queries.
-	 *   minShouldMatch <= -1: Indicates that the number of sub queries, minus this number should be mandatory.
-	 *   minShouldMatch < 0: Indicates that this percent of the total number of sub queries can be missing.
-	 *     The number computed from the percentage is rounded down, before being subtracted from the total to determine
-	 *     the minimum.
-	 *   minShouldMatch < 1: Indicates that this percent of the total number of sub queries are necessary.
-	 *     The number computed from the percentage is rounded down and used as the minimum.
-	 * @return {MatchQuery} object itself for cascading
-	 */
+  /**
+   * Controls the amount of minimum matching sub queries before a document will be considered.
+   * @param {number} minShouldMatch - number of minimum matching sub queries
+   *   minShouldMatch >= 1: Indicates a fixed value regardless of the number of sub queries.
+   *   minShouldMatch <= -1: Indicates that the number of sub queries, minus this number should be mandatory.
+   *   minShouldMatch < 0: Indicates that this percent of the total number of sub queries can be missing.
+   *     The number computed from the percentage is rounded down, before being subtracted from the total to determine
+   *     the minimum.
+   *   minShouldMatch < 1: Indicates that this percent of the total number of sub queries are necessary.
+   *     The number computed from the percentage is rounded down and used as the minimum.
+   * @return {MatchQuery} object itself for cascading
+   */
   minimumShouldMatch(minShouldMatch) {
-    minShouldMatch = Utils.asNumber(minShouldMatch, {
-      error: TypeError("Minimum should match must be a number or a string.")
-    });
     if (this._data.operator !== undefined && this._data.operator === "and") {
       throw SyntaxError("Match query with \"and\" operator does not support minimum should match.");
     }
@@ -323,13 +341,12 @@ export class MatchQuery extends BaseQuery {
     return this;
   }
 
-	/**
-	 * Sets the boolean operator.
-	 * @param {string} op - the operator (_or_/_and_)
-	 * @return {MatchQuery} object itself for cascading
-	 */
+  /**
+   * Sets the boolean operator.
+   * @param {string} op - the operator (_or_/_and_)
+   * @return {MatchQuery} object itself for cascading
+   */
   operator(op) {
-    op = Utils.asString(op);
     if (op !== 'and' && op !== 'or') {
       throw SyntaxError("Unknown operator.");
     }
@@ -340,38 +357,34 @@ export class MatchQuery extends BaseQuery {
     return this;
   }
 
-	/**
-	 * Sets the maximal allowed fuzziness.
-	 * @param {number|string} fuzziness - the edit distance as number or AUTO
-	 *
-	 * AUTO generates an edit distance based on the length of the term:
-	 * * 0..2 -> must match exactly
-	 * * 3..5 -> one edit allowed
-	 * * >5 two edits allowed
-	 *
-	 * @return {MatchQuery} - object itself for cascading
-	 */
+  /**
+   * Sets the maximal allowed fuzziness.
+   * @param {number|string} fuzziness - the edit distance as number or AUTO
+   *
+   * AUTO generates an edit distance based on the length of the term:
+   * * 0..2 -> must match exactly
+   * * 3..5 -> one edit allowed
+   * * >5 two edits allowed
+   *
+   * @return {MatchQuery} - object itself for cascading
+   */
   fuzziness(fuzziness) {
-    if (fuzziness !== "AUTO") {
-      fuzziness = Utils.asNumber(fuzziness, {
-        error: TypeError("Fuzziness must be a positive number or AUTO."),
-        check: (x) => x >= 0
-      });
+    if (fuzziness !== "AUTO" && fuzziness < 0) {
+      throw TypeError("Fuzziness must be a positive number or AUTO.");
     }
     this._data.fuzziness = fuzziness;
     return this;
   }
 
-	/**
-	 * Sets the starting word length which should not be considered for fuzziness.
-	 * @param {number} prefixLength - the positive prefix length
-	 * @return {MatchQuery} - object itself for cascading
-	 */
+  /**
+   * Sets the starting word length which should not be considered for fuzziness.
+   * @param {number} prefixLength - the positive prefix length
+   * @return {MatchQuery} - object itself for cascading
+   */
   prefixLength(prefixLength) {
-    prefixLength = Utils.asNumber(prefixLength, {
-      check: (x) => x >= 0,
-      error: TypeError("Prefix length must be a positive number.")
-    });
+    if (prefixLength < 0) {
+      throw TypeError("Prefix length must be a positive number.");
+    }
     this._data.prefix_length = prefixLength;
     return this;
   }
@@ -499,10 +512,10 @@ export class ConstantScoreQuery extends BaseQuery {
     super("constant_score", data);
   }
 
-	/**
-	 * Starts an array of queries. Use endFilter() to finish the array.
-	 * @return {ArrayQuery} array query for holding sub queries
-	 */
+  /**
+   * Starts an array of queries. Use endFilter() to finish the array.
+   * @return {ArrayQuery} array query for holding sub queries
+   */
   beginFilter() {
     this._data.filter = {};
     return new ArrayQuery("endFilter", () => {
@@ -559,10 +572,10 @@ export class BoolQuery extends BaseQuery {
     super("bool", data);
   }
 
-	/**
-	 * Starts an array of queries for must clause. Use endMust() to finish the array.
-	 * @return {ArrayQuery} array query for holding sub queries
-	 */
+  /**
+   * Starts an array of queries for must clause. Use endMust() to finish the array.
+   * @return {ArrayQuery} array query for holding sub queries
+   */
   beginMust() {
     this._data.must = {};
     return new ArrayQuery("endMust", () => {
@@ -570,10 +583,10 @@ export class BoolQuery extends BaseQuery {
     }, this._data.must);
   }
 
-	/**
-	 * Starts an array of queries for filter clause. Use endFilter() to finish the array.
-	 * @return {ArrayQuery} array query for holding sub queries
-	 */
+  /**
+   * Starts an array of queries for filter clause. Use endFilter() to finish the array.
+   * @return {ArrayQuery} array query for holding sub queries
+   */
   beginFilter() {
     this._data.filter = {};
     return new ArrayQuery("endFilter", () => {
@@ -581,10 +594,10 @@ export class BoolQuery extends BaseQuery {
     }, this._data.filter);
   }
 
-	/**
-	 * Starts an array of queries for should clause. Use endShould() to finish the array.
-	 * @return {ArrayQuery} array query for holding sub queries
-	 */
+  /**
+   * Starts an array of queries for should clause. Use endShould() to finish the array.
+   * @return {ArrayQuery} array query for holding sub queries
+   */
   beginShould() {
     this._data.should = {};
     return new ArrayQuery("endShould", () => {
@@ -592,10 +605,10 @@ export class BoolQuery extends BaseQuery {
     }, this._data.should);
   }
 
-	/**
-	 * Starts an array of queries for not clause. Use endNot() to finish the array.
-	 * @return {ArrayQuery} array query for holding sub queries
-	 */
+  /**
+   * Starts an array of queries for not clause. Use endNot() to finish the array.
+   * @return {ArrayQuery} array query for holding sub queries
+   */
   beginNot() {
     this._data.not = {};
     return new ArrayQuery("endNot", () => {
@@ -603,22 +616,19 @@ export class BoolQuery extends BaseQuery {
     }, this._data.not);
   }
 
-	/**
-	 * Controls the amount of minimum matching sub queries before a document will be considered.
-	 * @param {number} minShouldMatch - number of minimum matching sub queries
-	 *   minShouldMatch >= 1: Indicates a fixed value regardless of the number of sub queries.
-	 *   minShouldMatch <= -1: Indicates that the number of sub queries, minus this number should be mandatory.
-	 *   minShouldMatch < 0: Indicates that this percent of the total number of sub queries can be missing.
-	 *     The number computed from the percentage is rounded down, before being subtracted from the total to determine
-	 *     the minimum.
-	 *   minShouldMatch < 1: Indicates that this percent of the total number of sub queries are necessary.
-	 *     The number computed from the percentage is rounded down and used as the minimum.
-	 * @return {BoolQuery} object itself for cascading
-	 */
+  /**
+   * Controls the amount of minimum matching sub queries before a document will be considered.
+   * @param {number} minShouldMatch - number of minimum matching sub queries
+   *   minShouldMatch >= 1: Indicates a fixed value regardless of the number of sub queries.
+   *   minShouldMatch <= -1: Indicates that the number of sub queries, minus this number should be mandatory.
+   *   minShouldMatch < 0: Indicates that this percent of the total number of sub queries can be missing.
+   *     The number computed from the percentage is rounded down, before being subtracted from the total to determine
+   *     the minimum.
+   *   minShouldMatch < 1: Indicates that this percent of the total number of sub queries are necessary.
+   *     The number computed from the percentage is rounded down and used as the minimum.
+   * @return {BoolQuery} object itself for cascading
+   */
   minimumShouldMatch(minShouldMatch) {
-    if (!Utils.isNumber(minShouldMatch)) {
-      throw TypeError("Minimum should match must be a number or a string.");
-    }
     this._data.minimum_should_match = minShouldMatch;
     return this;
   }
@@ -649,33 +659,33 @@ export class QueryBuilder {
     this.useBM25();
   }
 
-	/**
-	 * The query performs a final scoring over all scored sub queries and rank documents by there relevant.
-	 * @param {boolean} enable - flag to enable or disable final scoring
-	 * @return {QueryBuilder}
-	 */
+  /**
+   * The query performs a final scoring over all scored sub queries and rank documents by there relevant.
+   * @param {boolean} enable - flag to enable or disable final scoring
+   * @return {QueryBuilder}
+   */
   enableFinalScoring(enable) {
-    this._data.final_scoring = Utils.asBoolean(enable);
+    this._data.final_scoring = enable;
     return this;
   }
 
-	/**
-	 * Use [Okapi BM25]{@link https://en.wikipedia.org/wiki/Okapi_BM25} as scoring model (default).
-	 *
-	 * See also [Lucene#MatchAllDocsQuery]{@link https://lucene.apache.org/core/6_4_0/core/org/apache/lucene/search/similarities/BM25Similarity.html}
-	 * and [Elasticsearch#BM25]{@link https://www.elastic.co/guide/en/elasticsearch/guide/current/pluggable-similarites.html#bm25}.
-	 *
-	 * @param {number} [k1=1.2] - controls how quickly an increase in term frequency results in term-frequency saturation.
-	 * 														Lower values result in quicker saturation, and higher values in slower saturation.
-	 * @param {number} [b=0.75] - controls how much effect field-length normalization should have.
-	 * 														A value of 0.0 disables normalization completely, and a value of 1.0 normalizes fully.
-	 * @return {QueryBuilder}
-	 */
+  /**
+   * Use [Okapi BM25]{@link https://en.wikipedia.org/wiki/Okapi_BM25} as scoring model (default).
+   *
+   * See also [Lucene#MatchAllDocsQuery]{@link https://lucene.apache.org/core/6_4_0/core/org/apache/lucene/search/similarities/BM25Similarity.html}
+   * and [Elasticsearch#BM25]{@link https://www.elastic.co/guide/en/elasticsearch/guide/current/pluggable-similarites.html#bm25}.
+   *
+   * @param {number} [k1=1.2] - controls how quickly an increase in term frequency results in term-frequency saturation.
+   *                            Lower values result in quicker saturation, and higher values in slower saturation.
+   * @param {number} [b=0.75] - controls how much effect field-length normalization should have.
+   *                            A value of 0.0 disables normalization completely, and a value of 1.0 normalizes fully.
+   * @return {QueryBuilder}
+   */
   useBM25(k1 = 1.2, b = 0.75) {
-    if (!Utils.isNumber(k1) || k1 < 0) {
+    if (k1 < 0) {
       throw TypeError("BM25s k1 must be a positive number.");
     }
-    if (!Utils.isNumber(b) || b < 0 || b > 1) {
+    if (b < 0 || b > 1) {
       throw TypeError("BM25s b must be a number between 0 and 1 inclusive.");
     }
 

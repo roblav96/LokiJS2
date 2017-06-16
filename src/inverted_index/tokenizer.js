@@ -45,10 +45,6 @@ export class Tokenizer {
 	 * @param {function} func - the function
 	 */
   setSplitter(label, func) {
-    label = Utils.asString(label);
-    if (!Utils.isFunction(func)) {
-      throw TypeError("Splitter must be a function.");
-    }
     if (label === "") {
       throw Error("Label cannot be empty.");
     }
@@ -246,15 +242,12 @@ export class Tokenizer {
   _getPosition(labelFunc) {
     if (Utils.isFunction(labelFunc)) {
       return this._queue.indexOf(labelFunc);
-    } else if (Utils.isConvertibleToString(labelFunc)) {
-      labelFunc = String(labelFunc);
+    } else {
       for (let i = 0; i < this._queue.length; i++) {
         if (this._queue[i][this._symbol] === labelFunc) {
           return i;
         }
       }
-    } else {
-      throw TypeError("Type of labelFunc must be string or function.");
     }
     return -1;
   }
@@ -267,10 +260,6 @@ export class Tokenizer {
 	 * @private
 	 */
   _addFunction(label, func, pos) {
-    label = Utils.asString(label);
-    if (!Utils.isFunction(func)) {
-      throw TypeError("Type of func must be function.");
-    }
     if (label === "") {
       throw Error("Label cannot be empty.");
     }

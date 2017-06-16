@@ -1,6 +1,6 @@
 /* global describe, it, expect */
 import {FullTextSearch} from '../../../../src/inverted_index/full_text_search';
-import {QueryBuilder as QB} from '../../../../src/inverted_index/queries';
+import {QueryBuilder as QB, FuzzyQuery} from '../../../../src/inverted_index/queries';
 
 describe('fuzzy query', () => {
 	// from lucene 6.4.0 core: TestFuzzyQuery
@@ -15,7 +15,8 @@ describe('fuzzy query', () => {
   };
 
   it('Fuzzy query: QB', () => {
-    let q = new QB().fuzzy("user", "albrt").boost(5.5).fuzziness(3).prefixLength(3).build();
+    let q = new FuzzyQuery("user", "albrt").boost(5.5).fuzziness(3).prefixLength(3).build();
+    expect(q).toEqual({type: "fuzzy", field: "user", value: "albrt", boost: 5.5, fuzziness: 3, prefix_length: 3});
 
     q = new QB().fuzzy(1, 1);
     expect(() => q.fuzziness("AUTO")).not.toThrowErrorOfType("TypeError");
@@ -23,8 +24,6 @@ describe('fuzzy query', () => {
     expect(() => q.fuzziness("3")).not.toThrowErrorOfType("TypeError");
     expect(() => q.prefixLength(-1)).toThrowErrorOfType("TypeError");
     expect(() => q.prefixLength("1")).not.toThrowErrorOfType("TypeError");
-    expect(() => new QB().fuzzy("user", undefined)).toThrowErrorOfType("TypeError");
-    expect(() => new QB().fuzzy(null, "albrt")).toThrowErrorOfType("TypeError");
   });
 
   it('Fuzzy query (1).', () => {
