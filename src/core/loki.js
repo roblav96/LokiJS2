@@ -22,7 +22,7 @@ import {Collection} from './collection';
 /**
  * Loki: The main database class
  * @constructor Loki
- * @implements LokiEventEmitter
+ * @extends LokiEventEmitter
  * @param {string} filename - name of the file to be saved to
  * @param {object=} options - (Optional) config options object
  * @param {string} options.env - override environment detection as 'NODEJS', 'BROWSER', 'CORDOVA'
@@ -114,7 +114,7 @@ export class Loki extends LokiEventEmitter {
       }
     };
 
-		// refactored environment detection due to invalid detection for browser environments.
+		// refactor event environment detection due to invalid detection for browser environments.
 		// if they do not specify an options.env we want to detect env rather than default to nodejs.
 		// currently keeping two properties for similar thing (options.env and options.persistenceMethod)
 		//   might want to review whether we can consolidate.
@@ -373,10 +373,8 @@ export class Loki extends LokiEventEmitter {
 	// alias of serialize
   toJSON() {
     return {
-      events: this.events,
       ENV: this.ENV,
       serializationMethod: this.serializationMethod,
-      asyncListeners: this.asyncListeners,
       autosave: this.autosave,
       autosaveInterval: this.autosaveInterval,
       collections: this.collections,
@@ -1076,5 +1074,3 @@ export class Loki extends LokiEventEmitter {
     }
   }
 }
-
-Loki.Plugins = {};

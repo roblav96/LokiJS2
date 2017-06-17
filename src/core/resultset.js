@@ -311,8 +311,6 @@ export class Resultset {
     this.collection = collection;
     this.filteredrows = [];
     this.filterInitialized = false;
-
-    return this;
   }
 
 	/**
@@ -344,7 +342,6 @@ export class Resultset {
 	 *
 	 * @param {int} qty - The number of documents to return.
 	 * @returns {Resultset} Returns a copy of the resultset, limited by qty, for subsequent chain ops.
-	 * @memberof Resultset
 	 */
   limit(qty) {
 		// if this has no filters applied, we need to populate filteredrows first
@@ -362,7 +359,6 @@ export class Resultset {
 	 *
 	 * @param {int} pos - Number of documents to skip; all preceding documents are filtered out.
 	 * @returns {Resultset} Returns a copy of the resultset, containing docs starting at 'pos' for subsequent chain ops.
-	 * @memberof Resultset
 	 */
   offset(pos) {
 		// if this has no filters applied, we need to populate filteredrows first
@@ -379,7 +375,6 @@ export class Resultset {
 	 * copy() - To support reuse of resultset in branched query situations.
 	 *
 	 * @returns {Resultset} Returns a copy of the resultset (set) but the underlying document references will be the same.
-	 * @memberof Resultset
 	 */
   copy() {
     const result = new Resultset(this.collection);
@@ -394,7 +389,6 @@ export class Resultset {
 
 	/**
 	 * Alias of copy()
-	 * @memberof Resultset
 	 */
   branch() {
     return this.copy();
@@ -406,7 +400,6 @@ export class Resultset {
 	 * @param transform {(string|array)} - name of collection transform or raw transform array
 	 * @param parameters {object=} - (Optional) object property hash of parameters, if the transform requires them.
 	 * @returns {Resultset} either (this) resultset or a clone of of this resultset (depending on steps)
-	 * @memberof Resultset
 	 */
   transform(transform, parameters) {
     let idx;
@@ -490,7 +483,6 @@ export class Resultset {
 	 *
 	 * @param {function} comparefun - A javascript compare function used for sorting.
 	 * @returns {Resultset} Reference to this resultset, sorted, for future chain operations.
-	 * @memberof Resultset
 	 */
   sort(comparefun) {
 		// if this has no filters applied, just we need to populate filteredrows first
@@ -513,7 +505,6 @@ export class Resultset {
 	 * @param {string} propname - name of property to sort by.
 	 * @param {bool=} isdesc - (Optional) If true, the property will be sorted in descending order
 	 * @returns {Resultset} Reference to this resultset, sorted, for future chain operations.
-	 * @memberof Resultset
 	 */
   simplesort(propname, isdesc) {
     if (typeof (isdesc) === 'undefined') {
@@ -560,7 +551,6 @@ export class Resultset {
 	 *
 	 * @param {array} properties - array of property names or subarray of [propertyname, isdesc] used evaluate sort order
 	 * @returns {Resultset} Reference to this resultset, sorted, for future chain operations.
-	 * @memberof Resultset
 	 */
   compoundsort(properties) {
     if (properties.length === 0) {
@@ -677,7 +667,6 @@ export class Resultset {
 	 * @param {object} query - A mongo-style query object used for filtering current results.
 	 * @param {boolean=} firstOnly - (Optional) Used by collection.findOne()
 	 * @returns {Resultset} this resultset for further chain ops.
-	 * @memberof Resultset
 	 */
   find(query, firstOnly) {
     if (this.collection.data.length === 0) {
@@ -925,7 +914,6 @@ export class Resultset {
 	 *
 	 * @param {function} fun - A javascript function used for filtering current results by.
 	 * @returns {Resultset} this resultset for further chain ops.
-	 * @memberof Resultset
 	 */
   where(fun) {
     let viewFunction;
@@ -975,7 +963,6 @@ export class Resultset {
 	 * count() - returns the number of documents in the resultset.
 	 *
 	 * @returns {number} The number of documents in the resultset.
-	 * @memberof Resultset
 	 */
   count() {
     if (this.filterInitialized) {
@@ -986,18 +973,15 @@ export class Resultset {
 
 	/**
 	 * Terminates the chain and returns array of filtered documents
-	 *
-	 * @param {object=} options - allows specifying 'forceClones' and 'forceCloneMethod' options.
-	 * @param {boolean} options.forceClones - Allows forcing the return of cloned objects even when
+	 * @param {boolean} forceClones - Allows forcing the return of cloned objects even when
 	 *        the collection is not configured for clone object.
-	 * @param {string} options.forceCloneMethod - Allows overriding the default or collection specified cloning method.
+	 * @param {string} forceCloneMethod - Allows overriding the default or collection specified cloning method.
 	 *        Possible values include 'parse-stringify', 'jquery-extend-deep', and 'shallow'
-	 * @param {bool} options.removeMeta - Will force clones and strip $loki and meta properties from documents
+	 * @param {boolean} removeMeta - Will force clones and strip $loki and meta properties from documents
 	 *
 	 * @returns {array} Array of documents in the resultset
-	 * @memberof Resultset
 	 */
-  data(options = {}) {
+  data({forceClones, forceCloneMethod = this.collection.cloneMethod, removeMeta = false} = {}) {
     let result = [];
     let data = this.collection.data;
     let obj;
@@ -1006,22 +990,22 @@ export class Resultset {
     let method;
 
 		// if user opts to strip meta, then force clones and use 'shallow' if 'force' options are not present
-    if (options.removeMeta && !options.forceClones) {
-      options.forceClones = true;
-      options.forceCloneMethod = options.forceCloneMethod || 'shallow';
+    if (removeMeta && !forceClones) {
+      forceClones = true;
+      forceCloneMethod = 'shallow';
     }
 
 		// if this has no filters applied, just return collection.data
     if (!this.filterInitialized) {
       if (this.filteredrows.length === 0) {
 				// determine whether we need to clone objects or not
-        if (this.collection.cloneObjects || options.forceClones) {
+        if (this.collection.cloneObjects || forceClones) {
           len = data.length;
-          method = options.forceCloneMethod || this.collection.cloneMethod;
+          method = forceCloneMethod;
 
           for (i = 0; i < len; i++) {
             obj = clone(data[i], method);
-            if (options.removeMeta) {
+            if (removeMeta) {
               delete obj.$loki;
               delete obj.meta;
             }
@@ -1042,11 +1026,11 @@ export class Resultset {
     const fr = this.filteredrows;
     len = fr.length;
 
-    if (this.collection.cloneObjects || options.forceClones) {
-      method = options.forceCloneMethod || this.collection.cloneMethod;
+    if (this.collection.cloneObjects || forceClones) {
+      method = forceCloneMethod;
       for (i = 0; i < len; i++) {
         obj = clone(data[fr[i]], method);
-        if (options.removeMeta) {
+        if (removeMeta) {
           delete obj.$loki;
           delete obj.meta;
         }
@@ -1065,7 +1049,6 @@ export class Resultset {
 	 *
 	 * @param {function} updateFunction - User supplied updateFunction(obj) will be executed for each document object.
 	 * @returns {Resultset} this resultset for further chain ops.
-	 * @memberof Resultset
 	 */
   update(updateFunction) {
     if (typeof(updateFunction) !== "function") {
@@ -1095,7 +1078,6 @@ export class Resultset {
 	 * Removes all document objects which are currently in resultset from collection (as well as resultset)
 	 *
 	 * @returns {Resultset} this (empty) resultset for further chain ops.
-	 * @memberof Resultset
 	 */
   remove() {
 
@@ -1117,7 +1099,6 @@ export class Resultset {
 	 * @param {function} mapFunction - this function accepts a single document for you to transform and return
 	 * @param {function} reduceFunction - this function accepts many (array of map outputs) and returns single value
 	 * @returns {value} The output of your reduceFunction
-	 * @memberof Resultset
 	 */
   mapReduce(mapFunction, reduceFunction) {
     try {
@@ -1135,7 +1116,6 @@ export class Resultset {
 	 * @param {(string|function)} rightJoinKey - Property name in the joinData to join on or a function to produce a value to join on
 	 * @param {function=} mapFun - (Optional) A function that receives each matching pair and maps them into output objects - function(left,right){return joinedObject}
 	 * @returns {Resultset} A resultset with data in the format [{left: leftObj, right: rightObj}]
-	 * @memberof Resultset
 	 */
   eqJoin(joinData, leftJoinKey, rightJoinKey, mapFun) {
     let leftData = [];

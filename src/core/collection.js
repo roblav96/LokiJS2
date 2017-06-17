@@ -3,7 +3,7 @@ import {UniqueIndex} from './unique_index';
 import {ExactIndex} from './exact_index';
 import {Resultset} from './resultset';
 import {DynamicView} from './dynamic_view';
-import {clone, cloneObjectArray} from './clone';
+import {clone} from './clone';
 import {ltHelper, gtHelper, aeqHelper} from './helper';
 import {Loki} from './loki';
 import {copyProperties} from './utils';
@@ -72,25 +72,26 @@ function deepProperty(obj, property, isDeep) {
 
 /**
  * Collection class that handles documents of same type
- * @constructor Collection
- * @implements LokiEventEmitter
- * @param {string} name - collection name
- * @param {(array|object)=} options - (optional) array of property names to be indicized OR a configuration object
- * @param {array} options.unique - array of property names to define unique constraints for
- * @param {array} options.exact - array of property names to define exact constraints for
- * @param {array} options.indices - array property names to define binary indexes for
- * @param {boolean} options.adaptiveBinaryIndices - collection indices will be actively rebuilt rather than lazily (default: true)
- * @param {boolean} options.asyncListeners - default is false
- * @param {boolean} options.disableChangesApi - default is true
- * @param {boolean} options.autoupdate - use Object.observe to update objects automatically (default: false)
- * @param {boolean} options.clone - specify whether inserts and queries clone to/from user
- * @param {boolean} options.serializableIndices  - ensures indexed property values are serializable (default: true)
- * @param {string} options.cloneMethod - 'parse-stringify' (default), 'jquery-extend-deep', 'shallow'
- * @param {int} options.ttlInterval - time interval for clearing out 'aged' documents; not set by default.
- * @see {@link Loki#addCollection} for normal creation of collections
+ * @extends LokiEventEmitter
  */
 export class Collection extends LokiEventEmitter {
 
+  /**
+   * @param {string} name - collection name
+   * @param {(array|object)=} options - (optional) array of property names to be indicized OR a configuration object
+   * @param {array} options.unique - array of property names to define unique constraints for
+   * @param {array} options.exact - array of property names to define exact constraints for
+   * @param {array} options.indices - array property names to define binary indexes for
+   * @param {boolean} options.adaptiveBinaryIndices - collection indices will be actively rebuilt rather than lazily (default: true)
+   * @param {boolean} options.asyncListeners - default is false
+   * @param {boolean} options.disableChangesApi - default is true
+   * @param {boolean} options.autoupdate - use Object.observe to update objects automatically (default: false)
+   * @param {boolean} options.clone - specify whether inserts and queries clone to/from user
+   * @param {boolean} options.serializableIndices  - ensures indexed property values are serializable (default: true)
+   * @param {string} options.cloneMethod - 'parse-stringify' (default), 'jquery-extend-deep', 'shallow'
+   * @param {int} options.ttlInterval - time interval for clearing out 'aged' documents; not set by default.
+   * @see {@link Loki#addCollection} for normal creation of collections
+   */
   constructor(name, options = {}) {
     super();
 		// the name of the collection

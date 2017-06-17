@@ -14,7 +14,6 @@ export class LokiEventEmitter {
   constructor() {
 		/**
 		 * @prop {hashmap} events - a hashmap, with each property being an array of callbacks
-		 * @memberof LokiEventEmitter
 		 */
     this.events = {};
 
@@ -22,7 +21,6 @@ export class LokiEventEmitter {
 		 * @prop {boolean} asyncListeners - boolean determines whether or not the callbacks associated with each event
 		 * should happen in an async fashion or not
 		 * Default is false, which means events are synchronous
-		 * @memberof LokiEventEmitter
 		 */
     this.asyncListeners = false;
   }
@@ -32,7 +30,6 @@ export class LokiEventEmitter {
 	 * @param {string|string[]} eventName - the name(s) of the event(s) to listen to
 	 * @param {function} listener - callback function of listener to attach
 	 * @returns {int} the index of the callback in the array of listeners for a particular event
-	 * @memberof LokiEventEmitter
 	 */
   on(eventName, listener) {
     let event;
@@ -58,7 +55,6 @@ export class LokiEventEmitter {
 	 * provided signatures match (i.e. if passing emit(event, arg0, arg1) the listener should take two parameters)
 	 * @param {string} eventName - the name of the event
 	 * @param {object=} data - optional object passed with the event
-	 * @memberof LokiEventEmitter
 	 */
   emit(eventName, data) {
     if (eventName && this.events[eventName]) {
@@ -81,7 +77,6 @@ export class LokiEventEmitter {
 	 * @param {string|string[]} eventName - the name(s) of the event(s) to listen to
 	 * @param {function} listener - callback function of listener to attach
 	 * @returns {int} the index of the callback in the array of listeners for a particular event
-	 * @memberof LokiEventEmitter
 	 */
   addListener(eventName, listener) {
     return this.on(eventName, listener);
@@ -91,12 +86,11 @@ export class LokiEventEmitter {
 	 * removeListener() - removes the listener at position 'index' from the event 'eventName'
 	 * @param {string|string[]} eventName - the name(s) of the event(s) which the listener is attached to
 	 * @param {function} listener - the listener callback function to remove from emitter
-	 * @memberof LokiEventEmitter
 	 */
   removeListener(eventName, listener) {
     if (Array.isArray(eventName)) {
       eventName.forEach((currentEventName) => {
-        this.removeListener(currentEventName, listen);
+        this.removeListener(currentEventName, listener);
       });
     }
 
