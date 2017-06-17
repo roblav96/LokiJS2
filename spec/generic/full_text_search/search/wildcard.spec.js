@@ -40,6 +40,18 @@ describe('wildcard query', () => {
     assertMatches(fts, query);
     query = new QB().wildcard("body", "m*").build();
     assertMatches(fts, query, [0, 1, 2, 3]);
+    query = new QB().wildcard("body", "m*tal").build();
+    assertMatches(fts, query, [0]);
+    query = new QB().wildcard("body", "m*tal*").build();
+    assertMatches(fts, query, [0, 1, 2]);
+    query = new QB().wildcard("body", "m*tals").build();
+    assertMatches(fts, query, [1, 2]);
+    query = new QB().wildcard("body", "*tall").build();
+    assertMatches(fts, query, []);
+    query = new QB().wildcard("body", "*tal").build();
+    assertMatches(fts, query, [0]);
+    query = new QB().wildcard("body", "*tal*").build();
+    assertMatches(fts, query, [0, 1, 2]);
 
     done();
   });
@@ -85,8 +97,8 @@ describe('wildcard query', () => {
       });
     }
     let query = null;
-		//query = new QB().wildcard("body", "foo*bar").build();
-		//assertMatches(fts, query, 4); // * not implemented
+    query = new QB().wildcard("body", "foo*bar").build();
+    assertMatches(fts, query, [0, 1, 2, 3]);
     query = new QB().wildcard("body", "foo\\*bar").build();
     assertMatches(fts, query, [0]);
     query = new QB().wildcard("body", "foo??bar").build();

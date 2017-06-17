@@ -99,6 +99,39 @@ export const QUERIES = [
 			}
 		}
 	},
+  {
+    fts: new QB()
+      .wildcard(FIELD_NAME_1, "so*").build(),
+    es: {
+      wildcard: {
+        [FIELD_NAME_1]: {
+          value: "so*"
+        }
+      }
+    }
+  },
+  {
+    fts: new QB()
+      .wildcard(FIELD_NAME_1, "so*n").build(),
+    es: {
+      wildcard: {
+        [FIELD_NAME_1]: {
+          value: "so*n"
+        }
+      }
+    }
+  },
+  {
+    fts: new QB()
+      .wildcard(FIELD_NAME_1, "so*n").build(),
+    es: {
+      wildcard: {
+        [FIELD_NAME_1]: {
+          value: "so*n"
+        }
+      }
+    }
+  },
 	{
 		fts: new QB()
 			.term(FIELD_NAME_1, "sollicitudin").boost(2)

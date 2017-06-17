@@ -424,10 +424,26 @@ class WildcardSearch {
         this._recursive(others[i].index, idx + 1, term + others[i].term);
       }
     } else if (!escaped && this._wildcard[idx] === '*') {
-      let all = InvertedIndex.extendTermIndex(root);
-      for (let i = 0; i < all.length; i++) {
-        this._recursive(all[i].index, idx + 1, term + all[i].term);
+      // Check if asterix is last wildcard character
+      if (idx + 1 === this._wildcard.length) {
+        let all = InvertedIndex.extendTermIndex(root);
+        for (let i = 0; i < all.length; i++) {
+          this._recursive(all[i].index, idx + 1, term + all[i].term);
+        }
+        return;
       }
+
+      // Iterate over the whole tree.
+      this._recursive(root, idx + 1, term);
+      let roots = [{index: root, term: ''}];
+      do {
+        root = roots.pop();
+        let others = InvertedIndex.getNextTermIndex(root.index);
+        for (let i = 0; i < others.length; i++) {
+          this._recursive(others[i].index, idx + 1, term + root.term + others[i].term);
+          roots.push({index: others[i].index, term: root.term + others[i].term});
+        }
+      } while (roots.length !== 0);
     } else {
       this._recursive(InvertedIndex.getTermIndex(this._wildcard[idx], root), idx + 1, term + this._wildcard[idx]);
     }
