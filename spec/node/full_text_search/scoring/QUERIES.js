@@ -123,11 +123,11 @@ export const QUERIES = [
   },
   {
     fts: new QB()
-      .wildcard(FIELD_NAME_1, "so*n").build(),
+      .wildcard(FIELD_NAME_1, "e*t").build(),
     es: {
       wildcard: {
         [FIELD_NAME_1]: {
-          value: "so*n"
+          value: "e*t"
         }
       }
     }

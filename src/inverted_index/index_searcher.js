@@ -424,7 +424,7 @@ class WildcardSearch {
         this._recursive(others[i].index, idx + 1, term + others[i].term);
       }
     } else if (!escaped && this._wildcard[idx] === '*') {
-      // Check if asterix is last wildcard character
+      // Check if asterisk is last wildcard character
       if (idx + 1 === this._wildcard.length) {
         let all = InvertedIndex.extendTermIndex(root);
         for (let i = 0; i < all.length; i++) {
@@ -432,7 +432,6 @@ class WildcardSearch {
         }
         return;
       }
-
       // Iterate over the whole tree.
       this._recursive(root, idx + 1, term);
       let roots = [{index: root, term: ''}];
