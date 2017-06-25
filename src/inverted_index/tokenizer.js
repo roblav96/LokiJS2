@@ -196,7 +196,6 @@ export class Tokenizer {
 	 * @param {{splitter: string, tokenizers: string[]}} serialized - the serialized labels
 	 * @param {Object.<string, function>|Tokenizer} funcTok - the depending functions with labels
 	 * 	or an equivalent tokenizer
-	 * @private
 	 */
   static fromJSONObject(serialized, funcTok) {
     let tkz = new Tokenizer();

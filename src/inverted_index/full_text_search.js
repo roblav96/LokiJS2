@@ -9,8 +9,10 @@ export class FullTextSearch {
    * @param {string} fields.name - the name of the field
    * @param {boolean=true} fields.store - flag to indicate if the full text search should be stored on serialization or
    *  rebuild on deserialization
+   * @param {boolean=true} fields.optimizeChanges - flag to indicate if deleting/updating a document should be optimized
+   *  (requires more memory but performs better)
    * @param {Tokenizer=Tokenizer} fields.tokenizer - the tokenizer of the field
-   * @param {string=$loki} id - the field name of the document index
+   * @param {string=$loki} id - the property name of the document index
    */
   constructor(fields, {id = "$loki"} = {}) {
     if (fields === undefined) {
@@ -18,24 +20,10 @@ export class FullTextSearch {
     }
 
     this._invIdxs = {};
-    // Get field names and tokenizers.
-    if (Array.isArray(fields)) {
-      for (let i = 0; i < fields.length; i++) {
-        let field = fields[i];
-        let name = field.name;
-
-        let store = field.store !== undefined ? field.store : true;
-
-        let tokenizer = null;
-        if (field.tokenizer !== undefined) {
-          tokenizer = field.tokenizer;
-        } else {
-          tokenizer = new Tokenizer();
-        }
-        this._invIdxs[name] = new InvertedIndex(store, tokenizer);
-      }
-    } else {
-      throw new TypeError('fields needs to be an array with field name and a tokenizer (optional).');
+    // Create inverted indices for each field.
+    for (let i = 0; i < fields.length; i++) {
+      let field = fields[i];
+      this._invIdxs[field.name] = new InvertedIndex(field);
     }
     this._id = id;
     this._docs = new Set();
