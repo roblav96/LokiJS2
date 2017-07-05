@@ -24,21 +24,13 @@
 		coll.insert({"abc": "hella"});
 		coll.insert({"abc": "helas"});
 
-		console.log(coll.data);
+    var fts = new Loki.FullTextSearch.FullTextSearch([{name: "name", optimizeChanges: false}]);
+    fts.addDocument({$loki: 1, name: "hello world"});
+    fts.addDocument({$loki: 2, name: "hel worlder"});
 
-		coll.removeWhere({"abc": "hella"});
-		console.log(coll.data);
-
-		var query = new Loki.FullTextSearch.QueryBuilder().wildcard("abc", "hela?").build();
-		console.log(query);
-		var res = coll.find(query);
-		console.log("---> ", res);
-
-		res = coll.find()
-		console.log(res);
-
-		var ll = db.serialize({serializationMethod: "destructured"})
-		var rl = db.serialize()
+    console.log(JSON.stringify(fts._invIdxs.name._root));
+    fts.removeDocument({$loki: 1})
+    console.log(JSON.stringify(fts._invIdxs.name._root))
 
 	</script>
 </head>

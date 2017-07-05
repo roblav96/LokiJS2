@@ -1,11 +1,12 @@
-var path = require('path');
+/* global process */
+const path = require('path');
 
 module.exports = function (config) {
-	var configuration = {
+	const configuration = {
 		files: [
-			{pattern: '../spec/generic/**/*.spec.js', watched: false},
-			{pattern: '../spec/web/**/*.spec.js', watched: false},
-			{pattern: '../spec/**/*.helpers.js', watched: false},
+			{pattern: '../packages/*/spec/generic/**/*.spec.js', watched: false},
+			{pattern: '../packages/*/spec/web/**/*.spec.js', watched: false},
+			{pattern: '../packages/*/spec/**/*.helpers.js', watched: false},
 		],
 
 		// coverage reporter generates the coverage
@@ -14,9 +15,9 @@ module.exports = function (config) {
 		frameworks: ['jasmine', 'jasmine-matchers'],
 
 		preprocessors: {
-			'../spec/generic/**/*.spec.js': ['webpack'],
-			'../spec/web/**/*.spec.js': ['webpack'],
-			'../spec/**/*.helpers.js': ['webpack']
+			'../packages/*/spec/generic/**/*.spec.js': ['webpack'],
+      '../packages/*/spec/web/**/*.spec.js': ['webpack'],
+      '../packages/*/spec/**/*.helpers.js': ['webpack'],
 		},
 
 		// optionally, configure the reporter
@@ -39,7 +40,7 @@ module.exports = function (config) {
 				"fs": "fs"
 			},
 			watch: true,
-      devtool: 'inline-source-map',
+      //devtool: 'inline-source-map'
 		},
 		webpackServer: {
 			noInfo: true
@@ -49,7 +50,7 @@ module.exports = function (config) {
 			'karma-coverage',
 			'karma-jasmine',
 			'karma-jasmine-matchers',
-			'karma-webpack'
+			'karma-webpack',
 		],
 	};
 
