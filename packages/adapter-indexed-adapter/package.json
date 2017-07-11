@@ -1,6 +1,6 @@
 {
   "name": "@sample_test/adater-indexed-adapter",
-  "version": "0.0.1-PLACEHOLDER",
+  "version": "0.0.0-PLACEHOLDER",
   "description": "Fast document oriented javascript in-memory database",
   "author": "Various authors",
   "license": "MIT",
