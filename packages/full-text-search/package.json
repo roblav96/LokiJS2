@@ -8,5 +8,5 @@
     "type": "git",
     "url": "https://github.com/LokiJS-Forge/LokiJS2.git"
   },
-  "main": "lib/loki.FullTextSearch.js"
+  "main": "loki.FullTextSearch.js"
 }
